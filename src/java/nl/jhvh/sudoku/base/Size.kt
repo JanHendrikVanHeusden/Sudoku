@@ -1,8 +1,5 @@
 package nl.jhvh.sudoku.base
 
-/** Interface to define constants etc. with regard to [Grid] dimensions.   */
-interface Size
-
 /**
  * Minimal allowed base dimension of a [Block] = [MIN_BASE_DIM].
  *  * 1 dimension only: we only support square Sudoku's (blocks of 2x2, 3x3, 4x4 etc.); so no support for, say, 2x3 block.

@@ -9,10 +9,10 @@ import java.util.Objects
  * Construct a [Grid] and allow the caller to fix cells etc., than have the constructed [Grid] returned by the [build] method.
  * TODO: verify the minimum number of fixed cells? See https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Minimum_number_of_givens
  */
-class GridBuilder(baseDim: Int = DEFAULT_BASE_DIM) {
+class GridBuilder(blockSize: Int = DEFAULT_BASE_DIM) {
 
     /** The [Grid] to build  */
-    private val grid: Grid = Grid(baseDim)
+    private val grid: Grid = Grid(blockSize)
 
     /**
      * Flag to indicate whether the [Grid] was completed;
@@ -20,7 +20,7 @@ class GridBuilder(baseDim: Int = DEFAULT_BASE_DIM) {
      */
     private var isBuilt: Boolean = false
 
-    /** @return The [Grid] as specified by size ([baseDim]) and by it's fixed values
+    /** @return The [Grid] as specified by size ([blockSize]) and by it's fixed values
      */
     fun build(): Grid {
         isBuilt = true
