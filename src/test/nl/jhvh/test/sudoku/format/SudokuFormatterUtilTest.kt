@@ -22,7 +22,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class SudokuFormatterTest {
+class SudokuFormatterUtilTest {
 
     @Test
     fun `test leftBorderIsGridBorder`() {
@@ -81,7 +81,6 @@ class SudokuFormatterTest {
         assertThat(colIndexIsLeftGridBorder(16, 15)).isFalse()
     }
 
-
     @Test
     fun `test rightBorderIsGridBorder`() {
         val cell: Cell = mockk(relaxed = true)
@@ -138,7 +137,6 @@ class SudokuFormatterTest {
         assertThat(colIndexIsRightGridBorder(16, 14)).isFalse()
         assertThat(colIndexIsRightGridBorder(16, 15)).isTrue()
     }
-
 
     @Test
     fun `test topBorderIsGridBorder`() {
@@ -197,7 +195,6 @@ class SudokuFormatterTest {
         assertThat(rowIndexIsTopGridBorder(16, 15)).isFalse()
     }
 
-
     @Test
     fun `test bottomBorderIsGridBorder`() {
         val cell: Cell = mockk(relaxed = true)
@@ -255,8 +252,6 @@ class SudokuFormatterTest {
         assertThat(rowIndexIsBottomGridBorder(16, 15)).isTrue()
     }
 
-
-
     @Test
     fun `test colIndexIsLeftBlockBorder`() {
         // The method under test does no input validation.
@@ -293,7 +288,6 @@ class SudokuFormatterTest {
         assertThat(colIndexIsLeftBlockBorder(4, 14)).isFalse()
         assertThat(colIndexIsLeftBlockBorder(4, 15)).isFalse()
     }
-
 
     @Test
     fun `test leftBorderIsBlockBorder`() {
@@ -372,7 +366,6 @@ class SudokuFormatterTest {
         assertThat(colIndexIsRightBlockBorder(4, 15)).isTrue()
     }
 
-
     @Test
     fun `test topBorderIsBlockBorder`() {
         val cell: Cell = mockk(relaxed = true)
@@ -429,7 +422,6 @@ class SudokuFormatterTest {
         assertThat(rowIndexIsTopBlockBorder(4, 14)).isFalse()
         assertThat(rowIndexIsTopBlockBorder(4, 15)).isFalse()
     }
-
 
     @Test
     fun `test bottomBorderIsBlockBorder`() {
