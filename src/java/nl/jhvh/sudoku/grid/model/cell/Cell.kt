@@ -8,7 +8,7 @@ import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueSource
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
-import nl.jhvh.sudoku.grid.model.cell.CellValue.MutableValue
+import nl.jhvh.sudoku.grid.model.cell.CellValue.UnknownValue
 import java.util.Collections.synchronizedSet
 
 val VALUE_UNKNOWN: Int? = null
@@ -26,11 +26,11 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int) : GridElement(grid)
     /** @see [GridEventListener] */
     override val eventListeners: MutableSet<GridEventListener<Cell, CellSetValueEvent>> = mutableSetOf()
 
-    var cellValue: CellValue = MutableValue(this)
+    var cellValue: CellValue = UnknownValue(this)
         @Synchronized
         get
         @Synchronized
-        set
+        private set
 
     fun fixValue(value: Int) {
         require(!(cellValue.isFixed && Integer.valueOf(value) != value)) { "Can not change the value of a fixed cell! $this" }
