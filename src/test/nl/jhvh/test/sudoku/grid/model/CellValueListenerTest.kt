@@ -4,9 +4,6 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
-import nl.jhvh.sudoku.grid.model.segment.Block
-import nl.jhvh.sudoku.grid.model.segment.Col
-import nl.jhvh.sudoku.grid.model.segment.Row
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

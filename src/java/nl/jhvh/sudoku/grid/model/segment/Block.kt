@@ -39,6 +39,6 @@ class Block(grid: Grid, val leftXIndex: Int, val topYIndex: Int) : GridSegment(g
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "Block(leftXIndex=$leftXIndex, rightXIndex=$rightXIndex, upperYIndex=$topYIndex, bottomYIndex=$bottomYIndex)"
 
-    override fun format(formatter: SudokuFormatter): String = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
 
 }

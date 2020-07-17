@@ -1,6 +1,6 @@
 package nl.jhvh.sudoku.format
 
-import nl.jhvh.sudoku.grid.model.Grid;
+import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellValue
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -16,21 +16,22 @@ import nl.jhvh.sudoku.grid.model.segment.Row
 interface SudokuFormatter {
 
     /** @return A formatted, human readable or machine readable (e.g. HTML) [String] representation of a [CellValue] */
-    fun format(cellValue: CellValue): String
+    fun format(cellValue: CellValue): List<String>
 
     /** @return A formatted, human readable or machine readable (e.g. HTML) [String] representation of a [Cell] */
-    fun format(cell: Cell): String
+    fun format(cell: Cell): List<String>
 
     /** @return A formatted, human readable or machine readable (e.g. HTML) [String] representation of a [Col] */
-    fun format(col: Col): String
+    fun format(col: Col): List<String>
 
     /** @return A formatted, human readable [String] representation of a [Row] */
-    fun format(row: Row): String
+    fun format(row: Row): List<String>
 
     /** @return A formatted, human readable or machine readable (e.g. HTML) [String] representation of a [Block] */
-    fun format(block: Block): String
+    fun format(block: Block): List<String>
 
     /** @return A formatted, human readable or machine readable (e.g. HTML) [String] representation of a [Grid] */
-    fun format(grid: Grid): String
+    fun format(grid: Grid): List<String>
 
 }
+

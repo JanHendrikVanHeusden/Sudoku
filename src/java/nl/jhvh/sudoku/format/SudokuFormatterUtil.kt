@@ -4,6 +4,8 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.segment.Block
 
+val lineEnd: String = System.lineSeparator()
+
 /** Is the left border of the given [Cell] a [Grid] border?  */
 val leftBorderIsGridBorder: (c: Cell) -> Boolean = { c -> colIndexIsLeftGridBorder(c.grid.gridSize, c.colIndex) }
 /** Given the grid size, does the column index indicate a left border?

@@ -3,7 +3,6 @@ package nl.jhvh.sudoku.grid.model
 import nl.jhvh.sudoku.base.DEFAULT_BASE_DIM
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
-import java.util.Objects
 
 /**
  * Construct a [Grid] and allow the caller to fix cells etc., than have the constructed [Grid] returned by the [build] method.

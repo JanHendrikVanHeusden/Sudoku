@@ -49,6 +49,5 @@ class Grid ( val blockSize: Int = 3) : Formattable {
         return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize)"
     }
 
-    override fun format(formatter: SudokuFormatter): String = formatter.format(this)
-
+    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
 }

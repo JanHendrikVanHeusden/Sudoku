@@ -26,6 +26,6 @@ class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
     /** Technical [toString] value; for a functional representation, see [.format]  */
     override fun toString(): String = "${this.javaClass.simpleName} [colIndex=$colIndex] [colRef=$colRef]"
 
-    override fun format(formatter: SudokuFormatter): String = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
 
 }

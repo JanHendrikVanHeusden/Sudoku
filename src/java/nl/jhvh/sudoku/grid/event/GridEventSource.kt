@@ -1,7 +1,6 @@
 package nl.jhvh.sudoku.grid.event
 
 import nl.jhvh.sudoku.grid.model.GridElement
-import java.util.function.Consumer
 
 /**
  * Base interface for sources that may emit [GridEvent]s

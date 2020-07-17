@@ -13,7 +13,7 @@ interface Formattable {
      *
      * @param formatter The [SudokuFormatter] implementation to be accepted by the element to print.
      *  * The element to print will accept the [SudokuFormatter] as a delegate for the print formatting
-     * @return The Sudoku element as a formatted [String]
+     * @return The Sudoku element as a formatted [List<String>]
      */
-    fun format(formatter: SudokuFormatter): String
+    fun format(formatter: SudokuFormatter): List<String>
 }

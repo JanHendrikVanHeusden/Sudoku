@@ -61,6 +61,6 @@ sealed class CellValue(val cell: Cell) : Formattable {
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]"
 
-    override fun format(formatter: SudokuFormatter): String = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
 
 }
