@@ -1,6 +1,6 @@
 package nl.jhvh.test.sudoku.format
 
-import nl.jhvh.sudoku.format.concatAlignEach
+import nl.jhvh.sudoku.format.concatAlignLeft
 import nl.jhvh.sudoku.format.concatEach
 import nl.jhvh.sudoku.format.toTextLines
 import org.assertj.core.api.Assertions.assertThat
@@ -33,7 +33,7 @@ class ListElementConcatTest {
         val list2 = listOf("IntelliJ IDEA", "Eclipse", "NetBeans")
 
         // when, then
-        assertThat(list1 concatAlignEach list2).isEqualTo(listOf(
+        assertThat(list1 concatAlignLeft list2).isEqualTo(listOf(
                 "JetBrains          IntelliJ IDEA",
                 "Eclipse Foundation Eclipse      ",
                 "Apache             NetBeans     "
@@ -62,7 +62,7 @@ class ListElementConcatTest {
         val list2 = listOf(" IntelliJ IDEA", " Eclipse", " NetBeans", " CodeEnvy")
 
         // when, then
-        assertThat(list1 concatAlignEach list2).isEqualTo(listOf(
+        assertThat(list1 concatAlignLeft list2).isEqualTo(listOf(
                 "12345.54321 IntelliJ IDEA",
                 "1           Eclipse      ",
                 "10          NetBeans     ",
@@ -80,7 +80,7 @@ class ListElementConcatTest {
         let { assertFailsWith<IllegalArgumentException> { list1 concatEach list2 } }
                 .also { assertThat(it.message)
                         .isEqualTo("Both collections must have equal sizes! Sizes: left=${list1.size}, right=${list2.size}") }
-        let { assertFailsWith<IllegalArgumentException> { list1 concatAlignEach  list2 } }
+        let { assertFailsWith<IllegalArgumentException> { list1 concatAlignLeft  list2 } }
                 .also { assertThat(it.message)
                         .isEqualTo("Both collections must have equal sizes! Sizes: left=${list1.size}, right=${list2.size}") }
     }
@@ -111,7 +111,7 @@ class ListElementConcatTest {
         val list4 = listOf(" IntelliJ IDEA", " Eclipse", " NetBeans", " CodeEnvy")
 
         // when, then
-        assertThat(concatAlignEach(list1, list2, list3, list4)).isEqualTo(listOf(
+        assertThat(concatAlignLeft(list1, list2, list3, list4)).isEqualTo(listOf(
                 "12345.54321 1 IntelliJ IDEA",
                 "1           2 Eclipse      ",
                 "10          3 NetBeans     ",
@@ -131,7 +131,7 @@ class ListElementConcatTest {
         let { assertFailsWith<IllegalArgumentException> { concatEach(list1, list2, list3) } }
                 .also { assertThat(it.message)
                         .isEqualTo("Both collections must have equal sizes! Sizes: left=${list1.size}, right=${list2.size}") }
-        let { assertFailsWith<IllegalArgumentException> { concatAlignEach(list1, list2, list3) } }
+        let { assertFailsWith<IllegalArgumentException> { concatAlignLeft(list1, list2, list3) } }
                 .also { assertThat(it.message)
                         .isEqualTo("Both collections must have equal sizes! Sizes: left=${list1.size}, right=${list2.size}") }
     }
