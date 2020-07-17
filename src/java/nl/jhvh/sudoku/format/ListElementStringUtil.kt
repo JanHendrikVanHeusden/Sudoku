@@ -4,14 +4,40 @@ import org.apache.commons.lang3.StringUtils
 
 val lineSeparator: String = System.lineSeparator()
 
+/** @return The length of the longest [toString] of all elements in the [collection] */
+fun maxStringLength (collection: Collection<*>): Int = collection.map { s -> s.toString().length } .max()!!
+
+fun List<*>.alignRight(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
+    require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
+    require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
+    val maxLength = maxStringLength(this)
+    val padAction: (String) -> String = { it.padStart(maxLength + extraLeftPad).padEnd(maxLength + extraLeftPad + extraRightPad) }
+    return this.map { padAction(it.toString()) }
+}
+
+fun List<*>.alignLeft(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
+    require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
+    require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
+    val maxLength = maxStringLength(this)
+    val padAction: (String) -> String = { it.padEnd(maxLength + extraRightPad).padStart(maxLength + extraLeftPad + extraRightPad) }
+    return this.map { padAction(it.toString()) }
+}
+
+fun List<*>.alignCenter(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
+    require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
+    require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
+    val maxLength = maxStringLength(this)
+    val padAction: (String) -> String = {
+        StringUtils.center(it, maxLength).padEnd(maxLength + extraRightPad).padStart(maxLength + extraLeftPad + extraRightPad)
+    }
+    return this.map { padAction(it.toString()) }
+}
+
 private fun Collection<*>.validateEqualSize(other: Collection<*>) {
     if (other.size != this.size) {
         throw IllegalArgumentException("Both collections must have equal sizes! Sizes: left=${this.size}, right=${other.size}")
     }
 }
-
-/** @return The length of the longest [toString] of all elements in the [collection] */
-fun maxStringLength (collection: Collection<*>): Int = collection.map { s -> s.toString().length } .max()!!
 
 /**
  * Given 2 [List]s, concatenates the [toString] value of each element of the left (receiver) list with the corresponding elemeent
@@ -48,10 +74,7 @@ fun concatEach(vararg lists: List<*>): List<String> {
  * @return A new [List]`<String>` with the concatenated and aligned values.
  */
 infix fun List<*>.concatAlignLeft(other: List<*>): List<String> {
-    validateEqualSize(other)
-    val leftLength = maxStringLength(this)
-    val rightLength = maxStringLength(other)
-    return this.mapIndexed { index, t -> t.toString().padEnd(leftLength) + other[index].toString().padEnd(rightLength) }
+    return this.alignLeft() concatEach other.alignLeft()
 }
 /**
  * Given a variable number of [List]s, concatenates the [toString] value of each element with the corresponding element
@@ -65,8 +88,7 @@ fun concatAlignLeft(vararg lists: List<*>): List<String> {
         return emptyList()
     }
     val result = lists[0].map { "" }
-    // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
-    return lists.fold(result, {current, next -> current concatAlignLeft next})
+    return lists.fold(result, {current, next -> current concatEach next.alignLeft()})
 }
 
 /**
@@ -77,10 +99,7 @@ fun concatAlignLeft(vararg lists: List<*>): List<String> {
  * @return A new [List]`<String>` with the concatenated and aligned values.
  */
 infix fun List<*>.concatAlignCenter(other: List<*>): List<String> {
-    validateEqualSize(other)
-    val leftLength = maxStringLength(this)
-    val rightLength = maxStringLength(other)
-    return this.mapIndexed { index, t -> StringUtils.center(t.toString(), leftLength) + StringUtils.center(other[index].toString(),rightLength) }
+    return this.alignCenter() concatEach other.alignCenter()
 }
 
 /**
@@ -96,7 +115,7 @@ fun concatAlignCenter(vararg lists: List<*>): List<String> {
     }
     val result = lists[0].map { "" }
     // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
-    return lists.fold(result, {current, next -> current concatAlignCenter next})
+    return lists.fold(result, {current, next -> current concatEach next.alignCenter()})
 }
 
 /**
@@ -107,10 +126,7 @@ fun concatAlignCenter(vararg lists: List<*>): List<String> {
  * @return A new [List]`<String>` with the concatenated and aligned values.
  */
 infix fun List<*>.concatAlignRight(other: List<*>): List<String> {
-    validateEqualSize(other)
-    val leftLength = maxStringLength(this)
-    val rightLength = maxStringLength(other)
-    return this.mapIndexed { index, t -> t.toString().padStart(leftLength) + other[index].toString().padStart(rightLength) }
+    return this.alignRight() concatEach other.alignRight()
 }
 
 /**
@@ -126,7 +142,7 @@ fun concatAlignRight(vararg lists: List<*>): List<String> {
     }
     val result = lists[0].map { "" }
     // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
-    return lists.fold(result, {current, next -> current concatAlignRight next})
+    return lists.fold(result, {current, next -> current concatEach next.alignRight()})
 }
 
 /**
