@@ -9,7 +9,6 @@ import nl.jhvh.sudoku.format.concatAlignCenter
 import nl.jhvh.sudoku.format.concatAlignLeft
 import nl.jhvh.sudoku.format.concatAlignRight
 import nl.jhvh.sudoku.format.concatEach
-import nl.jhvh.sudoku.format.toTextLines
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
@@ -285,12 +284,4 @@ class ListElementStringUtilTest {
                         .isEqualTo("Both collections must have equal sizes! Sizes: left=${list1.size}, right=${list2.size}") }
     }
 
-    @Test
-    fun `test correct output as text lines`() {
-        val lineSep = System.lineSeparator()
-        assertThat(listOf("JetBrains", "Eclipse Foundation", "Apache", "CodeEnvy").toTextLines())
-                .isEqualTo("JetBrains${lineSep}Eclipse Foundation${lineSep}Apache${lineSep}CodeEnvy$lineSep")
-        assertThat(listOf(1, 2, 3, 4, 5).toTextLines())
-                .isEqualTo("1${lineSep}2${lineSep}3${lineSep}4${lineSep}5$lineSep")
-    }
 }

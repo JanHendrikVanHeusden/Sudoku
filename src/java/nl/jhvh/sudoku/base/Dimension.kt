@@ -18,3 +18,7 @@ const val MAX_BASE_DIM: Int = 46340
  *  * 1 dimension only: we only support square Sudoku's (3x3 etc.); so no support for, say, 2x3 block.
  */
 const val DEFAULT_BASE_DIM: Int = 3
+
+/** Fixed minimum value to be entered in a cell  */
+const val CELL_MIN_VALUE: Int = 1
+

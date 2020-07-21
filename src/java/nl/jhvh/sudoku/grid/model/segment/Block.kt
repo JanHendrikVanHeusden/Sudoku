@@ -2,6 +2,7 @@ package nl.jhvh.sudoku.grid.model.segment
 
 import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
+import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
@@ -39,6 +40,6 @@ class Block(grid: Grid, val leftXIndex: Int, val topYIndex: Int) : GridSegment(g
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "Block(leftXIndex=$leftXIndex, rightXIndex=$rightXIndex, upperYIndex=$topYIndex, bottomYIndex=$bottomYIndex)"
 
-    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 
 }

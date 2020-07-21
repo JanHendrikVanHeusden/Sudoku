@@ -2,27 +2,45 @@ package nl.jhvh.test.sudoku.format
 
 import io.mockk.every
 import io.mockk.mockk
+import nl.jhvh.sudoku.format.bottomBorder
 import nl.jhvh.sudoku.format.bottomBorderIsBlockBorder
 import nl.jhvh.sudoku.format.bottomBorderIsGridBorder
+import nl.jhvh.sudoku.format.bottomLeftEdge
+import nl.jhvh.sudoku.format.bottomRightEdge
 import nl.jhvh.sudoku.format.colIndexIsLeftBlockBorder
 import nl.jhvh.sudoku.format.colIndexIsLeftGridBorder
 import nl.jhvh.sudoku.format.colIndexIsRightBlockBorder
 import nl.jhvh.sudoku.format.colIndexIsRightGridBorder
+import nl.jhvh.sudoku.format.leftBorder
 import nl.jhvh.sudoku.format.leftBorderIsBlockBorder
 import nl.jhvh.sudoku.format.leftBorderIsGridBorder
+import nl.jhvh.sudoku.format.rightBorder
 import nl.jhvh.sudoku.format.rightBorderIsBlockBorder
 import nl.jhvh.sudoku.format.rightBorderIsGridBorder
 import nl.jhvh.sudoku.format.rowIndexIsBottomBlockBorder
 import nl.jhvh.sudoku.format.rowIndexIsBottomGridBorder
 import nl.jhvh.sudoku.format.rowIndexIsTopBlockBorder
 import nl.jhvh.sudoku.format.rowIndexIsTopGridBorder
+import nl.jhvh.sudoku.format.topBorder
 import nl.jhvh.sudoku.format.topBorderIsBlockBorder
 import nl.jhvh.sudoku.format.topBorderIsGridBorder
+import nl.jhvh.sudoku.format.topLeftEdge
+import nl.jhvh.sudoku.format.topRightEdge
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class SudokuFormatterUtilTest {
+
+    private lateinit var cellMock: Cell
+
+    @BeforeEach
+    fun setUp() {
+        cellMock = mockk(relaxed = false)
+        every {cellMock.grid.blockSize} returns 3
+        every {cellMock.grid.gridSize} returns 9
+    }
 
     @Test
     fun `test leftBorderIsGridBorder`() {
@@ -33,10 +51,10 @@ class SudokuFormatterUtilTest {
             for (colIndex in 0..gridSize - 1) {
                 every { cell.colIndex } returns colIndex
                 when (colIndex) {
-                    0 -> assertThat(leftBorderIsGridBorder(cell))
+                    0 -> assertThat(cell.leftBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and colIndex=$colIndex")
                             .isTrue()
-                    else -> assertThat(leftBorderIsGridBorder(cell))
+                    else -> assertThat(cell.leftBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and colIndex=$colIndex")
                             .isFalse()
                 }
@@ -90,10 +108,10 @@ class SudokuFormatterUtilTest {
             for (colIndex in 0..gridSize - 1) {
                 every { cell.colIndex } returns colIndex
                 when (colIndex) {
-                    gridSize-1 -> assertThat(rightBorderIsGridBorder(cell))
+                    gridSize-1 -> assertThat(cell.rightBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and colIndex=$colIndex")
                             .isTrue()
-                    else -> assertThat(rightBorderIsGridBorder(cell))
+                    else -> assertThat(cell.rightBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and colIndex=$colIndex")
                             .isFalse()
                 }
@@ -147,10 +165,10 @@ class SudokuFormatterUtilTest {
             for (rowIndex in 0..gridSize - 1) {
                 every { cell.rowIndex } returns rowIndex
                 when (rowIndex) {
-                    0 -> assertThat(topBorderIsGridBorder(cell))
+                    0 -> assertThat(cell.topBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and rowIndex=$rowIndex")
                             .isTrue()
-                    else -> assertThat(topBorderIsGridBorder(cell))
+                    else -> assertThat(cell.topBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and rowIndex=$rowIndex")
                             .isFalse()
                 }
@@ -204,10 +222,10 @@ class SudokuFormatterUtilTest {
             for (rowIndex in 0..gridSize - 1) {
                 every { cell.rowIndex } returns rowIndex
                 when (rowIndex) {
-                    gridSize-1 -> assertThat(bottomBorderIsGridBorder(cell))
+                    gridSize-1 -> assertThat(cell.bottomBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and rowIndex=$rowIndex")
                             .isTrue()
-                    else -> assertThat(bottomBorderIsGridBorder(cell))
+                    else -> assertThat(cell.bottomBorderIsGridBorder())
                             .`as`("Test failure for gridSize=$gridSize and rowIndex=$rowIndex")
                             .isFalse()
                 }
@@ -298,10 +316,10 @@ class SudokuFormatterUtilTest {
             for (colIndex in 0..gridSize - 1) {
                 every { cell.colIndex } returns colIndex
                 when {
-                    colIndex % blockSize == 0 -> assertThat(leftBorderIsBlockBorder(cell))
+                    colIndex % blockSize == 0 -> assertThat(cell.leftBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, colIndex=$colIndex")
                             .isTrue()
-                    else -> assertThat(leftBorderIsBlockBorder(cell))
+                    else -> assertThat(cell.leftBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, colIndex=$colIndex")
                             .isFalse()
                 }
@@ -318,10 +336,10 @@ class SudokuFormatterUtilTest {
             for (colIndex in 0..gridSize - 1) {
                 every { cell.colIndex } returns colIndex
                 when {
-                    (colIndex+1) % blockSize == 0 -> assertThat(rightBorderIsBlockBorder(cell))
+                    (colIndex+1) % blockSize == 0 -> assertThat(cell.rightBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, colIndex=$colIndex")
                             .isTrue()
-                    else -> assertThat(rightBorderIsBlockBorder(cell))
+                    else -> assertThat(cell.rightBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, colIndex=$colIndex")
                             .isFalse()
                 }
@@ -375,10 +393,10 @@ class SudokuFormatterUtilTest {
             for (rowIndex in 0..gridSize - 1) {
                 every { cell.rowIndex } returns rowIndex
                 when {
-                    rowIndex % blockSize == 0 -> assertThat(topBorderIsBlockBorder(cell))
+                    rowIndex % blockSize == 0 -> assertThat(cell.topBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, rowIndex=$rowIndex")
                             .isTrue()
-                    else -> assertThat(topBorderIsBlockBorder(cell))
+                    else -> assertThat(cell.topBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, rowIndex=$rowIndex")
                             .isFalse()
                 }
@@ -425,7 +443,6 @@ class SudokuFormatterUtilTest {
 
     @Test
     fun `test bottomBorderIsBlockBorder`() {
-        bottomBorderIsBlockBorder
         val cell: Cell = mockk(relaxed = true)
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
@@ -433,10 +450,10 @@ class SudokuFormatterUtilTest {
             for (rowIndex in 0..gridSize - 1) {
                 every { cell.rowIndex } returns rowIndex
                 when {
-                    (rowIndex+1) % blockSize == 0 -> assertThat(bottomBorderIsBlockBorder(cell))
+                    (rowIndex+1) % blockSize == 0 -> assertThat(cell.bottomBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, rowIndex=$rowIndex")
                             .isTrue()
-                    else -> assertThat(bottomBorderIsBlockBorder(cell))
+                    else -> assertThat(cell.bottomBorderIsBlockBorder())
                             .`as`("Test failure for gridSize=$gridSize, blockSize=$blockSize, rowIndex=$rowIndex")
                             .isFalse()
                 }
@@ -481,4 +498,660 @@ class SudokuFormatterUtilTest {
         assertThat(rowIndexIsBottomBlockBorder(4, 15)).isTrue()
     }
 
+
+    @Test
+    fun `Cell - leftBorder`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // left grid border cell
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.leftBorder()).isEqualTo('║')
+        // left block border cell
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.leftBorder()).isEqualTo('║')
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.leftBorder()).isEqualTo('║')
+        // Left border not grid or block border
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.leftBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.leftBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.leftBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.leftBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 7
+        assertThat(cellMock.leftBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 8
+    }
+
+    @Test
+    fun `Cell - rightBorder`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // right grid border cell
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.rightBorder()).isEqualTo('║')
+        // right block border cell
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.rightBorder()).isEqualTo('║')
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.rightBorder()).isEqualTo('║')
+        // Left border not grid or block border
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.rightBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.rightBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.rightBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.rightBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.rightBorder()).isEqualTo('│')
+        every {cellMock.colIndex} returns 7
+    }
+
+    @Test
+    fun `Cell - topBorder`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // top grid border cell
+        every {cellMock.rowIndex} returns 0
+        assertThat(cellMock.topBorder()).isEqualTo('═')
+        // top block border cell
+        every {cellMock.rowIndex} returns 3
+        assertThat(cellMock.topBorder()).isEqualTo('═')
+        every {cellMock.rowIndex} returns 6
+        assertThat(cellMock.topBorder()).isEqualTo('═')
+        // Left border not grid or block border
+        every {cellMock.rowIndex} returns 1
+        assertThat(cellMock.topBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 2
+        assertThat(cellMock.topBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 4
+        assertThat(cellMock.topBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 5
+        assertThat(cellMock.topBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 7
+        assertThat(cellMock.topBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 8
+    }
+
+    @Test
+    fun `Cell - bottomBorder`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // bottom grid border cell
+        every {cellMock.rowIndex} returns 8
+        assertThat(cellMock.bottomBorder()).isEqualTo('═')
+        // bottom block border cell
+        every {cellMock.rowIndex} returns 2
+        assertThat(cellMock.bottomBorder()).isEqualTo('═')
+        every {cellMock.rowIndex} returns 5
+        assertThat(cellMock.bottomBorder()).isEqualTo('═')
+        // Left border not grid or block border
+        every {cellMock.rowIndex} returns 0
+        assertThat(cellMock.bottomBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 1
+        assertThat(cellMock.bottomBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 3
+        assertThat(cellMock.bottomBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 4
+        assertThat(cellMock.bottomBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 6
+        assertThat(cellMock.bottomBorder()).isEqualTo('─')
+        every {cellMock.rowIndex} returns 7
+    }
+
+    @Test
+    fun `Cell - topLeftEdge`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // top left cell
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╔')
+
+        // top cell, left border is block border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╦')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╦')
+
+        // top cell, left border is not a block border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 7
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╤')
+
+        // top is block border but not grid border, left is grid border
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╠')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╠')
+
+        // top is not block border, left is grid border
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╟')
+
+        // top is block border but not grid border, left is block border but not grid border
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╬')
+
+        // top is not block border and not grid border, left is block border but not grid border
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topLeftEdge()).isEqualTo('╫')
+
+        val gridSize = cellMock.grid.gridSize
+        val blockSize = cellMock.grid.blockSize
+        // no block border or grid borders
+        for (x in 0..gridSize-1) {
+            if (x % blockSize == 0) {
+                continue
+            }
+            for (y in 0..gridSize-1) {
+                if (y % blockSize == 0) {
+                    continue
+                }
+                every {cellMock.colIndex} returns x
+                every {cellMock.rowIndex} returns y
+            }
+            assertThat(cellMock.topLeftEdge())
+                    .`as`("Failure for colIndex=${cellMock.colIndex} and rowIndex=${cellMock.rowIndex}")
+                    .isEqualTo('┼')
+        }
+    }
+
+    @Test
+    fun `Cell - topRightEdge`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // top right cell
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╗')
+
+        // top cell, right border is block border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╦')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╦')
+
+        // top cell, right border is not a block border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 7
+        assertThat(cellMock.topRightEdge()).isEqualTo('╤')
+
+        // top is block border but not grid border, right is grid border
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╣')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╣')
+
+        // top is not block border, right is grid border
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.topRightEdge()).isEqualTo('╢')
+
+        // top is block border but not grid border, right is block border but not grid border
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╬')
+
+        // top is not block border and not grid border, right is block border but not grid border
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.topRightEdge()).isEqualTo('╫')
+
+        val gridSize = cellMock.grid.gridSize
+        val blockSize = cellMock.grid.blockSize
+        // no block border or grid borders
+        for (x in 0..gridSize-1) {
+            if ((x+1) % blockSize == 0) {
+                continue
+            }
+            for (y in 0..gridSize-1) {
+                if ((y+1) % blockSize == 0) {
+                    continue
+                }
+                every {cellMock.colIndex} returns x
+                every {cellMock.rowIndex} returns y
+            }
+            assertThat(cellMock.topRightEdge())
+                    .`as`("Failure for colIndex=${cellMock.colIndex} and rowIndex=${cellMock.rowIndex}")
+                    .isEqualTo('┼')
+        }
+    }
+
+    @Test
+    fun `Cell - bottomLeftEdge`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // bottom left cell
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╚')
+
+        // bottom cell, left border is block border
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╩')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╩')
+
+        // bottom cell, left border is not a block border
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 7
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╧')
+
+        // bottom is block border but not grid border, left is grid border
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╠')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╠')
+
+        // bottom is not block border, left is grid border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╟')
+        
+        // bottom is block border but not grid border, left is block border but not grid border
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╬')
+
+        // bottom is not block border and not grid border, left is block border but not grid border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomLeftEdge()).isEqualTo('╫')
+
+        val gridSize = cellMock.grid.gridSize
+        val blockSize = cellMock.grid.blockSize
+        // no block border or grid borders
+        for (x in 0..gridSize-1) {
+            if (x % blockSize == 0) {
+                continue
+            }
+            for (y in 0..gridSize-1) {
+                if ((y+1) % blockSize == 0) {
+                    continue
+                }
+                every {cellMock.colIndex} returns x
+                every {cellMock.rowIndex} returns y
+            }
+            assertThat(cellMock.bottomLeftEdge())
+                    .`as`("Failure for colIndex=${cellMock.colIndex} and rowIndex=${cellMock.rowIndex}")
+                    .isEqualTo('┼')
+        }
+    }
+
+    @Test
+    fun `Cell - bottomRightEdge`() {
+        // given: blockSize = 3, gridSize = 9
+
+        // bottom right cell
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╝')
+
+        // bottom cell, right border is block border
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╩')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╩')
+
+        // bottom cell, right border is not a block border
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 0
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 1
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 3
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 4
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 6
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+        every {cellMock.rowIndex} returns 8
+        every {cellMock.colIndex} returns 7
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╧')
+
+        // bottom is block border but not grid border, right is grid border
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╣')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╣')
+
+        // bottom is not block border, right is grid border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 8
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╢')
+
+        // bottom is block border but not grid border, right is block border but not grid border
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 2
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╬')
+        every {cellMock.rowIndex} returns 5
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╬')
+
+        // bottom is not block border and not grid border, right is block border but not grid border
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 2
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+
+        every {cellMock.rowIndex} returns 0
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 1
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 3
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 4
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 6
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+        every {cellMock.rowIndex} returns 7
+        every {cellMock.colIndex} returns 5
+        assertThat(cellMock.bottomRightEdge()).isEqualTo('╫')
+
+        val gridSize = cellMock.grid.gridSize
+        val blockSize = cellMock.grid.blockSize
+        // no block border or grid borders
+        for (x in 0..gridSize-1) {
+            if ((x+1) % blockSize == 0) {
+                continue
+            }
+            for (y in 0..gridSize-1) {
+                if ((y+1) % blockSize == 0) {
+                    continue
+                }
+                every {cellMock.colIndex} returns x
+                every {cellMock.rowIndex} returns y
+            }
+            assertThat(cellMock.bottomRightEdge())
+                    .`as`("Failure for colIndex=${cellMock.colIndex} and rowIndex=${cellMock.rowIndex}")
+                    .isEqualTo('┼')
+        }
+    }
 }

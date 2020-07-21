@@ -2,6 +2,7 @@ package nl.jhvh.sudoku.grid.model
 
 import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
+import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
@@ -44,10 +45,12 @@ class Grid ( val blockSize: Int = 3) : Formattable {
         cell.fixValue(value)
     }
 
+    override fun maxValueLength(): Int = this.maxValue.toString().length
+
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String {
         return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize)"
     }
 
-    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 }

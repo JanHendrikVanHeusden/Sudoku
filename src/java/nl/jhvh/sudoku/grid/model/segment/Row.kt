@@ -2,6 +2,7 @@ package nl.jhvh.sudoku.grid.model.segment
 
 import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
+import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
@@ -26,6 +27,6 @@ class Row(grid: Grid, val rowIndex: Int) : GridSegment(grid), Formattable {
     /** Technical [toString] value; for a functional representation, see [.format]  */
     override fun toString(): String = "${this.javaClass.simpleName} [rowIndex=$rowIndex] [rowRef=$rowRef]"
 
-    override fun format(formatter: SudokuFormatter): List<String> = formatter.format(this)
+    override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 
 }

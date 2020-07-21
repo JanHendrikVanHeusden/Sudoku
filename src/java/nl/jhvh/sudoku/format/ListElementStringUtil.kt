@@ -5,12 +5,12 @@ import org.apache.commons.lang3.StringUtils
 val lineSeparator: String = System.lineSeparator()
 
 /** @return The length of the longest [toString] of all elements in the [collection] */
-fun maxStringLength (collection: Collection<*>): Int = collection.map { s -> s.toString().length } .max()!!
+fun Collection<*>.maxStringLength(): Int = this.map { s -> s.toString().length } .max()!!
 
 fun List<*>.alignRight(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
     require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
     require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
-    val maxLength = maxStringLength(this)
+    val maxLength = this.maxStringLength()
     val padAction: (String) -> String = { it.padStart(maxLength + extraLeftPad).padEnd(maxLength + extraLeftPad + extraRightPad) }
     return this.map { padAction(it.toString()) }
 }
@@ -18,7 +18,7 @@ fun List<*>.alignRight(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<Stri
 fun List<*>.alignLeft(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
     require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
     require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
-    val maxLength = maxStringLength(this)
+    val maxLength = this.maxStringLength()
     val padAction: (String) -> String = { it.padEnd(maxLength + extraRightPad).padStart(maxLength + extraLeftPad + extraRightPad) }
     return this.map { padAction(it.toString()) }
 }
@@ -26,7 +26,7 @@ fun List<*>.alignLeft(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<Strin
 fun List<*>.alignCenter(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
     require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
     require(extraRightPad >= 0, { "extraRightPad must be non-negative or omitted (current: $extraRightPad)" })
-    val maxLength = maxStringLength(this)
+    val maxLength = this.maxStringLength()
     val padAction: (String) -> String = {
         StringUtils.center(it, maxLength).padEnd(maxLength + extraRightPad).padStart(maxLength + extraLeftPad + extraRightPad)
     }
@@ -144,11 +144,3 @@ fun concatAlignRight(vararg lists: List<*>): List<String> {
     // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
     return lists.fold(result, {current, next -> current concatEach next.alignRight()})
 }
-
-/**
- * Concatenates all elements of the given [List], each elemente ended by a new line ([System.lineSeparator].
- * A [System.lineSeparator] is also added at the very end.
- * @receiver [List]`<*>`
- * @return String The [toString] values of each element, each on a new line.
- */
-fun List<*>.toTextLines(): String = this.joinToString(separator = lineSeparator, postfix = lineSeparator)
