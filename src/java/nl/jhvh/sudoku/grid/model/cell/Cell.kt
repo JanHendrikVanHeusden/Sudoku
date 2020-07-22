@@ -31,10 +31,6 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int) : GridElement(grid)
         @Synchronized
         private set
 
-    fun setValue(value: Int) {
-
-    }
-
     fun fixValue(value: Int) {
         cellValue = FixedValue(this, value)
         valueCandidates.clear()

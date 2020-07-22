@@ -5,11 +5,8 @@ import nl.jhvh.sudoku.grid.model.GridBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 
 /** Unit integration test for [Row] formatting */
-@TestInstance(Lifecycle.PER_CLASS) // to allow setUp() with @BeforeAll annotation
 internal class RowBoxFormatterTest {
 
     private val subject = RowBoxFormatter()

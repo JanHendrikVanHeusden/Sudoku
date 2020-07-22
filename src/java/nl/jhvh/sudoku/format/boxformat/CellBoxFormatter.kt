@@ -1,16 +1,17 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.bottomBorder
-import nl.jhvh.sudoku.format.bottomLeftEdge
-import nl.jhvh.sudoku.format.bottomRightEdge
+import nl.jhvh.sudoku.format.bottomBorderIsBlockBorder
+import nl.jhvh.sudoku.format.bottomBorderIsGridBorder
 import nl.jhvh.sudoku.format.concatEach
 import nl.jhvh.sudoku.format.element.CellFormatter
-import nl.jhvh.sudoku.format.leftBorder
-import nl.jhvh.sudoku.format.rightBorder
-import nl.jhvh.sudoku.format.topBorder
-import nl.jhvh.sudoku.format.topLeftEdge
-import nl.jhvh.sudoku.format.topRightEdge
+import nl.jhvh.sudoku.format.leftBorderIsBlockBorder
+import nl.jhvh.sudoku.format.leftBorderIsGridBorder
+import nl.jhvh.sudoku.format.rightBorderIsBlockBorder
+import nl.jhvh.sudoku.format.rightBorderIsGridBorder
+import nl.jhvh.sudoku.format.simple.SimpleCellValueFormatter
+import nl.jhvh.sudoku.format.topBorderIsBlockBorder
+import nl.jhvh.sudoku.format.topBorderIsGridBorder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 
 /**
@@ -21,8 +22,12 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * Borders:
  *  * The height of a top or bottom border is always 1. The width varies by the width of the formatted value.
  *  * The width and height of left and richt borders are always 1.
+ *  * Box drawing characters: ║ │ ═ ─ ╔ ╗ ╚ ╝ ╤ ╧ ╦ ╩ ╟ ╢ ╠ ╣ ╬ ┼ ╪ ╫ etc.
+ *
+ * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
+ * testing etc.)
  */
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter cell: Cell (instead of element: cell)
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `cell: Cell` (instead of `element: cell`)
 class CellBoxFormatter: CellFormatter, BoxBorderingFormatter<Cell> {
 
     private val cellValueFormatter = SimpleCellValueFormatter()
@@ -71,4 +76,99 @@ class CellBoxFormatter: CellFormatter, BoxBorderingFormatter<Cell> {
 
     override fun getBottomRightEdge(cell: Cell): String = cell.bottomRightEdge().toString()
 
+    companion object BorderChar {
+
+        fun Cell.leftBorder(): Char {
+            return when {
+                (this.leftBorderIsGridBorder() || this.leftBorderIsBlockBorder()) -> `boxChar ║`
+                else -> `boxChar │`
+            }
+        }
+
+        fun Cell.rightBorder(): Char {
+            return when {
+                (this.rightBorderIsGridBorder() || this.rightBorderIsBlockBorder()) -> `boxChar ║`
+                else -> `boxChar │`
+            }
+        }
+
+        fun Cell.topBorder(): Char {
+            return when {
+                (this.topBorderIsGridBorder() || this.topBorderIsBlockBorder()) -> `boxChar ═`
+                else -> `boxChar ─`
+            }
+        }
+
+        fun Cell.bottomBorder(): Char {
+            return when {
+                (this.bottomBorderIsGridBorder() || this.bottomBorderIsBlockBorder()) -> `boxChar ═`
+                else -> `boxChar ─`
+            }
+        }
+
+        fun Cell.topLeftEdge(): Char {
+            return when {
+                (this.topBorderIsGridBorder() && this.leftBorderIsGridBorder()) -> `boxChar ╔`
+                (this.topBorderIsGridBorder() && this.leftBorderIsBlockBorder()) -> `boxChar ╦`
+                (this.topBorderIsGridBorder()) -> `boxChar ╤`
+
+                (this.leftBorderIsGridBorder() && this.topBorderIsBlockBorder()) -> `boxChar ╠`
+                (this.leftBorderIsGridBorder() && !this.topBorderIsBlockBorder()) -> `boxChar ╟`
+
+                (this.topBorderIsBlockBorder() && this.leftBorderIsBlockBorder()) -> `boxChar ╬`
+                (this.topBorderIsBlockBorder()) -> `boxChar ╪`
+                (this.leftBorderIsBlockBorder()) -> `boxChar ╫`
+                else -> `boxChar ┼`
+            }
+        }
+
+        fun Cell.topRightEdge(): Char {
+            return when {
+                (this.topBorderIsGridBorder() && this.rightBorderIsGridBorder()) -> `boxChar ╗`
+                (this.topBorderIsGridBorder() && this.rightBorderIsBlockBorder()) -> `boxChar ╦`
+                (this.topBorderIsGridBorder()) -> `boxChar ╤`
+
+                (this.rightBorderIsGridBorder() && this.topBorderIsBlockBorder()) -> `boxChar ╣`
+                (this.rightBorderIsGridBorder()) -> `boxChar ╢`
+
+                (this.topBorderIsBlockBorder() && this.rightBorderIsBlockBorder()) -> `boxChar ╬`
+                (this.topBorderIsBlockBorder()) -> `boxChar ╪`
+                (this.rightBorderIsBlockBorder()) -> `boxChar ╫`
+                else -> `boxChar ┼`
+            }
+        }
+
+        fun Cell.bottomLeftEdge(): Char {
+            return when {
+                (this.bottomBorderIsGridBorder() && this.leftBorderIsGridBorder()) -> `boxChar ╚`
+                (this.bottomBorderIsGridBorder() && this.leftBorderIsBlockBorder()) -> `boxChar ╩`
+                (this.bottomBorderIsGridBorder()) -> `boxChar ╧`
+
+                (this.leftBorderIsGridBorder() && this.bottomBorderIsBlockBorder()) -> `boxChar ╠`
+                (this.leftBorderIsGridBorder()) -> `boxChar ╟`
+
+                (this.bottomBorderIsBlockBorder() && this.leftBorderIsBlockBorder()) -> `boxChar ╬`
+                (this.bottomBorderIsBlockBorder()) -> `boxChar ╪`
+                (this.leftBorderIsBlockBorder()) -> `boxChar ╫`
+                else -> `boxChar ┼`
+            }
+        }
+
+        fun Cell.bottomRightEdge(): Char {
+            return when {
+                (this.bottomBorderIsGridBorder() && this.rightBorderIsGridBorder()) -> `boxChar ╝`
+                (this.bottomBorderIsGridBorder() && this.rightBorderIsBlockBorder()) -> `boxChar ╩`
+                (this.bottomBorderIsGridBorder()) -> `boxChar ╧`
+
+                (this.rightBorderIsGridBorder() && this.bottomBorderIsBlockBorder()) -> `boxChar ╣`
+                (this.rightBorderIsGridBorder()) -> `boxChar ╢`
+
+                (this.bottomBorderIsBlockBorder() && this.rightBorderIsBlockBorder()) -> `boxChar ╬`
+                (this.bottomBorderIsBlockBorder()) -> `boxChar ╪`
+                (this.rightBorderIsBlockBorder()) -> `boxChar ╫`
+                else -> `boxChar ┼`
+            }
+        }
+
+    }
 }

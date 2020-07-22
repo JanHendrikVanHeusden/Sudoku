@@ -2,8 +2,6 @@ package nl.jhvh.sudoku.format
 
 import org.apache.commons.lang3.StringUtils
 
-val lineSeparator: String = System.lineSeparator()
-
 /** @return The length of the longest [toString] of all elements in the [collection] */
 fun Collection<*>.maxStringLength(): Int = this.map { s -> s.toString().length } .max()!!
 

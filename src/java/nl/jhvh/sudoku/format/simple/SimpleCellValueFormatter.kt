@@ -1,4 +1,4 @@
-package nl.jhvh.sudoku.format.boxformat
+package nl.jhvh.sudoku.format.simple
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.element.CellValueFormatter
@@ -9,10 +9,20 @@ import java.lang.Integer.max
 
 const val fixedValueMarker: Char = '►'
 
+/**
+ * Basic [CellValue] formatter for textual output, typically to the console.
+ * To be used in other (typically text based) formatters.
+ */
 class SimpleCellValueFormatter: CellValueFormatter {
 
     val minimalFormattedLength:Int = 3
 
+    /**
+     * A basic text format representation of the [cellValue].
+     * The resulting [String] may include one or more of the following characters: `space`, [fixedValueMarker] and digit.
+     * @param cellValue CellValue
+     * @return The formatted output as a [FormattableList], with a single [String]
+     */
     override fun format(cellValue: CellValue): FormattableList {
         // +1 to allow for the fixedValueMarker
         val minimalLength = max(cellValue.grid.maxValueLength+1, minimalFormattedLength)

@@ -3,22 +3,27 @@ package nl.jhvh.sudoku.format.boxformat
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.concatEach
 import nl.jhvh.sudoku.format.element.RowFormatter
-import nl.jhvh.sudoku.format.leftBorder
-import nl.jhvh.sudoku.format.rightBorder
 import nl.jhvh.sudoku.grid.model.segment.Row
 
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter row: Row (instead of element: Row)
+/**
+ * Formatter to format a [Row] using box drawing characters and numbers
+ *  * Box drawing characters: ║ │ ═ ─ ╔ ╗ ╚ ╝ ╤ ╧ ╦ ╩ ╟ ╢ ╠ ╣ ╬ ┼ ╪ ╫ etc.
+ *
+ * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
+ * testing etc.)
+ */
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `row: Row` (instead of `element: Row`)
 class RowBoxFormatter: RowFormatter, BoxBorderingFormatter<Row> {
 
     private val cellFormatter = CellBoxFormatter()
 
     override fun format(row: Row): FormattableList {
         val topBorder =
-                listOf(getTopLeftEdge(row)) concatEach getTopBorder(row) as List<String> concatEach listOf(getTopRightEdge(row))
+                listOf(getTopLeftEdge(row)) concatEach getTopBorder(row) concatEach listOf(getTopRightEdge(row))
         val valueWithLeftRightBorders =
-                getLeftBorder(row) as List<String> concatEach nakedFormat(row) as List<String> concatEach getRightBorder(row) as List<String>
+                getLeftBorder(row) concatEach nakedFormat(row) concatEach getRightBorder(row)
         val bottomBorder =
-                listOf(getBottomLeftEdge(row)) concatEach getBottomBorder(row) as List<String> concatEach listOf(getBottomRightEdge(row))
+                listOf(getBottomLeftEdge(row)) concatEach getBottomBorder(row) concatEach listOf(getBottomRightEdge(row))
         return FormattableList(topBorder + valueWithLeftRightBorders + bottomBorder)
     }
 
@@ -26,18 +31,16 @@ class RowBoxFormatter: RowFormatter, BoxBorderingFormatter<Row> {
         val leftCellsWithRightBorder = concatEach(*row.cellList.dropLast(1).map {
             cellFormatter.nakedFormat(it) concatEach cellFormatter.getRightBorder(it)
         }.toTypedArray())
-        val rightCellNaked = cellFormatter.nakedFormat(row.cellList.last()) as List<String>
+        val rightCellNaked = cellFormatter.nakedFormat(row.cellList.last())
         return FormattableList(leftCellsWithRightBorder concatEach rightCellNaked)
     }
 
     override fun getLeftBorder(row: Row): FormattableList {
-        val leftBorderChar = row.cellList.first().leftBorder()
-        return FormattableList(nakedFormat(row).map { leftBorderChar.toString() })
+        return cellFormatter.getLeftBorder(row.cellList.first())
     }
 
     override fun getRightBorder(row: Row): FormattableList {
-        val rightBorderChar = row.cellList.last().rightBorder()
-        return FormattableList(nakedFormat(row).map { rightBorderChar.toString() })
+        return cellFormatter.getRightBorder(row.cellList.last())
     }
 
     override fun getTopBorder(row: Row): FormattableList {
