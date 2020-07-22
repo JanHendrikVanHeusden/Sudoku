@@ -45,7 +45,7 @@ class Grid ( val blockSize: Int = 3) : Formattable {
         cell.fixValue(value)
     }
 
-    override fun maxValueLength(): Int = this.maxValue.toString().length
+    override val maxValueLength: Int by lazy { this.maxValue.toString().length }
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String {

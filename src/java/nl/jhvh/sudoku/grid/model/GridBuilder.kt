@@ -1,6 +1,6 @@
 package nl.jhvh.sudoku.grid.model
 
-import nl.jhvh.sudoku.base.DEFAULT_BASE_DIM
+import nl.jhvh.sudoku.base.DEFAULT_BLOCK_SIZE
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 
@@ -8,7 +8,7 @@ import nl.jhvh.sudoku.grid.model.cell.CellRef
  * Construct a [Grid] and allow the caller to fix cells etc., than have the constructed [Grid] returned by the [build] method.
  * TODO: verify the minimum number of fixed cells? See https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Minimum_number_of_givens
  */
-class GridBuilder(blockSize: Int = DEFAULT_BASE_DIM) {
+class GridBuilder(blockSize: Int = DEFAULT_BLOCK_SIZE) {
 
     /** The [Grid] to build  */
     private val grid: Grid = Grid(blockSize)
@@ -19,7 +19,7 @@ class GridBuilder(blockSize: Int = DEFAULT_BASE_DIM) {
      */
     private var isBuilt: Boolean = false
 
-    /** @return The [Grid] as specified by size ([blockSize]) and by it's fixed values
+    /** @return The [Grid] as specified by its blockSize and by it's fixed values
      */
     fun build(): Grid {
         isBuilt = true

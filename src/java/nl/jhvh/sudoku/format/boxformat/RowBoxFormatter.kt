@@ -36,7 +36,7 @@ class RowBoxFormatter: RowFormatter, BoxBorderingFormatter<Row> {
     }
 
     override fun getRightBorder(row: Row): FormattableList {
-        val rightBorderChar = row.cellList.first().rightBorder()
+        val rightBorderChar = row.cellList.last().rightBorder()
         return FormattableList(nakedFormat(row).map { rightBorderChar.toString() })
     }
 

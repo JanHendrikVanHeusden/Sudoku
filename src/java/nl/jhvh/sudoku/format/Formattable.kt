@@ -28,5 +28,5 @@ interface Formattable {
      *   E.g. for a `3*3` block size, the maximum value is 9, so the length (number of digits) of that is 1.
      *   For a `4*4` block size, the maximum value is 16, so the length is 2. Etc.
      */
-    fun maxValueLength(): Int
+    val maxValueLength: Int
 }

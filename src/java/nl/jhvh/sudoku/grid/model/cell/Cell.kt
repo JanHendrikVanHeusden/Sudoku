@@ -12,8 +12,6 @@ import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import java.util.Collections.synchronizedSet
 
-val VALUE_UNKNOWN: Int? = null
-
 /**
  * A [Cell] in a Sudoku represents a single square in a [Grid]
  *  * The [Cell] can either be empty, or filled with a single numeric value; see also [CellValue]
@@ -33,11 +31,15 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int) : GridElement(grid)
         @Synchronized
         private set
 
+    fun setValue(value: Int) {
+
+    }
+
     fun fixValue(value: Int) {
-        require(!(cellValue.isFixed && Integer.valueOf(value) != value)) { "Can not change the value of a fixed cell! $this" }
         cellValue = FixedValue(this, value)
         valueCandidates.clear()
     }
+
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: colIndex=$colIndex, rowIndex=$rowIndex, cellValue=[$cellValue], valueCandidates=$valueCandidates"

@@ -10,6 +10,8 @@ import nl.jhvh.sudoku.grid.model.GridElement
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
+val VALUE_UNKNOWN: Int? = null
+
 /** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
 sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
@@ -57,6 +59,9 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
     /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
     abstract val isFixed: Boolean
+
+    /** @return Whether a known value (`!=` [VALUE_UNKNOWN] is set, either fixed or mutable */
+    fun hasValue(): Boolean = this.value != VALUE_UNKNOWN
 
     abstract fun setValue(value: Int)
 

@@ -11,9 +11,9 @@ package nl.jhvh.sudoku.grid.model.cell
  *          So the 2nd column (indicated by "`2`") would correspond with [y]-value **`1`**.
  */
 data class CellRef(val x: Int, val y: Int) {
-    val rowRef: String
-    val colRef: String
-    val cellRef: String
+    val rowRef: String = indexToRowRef(y)
+    val colRef: String = indexToColRef(x)
+    val cellRef: String = rowRef + colRef
 
     constructor(cellRef: String) : this(getRowFromCellRef(cellRef), getColFromCellRef(cellRef)) {}
     constructor(rowRef: String, colRef: String) : this(colRefToIndex(colRef.trim { it <= ' ' }.toUpperCase()),
@@ -42,9 +42,8 @@ data class CellRef(val x: Int, val y: Int) {
         return (y == cellRef.y)
     }
 
-    init {
-        rowRef = indexToRowRef(y)
-        colRef = indexToColRef(x)
-        cellRef = rowRef + colRef
+    override fun toString(): String {
+        return "${this.javaClass.simpleName} (x=$x, y=$y, rowRef='$rowRef', colRef='$colRef', cellRef='$cellRef')"
     }
+
 }
