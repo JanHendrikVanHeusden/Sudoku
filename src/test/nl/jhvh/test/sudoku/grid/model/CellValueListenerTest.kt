@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
  * Is not a unit tst but rather a component integration test, as it tests the results
  * of the listener actions all over the[Cell]s in the [Grid].
  */
+@Disabled("Not implemented yet")
 internal class CellValueListenerTest {
     /**
      * Test method for the whole cycle of setting values, firing the appropriate [CellSetValueEvent]
@@ -23,7 +24,6 @@ internal class CellValueListenerTest {
      * are checked after fixing the values up to the [GridBuilder.build].
      */
     @Test
-    @Disabled("Not implemented yet")
     fun `test Cell value listeners`() {
         val grid = GridBuilder()
                 .fix(CellRef(0, 0), 2)

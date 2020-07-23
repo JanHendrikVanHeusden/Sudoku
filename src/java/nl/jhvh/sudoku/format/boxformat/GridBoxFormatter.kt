@@ -13,10 +13,8 @@ import nl.jhvh.sudoku.grid.model.Grid
  * testing etc.)
  */
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `grid: Grid` (instead of `grid: Grid`)
-class GridBoxFormatter: GridFormatter, BoxBorderingFormatter<Grid> {
-
-    private val rowFormatter = RowBoxFormatter()
-    private val colFormatter = ColumnBoxFormatter()
+class GridBoxFormatter(private val rowFormatter: RowBoxFormatter, private val colFormatter: ColumnBoxFormatter
+) : GridFormatter, ElementBoxFormattable<Grid> {
 
     override fun format(grid: Grid): FormattableList {
 

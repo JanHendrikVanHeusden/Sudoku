@@ -28,9 +28,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * testing etc.)
  */
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `cell: Cell` (instead of `element: cell`)
-class CellBoxFormatter: CellFormatter, BoxBorderingFormatter<Cell> {
-
-    private val cellValueFormatter = SimpleCellValueFormatter()
+class CellBoxFormatter(private val cellValueFormatter: SimpleCellValueFormatter) : CellFormatter, ElementBoxFormattable<Cell> {
 
     override fun format(cell: Cell): FormattableList {
         val topBorder =

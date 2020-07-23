@@ -7,7 +7,6 @@ import nl.jhvh.sudoku.format.element.CellValueFormatter
 import nl.jhvh.sudoku.format.element.ColumnFormatter
 import nl.jhvh.sudoku.format.element.GridFormatter
 import nl.jhvh.sudoku.format.element.RowFormatter
-import nl.jhvh.sudoku.format.simple.SimpleCellValueFormatter
 
 /**
  * Formatter to format a grid or grid element using box drawing characters and numbers
@@ -16,10 +15,11 @@ import nl.jhvh.sudoku.format.simple.SimpleCellValueFormatter
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-class SudokuBoxFormatter : SudokuFormatter,
-        CellValueFormatter by SimpleCellValueFormatter(),
-        CellFormatter by CellBoxFormatter(),
-        ColumnFormatter by ColumnBoxFormatter(),
-        RowFormatter by RowBoxFormatter(),
-        BlockFormatter by BlockBoxFormatter(),
-        GridFormatter by GridBoxFormatter()
+class SudokuBoxFormatter :
+        SudokuFormatter,
+        CellValueFormatter by simpleCellValueFormatterInstance,
+        CellFormatter by cellBoxFormatterInstance,
+        ColumnFormatter by columnBoxFormatterInstance,
+        RowFormatter by rowBoxFormatterInstance,
+        BlockFormatter by blockBoxFormatterInstance,
+        GridFormatter by gridBoxFormatterInstance

@@ -10,7 +10,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-interface BoxBorderingFormatter<in G> {
+interface ElementBoxFormattable<in G> {
 
     /**
      * Formats the content without outside borders.

@@ -13,4 +13,10 @@ import nl.jhvh.sudoku.format.element.RowFormatter
  *  * This interface represents the visitor in the classic Visitor Pattern.
  *     * It lists the 'accepting' methods for the supported Sudoku element types.
  */
-interface SudokuFormatter: CellValueFormatter, CellFormatter, ColumnFormatter, RowFormatter, BlockFormatter, GridFormatter
+interface SudokuFormatter:
+        CellValueFormatter,
+        CellFormatter,
+        ColumnFormatter,
+        RowFormatter,
+        BlockFormatter,
+        GridFormatter

@@ -13,9 +13,7 @@ import nl.jhvh.sudoku.grid.model.segment.Col
  * testing etc.)
  */
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `col: Col` (instead of `element: Col`)
-class ColumnBoxFormatter: ColumnFormatter, BoxBorderingFormatter<Col> {
-
-    private val cellFormatter = CellBoxFormatter()
+class ColumnBoxFormatter(private val cellFormatter: CellBoxFormatter) : ColumnFormatter, ElementBoxFormattable<Col> {
 
     override fun format(col: Col): FormattableList {
         val topBorder =

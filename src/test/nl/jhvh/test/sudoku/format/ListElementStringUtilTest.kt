@@ -11,7 +11,6 @@ import nl.jhvh.sudoku.format.concatAlignRight
 import nl.jhvh.sudoku.format.concatEach
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import kotlin.test.assertFailsWith
 
