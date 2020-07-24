@@ -1,7 +1,5 @@
-package nl.jhvh.test.sudoku.grid.model
+package nl.jhvh.sudoku.grid.model
 
-import nl.jhvh.sudoku.grid.model.Grid
-import nl.jhvh.sudoku.grid.model.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col

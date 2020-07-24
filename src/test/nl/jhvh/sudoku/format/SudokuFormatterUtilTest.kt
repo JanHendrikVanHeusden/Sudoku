@@ -1,9 +1,7 @@
-package nl.jhvh.test.sudoku.format
+package nl.jhvh.sudoku.format
 
 import io.mockk.every
 import io.mockk.mockk
-import nl.jhvh.sudoku.format.bottomBorderIsBlockBorder
-import nl.jhvh.sudoku.format.bottomBorderIsGridBorder
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.bottomBorder
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.bottomLeftEdge
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.bottomRightEdge
@@ -12,20 +10,6 @@ import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.rightBorder
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.topBorder
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.topLeftEdge
 import nl.jhvh.sudoku.format.boxformat.CellBoxFormatter.BorderChar.topRightEdge
-import nl.jhvh.sudoku.format.colIndexIsLeftBlockBorder
-import nl.jhvh.sudoku.format.colIndexIsLeftGridBorder
-import nl.jhvh.sudoku.format.colIndexIsRightBlockBorder
-import nl.jhvh.sudoku.format.colIndexIsRightGridBorder
-import nl.jhvh.sudoku.format.leftBorderIsBlockBorder
-import nl.jhvh.sudoku.format.leftBorderIsGridBorder
-import nl.jhvh.sudoku.format.rightBorderIsBlockBorder
-import nl.jhvh.sudoku.format.rightBorderIsGridBorder
-import nl.jhvh.sudoku.format.rowIndexIsBottomBlockBorder
-import nl.jhvh.sudoku.format.rowIndexIsBottomGridBorder
-import nl.jhvh.sudoku.format.rowIndexIsTopBlockBorder
-import nl.jhvh.sudoku.format.rowIndexIsTopGridBorder
-import nl.jhvh.sudoku.format.topBorderIsBlockBorder
-import nl.jhvh.sudoku.format.topBorderIsGridBorder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

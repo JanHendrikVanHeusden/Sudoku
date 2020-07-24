@@ -1,14 +1,7 @@
-package nl.jhvh.test.sudoku.format
+package nl.jhvh.sudoku.format
 
 import io.mockk.every
 import io.mockk.mockk
-import nl.jhvh.sudoku.format.alignCenter
-import nl.jhvh.sudoku.format.alignLeft
-import nl.jhvh.sudoku.format.alignRight
-import nl.jhvh.sudoku.format.concatAlignCenter
-import nl.jhvh.sudoku.format.concatAlignLeft
-import nl.jhvh.sudoku.format.concatAlignRight
-import nl.jhvh.sudoku.format.concatEach
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

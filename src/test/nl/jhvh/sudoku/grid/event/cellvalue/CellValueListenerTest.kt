@@ -1,4 +1,4 @@
-package nl.jhvh.test.sudoku.grid.model
+package nl.jhvh.sudoku.grid.event.cellvalue
 
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridBuilder

@@ -1,6 +1,5 @@
-package nl.jhvh.test.sudoku.base
+package nl.jhvh.sudoku.base
 
-import nl.jhvh.sudoku.base.incrementFromZero
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
