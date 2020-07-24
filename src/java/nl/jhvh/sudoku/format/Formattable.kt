@@ -8,7 +8,14 @@ package nl.jhvh.sudoku.format
  */
 interface Formattable {
 
-    class FormattableList(collection: List<String> = emptyList()): List<String> by ArrayList<String>(collection) {
+    /** [List]<[String]> with [toString] overridden for of formatting grid or grid elements */
+    class FormattableList(collection: List<String> = emptyList()):
+            List<String> by ArrayList<String>(collection) {
+
+        /**
+         * Produces desired results when formatting grid or grid elements
+         * @return The content of each line, separated by [lineSeparator] = [System.lineSeparator]
+         */
         override fun toString(): String {
             return this.joinToString(separator = lineSeparator)
         }
