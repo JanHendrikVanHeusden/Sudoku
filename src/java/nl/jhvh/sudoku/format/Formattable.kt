@@ -8,19 +8,6 @@ package nl.jhvh.sudoku.format
  */
 interface Formattable {
 
-    /** [List]<[String]> with [toString] overridden for of formatting grid or grid elements */
-    class FormattableList(collection: List<String> = emptyList()):
-            List<String> by ArrayList<String>(collection) {
-
-        /**
-         * Produces desired results when formatting grid or grid elements
-         * @return The content of each line, separated by [lineSeparator] = [System.lineSeparator]
-         */
-        override fun toString(): String {
-            return this.joinToString(separator = lineSeparator)
-        }
-    }
-
     /**
      * Output a Sudoku element (typically the [Grid], but may also be a [GridSegment] like a [Cell] or [Row]),
      * in a human readable or machine readable (e.g. HTML) way
@@ -36,4 +23,29 @@ interface Formattable {
      *   For a `4*4` block size, the maximum value is 16, so the length is 2. Etc.
      */
     val maxValueLength: Int
+
+
+    /** [List]<[String]> with [toString] overridden for of formatting grid or grid elements */
+    class FormattableList(collection: List<String> = emptyList()):
+            List<String> by ArrayList<String>(collection) {
+
+        /**
+         * Produces desired results when formatting grid or grid elements
+         * @return The content of each line, separated by [lineSeparator] = [System.lineSeparator]
+         */
+        override fun toString(): String {
+            return this.joinToString(separator = lineSeparator)
+        }
+
+        /** [equals] based [List.equals] */
+        override fun equals(other: Any?): Boolean {
+            return this.toList().equals(other)
+        }
+
+        /** [hashCode] based [List.hashCode] */
+        override fun hashCode(): Int {
+            return this.toList().hashCode()
+        }
+    }
+
 }
