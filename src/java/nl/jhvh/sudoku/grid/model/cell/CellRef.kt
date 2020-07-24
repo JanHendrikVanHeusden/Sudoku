@@ -1,8 +1,10 @@
+@file:Suppress("KDocUnresolvedReference")
+
 package nl.jhvh.sudoku.grid.model.cell
 
 import nl.jhvh.sudoku.base.MAX_BLOCK_SIZE
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.equals
+import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.hashCode
 
 /**
  * A [CellRef] can be constructed (and represented) by a combination of:
@@ -30,34 +32,8 @@ data class CellRef(val x: Int, val y: Int) {
     constructor(rowRef: String, colRef: String) : this(colRefToIndex(colRef.trim { it <= ' ' }.toUpperCase()),
             rowRefToIndex(rowRef.trim { it <= ' ' }.toUpperCase())) {}
 
-    private val theHashCode = (31 + x + y) * 31
-
-    /** [hashCode] based on [x] and [y] only  */
-    override fun hashCode(): Int = theHashCode
-
-    /** [equals] based on [x] and [y] only */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-        if (other == null) {
-            return false
-        }
-        if (javaClass != other.javaClass) {
-            return false
-        }
-        val cellRef = other as CellRef
-        if (x != cellRef.x) {
-            return false
-        }
-        return (y == cellRef.y)
-    }
-
-    override fun toString(): String {
-        return "${this.javaClass.simpleName} (x=$x, y=$y, rowRef='$rowRef', colRef='$colRef', cellRef='$cellRef')"
-    }
-
     companion object CellRefCalculation {
+
         private val maxBlockSizeStringLength = MAX_BLOCK_SIZE.toString().length
         private const val A: Char = 'A'
         private const val AInt: Int = 'A'.toInt()
@@ -67,31 +43,35 @@ data class CellRef(val x: Int, val y: Int) {
         private fun String.trimSpacesAndControlChars() = this.trim{ it <= ' '}
 
         private const val ROW_REF_PATTERN_STRING: String = "[A-Z]+"
-        private val rowRefPattern: Pattern = Pattern.compile("^$ROW_REF_PATTERN_STRING$")
+        private val rowRefRegex = Regex("^$ROW_REF_PATTERN_STRING$")
 
         private const val COL_REF_PATTERN_STRING: String = "[1-9][0-9]*"
-        private val colRefPattern: Pattern = Pattern.compile("^$COL_REF_PATTERN_STRING$")
+        private val colRefRegex = Regex("^$COL_REF_PATTERN_STRING$")
 
-        private val cellRefPattern: Pattern = Pattern.compile("^($ROW_REF_PATTERN_STRING)\\s*($COL_REF_PATTERN_STRING)$")
+        private val cellRefRegex = Regex("^($ROW_REF_PATTERN_STRING)\\s*($COL_REF_PATTERN_STRING)$")
 
-        private fun parseCellRef(cellRef: String): Matcher {
-            val cellRefMatcher = cellRefPattern.matcher(cellRef.trim { it <= ' ' }.toUpperCase())
-            require(cellRefMatcher.find()) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
-            return cellRefMatcher
+        private fun parseCellRef(cellRef: String): List<String> {
+            val tidiedCellRef = cellRef.trim { it <= ' ' }.toUpperCase()
+            val cellRefMatchResult = cellRefRegex.find(tidiedCellRef)
+            val groupValues = cellRefMatchResult?.groupValues?: emptyList()
+            // if match result != null then groupValues[0] contains the whole matching String.
+            // groupValues[1], [2], ... etc. contain the matches of the groups in the pattern
+            require(cellRefMatchResult != null && groupValues[0] == tidiedCellRef) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
+            return groupValues
         }
 
         fun getRowRefFromCellRef(cellRef: String): String {
-            return parseCellRef(cellRef).group(rowGroupInCellPattern)
+            return parseCellRef(cellRef)[rowGroupInCellPattern]
         }
 
         fun getColRefFromCellRef(cellRef: String): String {
-            return parseCellRef(cellRef).group(colGroupInCellPattern)
+            return parseCellRef(cellRef)[colGroupInCellPattern]
         }
 
         fun rowRefToIndex(rowRef: String): Int {
             val rowRefUpper = rowRef.trimSpacesAndControlChars().toUpperCase()
             require(rowRefUpper.isNotBlank()) {"""Row reference must not be blank. Format must be "A", "J", "AC" etc."""}
-            require(rowRefPattern.matcher(rowRefUpper).find()) {"""Invalid format, can not parse row reference [$rowRef]. Format must be "A", "J", "AC" etc."""}
+            require(rowRefRegex.matches(rowRefUpper)) {"""Invalid format, can not parse row reference [$rowRef]. Format must be "A", "J", "AC" etc."""}
             var value = 0
             for (x in 0 until rowRefUpper.length) {
                 // +1 because the references have no zero A = 1, Z = 26, AA = 27 (no A0!) -> no zeros!
@@ -124,7 +104,7 @@ data class CellRef(val x: Int, val y: Int) {
             // trim all spaces and control characters, and make uppercase
             val colRefUpper = colRef.trimSpacesAndControlChars().toUpperCase()
             require(colRefUpper.isNotBlank()) {"""Column reference must not be blank. Format must be "A", "J", "AC" etc."""}
-            require(colRefPattern.matcher(colRefUpper).find()) {"""Invalid format, can not parse column reference [$colRef]. Format must be "1", "8", "11" etc."""}
+            require(colRefRegex.matches(colRefUpper)) {"""Invalid format, can not parse column reference [$colRef]. Format must be "1", "8", "11" etc."""}
             require(colRefUpper.length <= maxBlockSizeStringLength && colRefUpper.toInt() <= MAX_BLOCK_SIZE) {
                 "Too high value [$colRef] for column reference! Block size asked for is [${MAX_BLOCK_SIZE+1}] or higher but must be between 1 and $MAX_BLOCK_SIZE"
             }
@@ -138,6 +118,33 @@ data class CellRef(val x: Int, val y: Int) {
             }
             return (colIndex + 1).toString() // +1 to make it one-based
         }
+    }
+
+    private val theHashCode = (31 + x + y) * 31
+
+    /** [hashCode] based on [x] and [y] only  */
+    override fun hashCode(): Int = theHashCode
+
+    /** [equals] based on [x] and [y] only */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null) {
+            return false
+        }
+        if (javaClass != other.javaClass) {
+            return false
+        }
+        val cellRef = other as CellRef
+        if (x != cellRef.x) {
+            return false
+        }
+        return (y == cellRef.y)
+    }
+
+    override fun toString(): String {
+        return "${this.javaClass.simpleName} (x=$x, y=$y, rowRef='$rowRef', colRef='$colRef', cellRef='$cellRef')"
     }
 
 }
