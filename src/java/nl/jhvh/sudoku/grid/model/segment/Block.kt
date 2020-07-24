@@ -29,9 +29,9 @@ class Block(grid: Grid, val leftXIndex: Int, val topYIndex: Int) : GridSegment(g
     override val cellList: List<Cell> = incrementFromZero(grid.gridSize)
             .map { grid.findCell(x = it % grid.blockSize + leftXIndex, y = it/grid.blockSize + topYIndex) }
 
-    fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCellCoordinates(cell.colIndex, cell.rowIndex)
+    fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCell(cell.colIndex, cell.rowIndex)
 
-    fun containsCellCoordinates(x: Int, y: Int): Boolean = x in leftXIndex..rightXIndex && y in topYIndex..bottomYIndex
+    fun containsCell(x: Int, y: Int): Boolean = x in leftXIndex..rightXIndex && y in topYIndex..bottomYIndex
 
     override fun onEvent(gridEvent: CellSetValueEvent) {
         TODO("Not yet implemented")

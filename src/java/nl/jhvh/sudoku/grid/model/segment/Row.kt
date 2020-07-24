@@ -7,7 +7,7 @@ import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
-import nl.jhvh.sudoku.grid.model.cell.indexToRowRef
+import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToRowRef
 
 /**
  * A [Row]represents a collection of [Cell]s within a Sudoku that are at the same vertical axis (see [.rowIndex]).
