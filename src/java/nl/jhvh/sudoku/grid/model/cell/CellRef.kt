@@ -53,11 +53,11 @@ data class CellRef(val x: Int, val y: Int) {
         private fun parseCellRef(cellRef: String): List<String> {
             val tidiedCellRef = cellRef.trim { it <= ' ' }.toUpperCase()
             val cellRefMatchResult = cellRefRegex.find(tidiedCellRef)
-            val groupValues = cellRefMatchResult?.groupValues?: emptyList()
+            val groupValues = cellRefMatchResult?.groupValues
             // if match result != null then groupValues[0] contains the whole matching String.
             // groupValues[1], [2], ... etc. contain the matches of the groups in the pattern
-            require(cellRefMatchResult != null && groupValues[0] == tidiedCellRef) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
-            return groupValues
+            require(cellRefMatchResult != null && groupValues!![0] == tidiedCellRef) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
+            return groupValues!!
         }
 
         fun getRowRefFromCellRef(cellRef: String): String {
