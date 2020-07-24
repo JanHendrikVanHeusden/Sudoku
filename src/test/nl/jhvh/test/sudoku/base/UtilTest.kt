@@ -9,9 +9,10 @@ class UtilTest {
 
     @Test
     fun `test zero based IntArray`() {
-        assertThat(incrementFromZero(3)).hasSameElementsAs(listOf(0, 1, 2))
+        assertThat(incrementFromZero(3)).isEqualTo(listOf(0, 1, 2))
         assertThat(incrementFromZero(0)).isEmpty()
-        assertFailsWith<NegativeArraySizeException> { incrementFromZero(-10)}
+        assertThat(incrementFromZero(1)).isEqualTo(listOf(0))
+        assertFailsWith<IllegalArgumentException> { incrementFromZero(-10)}
         assertThat(incrementFromZero(500))
                 .startsWith(0)
                 .endsWith(499)
