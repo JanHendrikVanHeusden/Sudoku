@@ -5,11 +5,11 @@ import java.util.HashSet
 
 /**
  * Sudoku structure, base rules
- * * A [Grid] consists of [GridSegment]s:
  * * A [Grid] is a square of `n * n` [Cell]s
- * * A [Grid] is divided in [Row]s, [Col]s and [Block]s.
- * * Each [GridSegment] can contain a number only one time
- * * Each solved [GridSegment] contains all numbers from `1 - n` (inclusive)
+ * * A [Grid] consists of [GridSegment]s:
+ *    * [Row]s, [Col]s (aka columns) and [Block]s.
+ * * Each [GridSegment] can contain numbers 1..n, each number at most one time
+ * * Each **solved** [GridSegment] must contain all numbers `1..n` (inclusive)
  *
  * Rules that help to solve a Sudoku, derived from the structure & base rules above;
  * * Where the 3rd and 4th are extensions of the previous ones;
@@ -27,18 +27,21 @@ import java.util.HashSet
  * It seems to me that with these basic rules, any Sudoku should be solvable, because basically there are no more rules
  * in Sudoku than the structure rules (*) and the derived rules (1-4).
  *
- * Several more or less smart additional strategies exist, e.g.
+ * Several less or more smart additional strategies exist, e.g.
  *  * Trial and error: try some possible solution, and if it proves wrong, go back to the situation that you know to be correct.
  *      * *Should not be necessary (at least I hope so - inefficient, and notoriously difficult to program this properly...)*
  *
- *  * Assume that the Sudoku has only 1 solution, and deduce that a certain partial solution (e.g. a certain value in a [Cell]) can be eliminated.
+ *  * Assume that the Sudoku has only 1 solution, and deduce that a certain partial solution (e.g. a certain value in a [Cell])
+ *    can be eliminated.
  *      * Although this is a useful approach for Sudoku's that are known to be correct, we can not use it because this Sudoku solver may
  *        also be used to find that a given [Grid] is unsolvable (incorrect).
  *  * Some derived rules about certain patterns, e.g. *Swordfish*, *X-Wing*, *Jellyfish*, etc.
- *      * As far as I can see, these should never really be necessary... But let's see... Really fiendish Sudokus exist in the world!
+ *      * As far as I can see, these should never really be necessary...
+ *        But let's see... Really fiendish Sudokus exist in the world!
  *
  * So at the time of writing, this Sudoku solver is aimed to rely on only the basic rules. Let's see!
  */
+@Suppress("KDocUnresolvedReference")
 class SegmentSubsetFinder internal constructor(private val segment: GridSegment) {
     private val knownSubsets: Set<Set<Int>> = HashSet()
 
@@ -58,6 +61,8 @@ class SegmentSubsetFinder internal constructor(private val segment: GridSegment)
      * But the alternatives that remain in the subset (values 4 and 7 in this example) can also be removed from
      * all other [Cell]s in the [GridSegment]s this subset is part of: the "naked candidates removal".
      */
-    fun resolveHiddenSubsets(level: Int) {}
+    fun resolveHiddenSubsets(level: Int) {
+        TODO("Not implemented yet")
+    }
 
 }
