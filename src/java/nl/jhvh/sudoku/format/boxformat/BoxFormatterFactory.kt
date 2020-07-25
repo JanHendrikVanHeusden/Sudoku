@@ -1,7 +1,13 @@
 package nl.jhvh.sudoku.format.boxformat
 
+import nl.jhvh.sudoku.format.boxformat.BoxFormatterFactory.FactoryInstance.factoryInstance
 import nl.jhvh.sudoku.format.simple.SimpleCellValueFormatter
 
+/**
+ * This factory produces stateless formatters, so a single instance is sufficient, using [factoryInstance].
+ *  * The formatters produced could have been completely static; however the factory pattern is chosen solely
+ *    for testability (mocking and verification in unit tests).
+ */
 class BoxFormatterFactory {
 
     val simpleCellValueFormatterInstance: SimpleCellValueFormatter = SimpleCellValueFormatter()
@@ -12,6 +18,7 @@ class BoxFormatterFactory {
     val gridBoxFormatterInstance: GridBoxFormatter = GridBoxFormatter(rowBoxFormatterInstance, columnBoxFormatterInstance)
 
     companion object FactoryInstance {
-        val instance: BoxFormatterFactory = BoxFormatterFactory()
+        /** Singleton [BoxFormatterFactory] instance. */
+        val factoryInstance: BoxFormatterFactory = BoxFormatterFactory()
     }
 }

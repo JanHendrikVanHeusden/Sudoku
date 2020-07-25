@@ -10,7 +10,7 @@ import java.lang.Integer.max
 const val fixedValueMarker: Char = '►'
 
 /**
- * Basic [CellValue] formatter for textual output, typically to the console.
+ * Basic stateless [CellValue] formatter for textual output, typically to the console.
  * To be used in other (typically text based) formatters.
  */
 class SimpleCellValueFormatter: CellValueFormatter {

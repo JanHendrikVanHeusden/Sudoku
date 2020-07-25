@@ -15,8 +15,8 @@ import nl.jhvh.sudoku.format.topBorderIsGridBorder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 
 /**
- * Simple formatting of a [Cell], typically for output to [System.out].
- *  * The height of the cell value of a formatted [Cell] is always 1, the heigth of the top and bottom borders is 1 each.
+ * Simple formatting of a [Cell], typically for output to [System.out]. Stateless.
+ *  * The height of the cell value of a formatted [Cell] is always 1, the height of the top and bottom borders is 1 each.
  *  * The width of a cell value varies with the width of the grid's highest possible cell value; for `3*3` block size the
  *    highest value 1 9, for `4*4` 16 etc.
  * Borders:

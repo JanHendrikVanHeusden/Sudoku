@@ -18,19 +18,22 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-/** Unit tests for [SudokuBoxFormatter] */
+/**
+ * Unit tests for [SudokuBoxFormatter]. That class delegates all it's work to formatters for each element,
+ * so the tests only check that the formatting is correctly delegated.
+ * The delegates have their own tests, so no functional tests needed here.
+ */
 internal class SudokuBoxFormatterTest {
 
     private lateinit var subject: SudokuBoxFormatter
 
-    private lateinit var cellValueFormatterMock: SimpleCellValueFormatter
-    private lateinit var cellFormatterMock: CellBoxFormatter
-    private lateinit var rowFormatterMock: RowBoxFormatter
-    private lateinit var colFormatterMock: ColumnBoxFormatter
-    private lateinit var blockFormatterMock: BlockBoxFormatter
-    private lateinit var gridFormatterMock: GridBoxFormatter
-
-    private lateinit var gridMock: Grid
+    // mocks for the delegates
+    private lateinit var cellValueFormatterDelegate: SimpleCellValueFormatter
+    private lateinit var cellFormatterDelegate: CellBoxFormatter
+    private lateinit var rowFormatterDelegate: RowBoxFormatter
+    private lateinit var colFormatterDelegate: ColumnBoxFormatter
+    private lateinit var blockFormatterDelegate: BlockBoxFormatter
+    private lateinit var gridFormatterDelegate: GridBoxFormatter
 
     @AfterEach
     fun tearDownAfterAll() {
@@ -39,124 +42,106 @@ internal class SudokuBoxFormatterTest {
 
     @BeforeEach
     fun setUp() {
-        cellValueFormatterMock = mockk()
-        cellFormatterMock = mockk()
-        rowFormatterMock = mockk()
-        colFormatterMock = mockk()
-        blockFormatterMock = mockk()
-        gridFormatterMock = mockk()
+        cellValueFormatterDelegate = mockk()
+        cellFormatterDelegate = mockk()
+        rowFormatterDelegate = mockk()
+        colFormatterDelegate = mockk()
+        blockFormatterDelegate = mockk()
+        gridFormatterDelegate = mockk()
 
-        val formatterFactory: BoxFormatterFactory = mockk(relaxed = false)
-        every { formatterFactory.simpleCellValueFormatterInstance } returns cellValueFormatterMock
-        every { formatterFactory.cellBoxFormatterInstance } returns cellFormatterMock
-        every { formatterFactory.rowBoxFormatterInstance } returns rowFormatterMock
-        every { formatterFactory.columnBoxFormatterInstance } returns colFormatterMock
-        every { formatterFactory.blockBoxFormatterInstance } returns blockFormatterMock
-        every { formatterFactory.gridBoxFormatterInstance } returns gridFormatterMock
+        val formatterFactoryMock: BoxFormatterFactory = mockk(relaxed = false)
+        every { formatterFactoryMock.simpleCellValueFormatterInstance } returns cellValueFormatterDelegate
+        every { formatterFactoryMock.cellBoxFormatterInstance } returns cellFormatterDelegate
+        every { formatterFactoryMock.rowBoxFormatterInstance } returns rowFormatterDelegate
+        every { formatterFactoryMock.columnBoxFormatterInstance } returns colFormatterDelegate
+        every { formatterFactoryMock.blockBoxFormatterInstance } returns blockFormatterDelegate
+        every { formatterFactoryMock.gridBoxFormatterInstance } returns gridFormatterDelegate
 
-        subject = SudokuBoxFormatter(formatterFactory)
+        subject = SudokuBoxFormatter(formatterFactoryMock)
     }
 
     @Test
     fun `format - CellValue`() {
         // given
-        val mockedFormattedCellValue = "vmk" // same length as actual formatted value
-        val cellValueFormatResult = FormattableList(listOf(mockedFormattedCellValue))
-
+        val cellValueFormatResult = FormattableList(listOf("mockedFormattedCellValue"))
         val cellValueMock: CellValue = mockk()
-        every {cellValueFormatterMock.format(cellValueMock)} returns cellValueFormatResult
-
+        every {cellValueFormatterDelegate.format(cellValueMock)} returns cellValueFormatResult
         // when
         val formatResult = subject.format(cellValueMock)
         // then
         assertThat(formatResult).isEqualTo(cellValueFormatResult)
-        verify (exactly = 1) { cellValueFormatterMock.format(cellValueMock) }
-        confirmVerified(cellValueFormatterMock, cellValueMock)
+        verify (exactly = 1) { cellValueFormatterDelegate.format(cellValueMock) }
+        confirmVerified(cellValueFormatterDelegate, cellValueMock)
     }
 
     @Test
     fun `format - Cell`() {
         // given
-        val mockedFormattedCell = "cmk"
-        val cellFormatResult = FormattableList(listOf(mockedFormattedCell))
-
+        val cellFormatResult = FormattableList(listOf("mockedFormattedCell"))
         val cellMock: Cell = mockk()
-        every {cellFormatterMock.format(cellMock)} returns cellFormatResult
-
+        every {cellFormatterDelegate.format(cellMock)} returns cellFormatResult
         // when
         val formatResult = subject.format(cellMock)
         // then
         assertThat(formatResult).isEqualTo(cellFormatResult)
-        verify (exactly = 1) { cellFormatterMock.format(cellMock) }
-        confirmVerified(cellFormatterMock, cellMock)
+        verify (exactly = 1) { cellFormatterDelegate.format(cellMock) }
+        confirmVerified(cellFormatterDelegate, cellMock)
     }
 
     @Test
     fun `format - Row`() {
         // given
-        val mockedFormattedRow = "rmk"
-        val rowFormatResult = FormattableList(listOf(mockedFormattedRow))
-
+        val rowFormatResult = FormattableList(listOf("mockedFormattedRow"))
         val rowMock: Row = mockk()
-        every {rowFormatterMock.format(rowMock)} returns rowFormatResult
-
+        every {rowFormatterDelegate.format(rowMock)} returns rowFormatResult
         // when
         val formatResult = subject.format(rowMock)
         // then
         assertThat(formatResult).isEqualTo(rowFormatResult)
-        verify (exactly = 1) { rowFormatterMock.format(rowMock) }
-        confirmVerified(rowFormatterMock, rowMock)
+        verify (exactly = 1) { rowFormatterDelegate.format(rowMock) }
+        confirmVerified(rowFormatterDelegate, rowMock)
     }
 
     @Test
     fun `format - Column`() {
         // given
-        val mockedFormattedCol = "clm"
-        val colFormatResult = FormattableList(listOf(mockedFormattedCol))
-
+        val colFormatResult = FormattableList(listOf("mockedFormattedCol"))
         val colMock: Col = mockk()
-        every {colFormatterMock.format(colMock)} returns colFormatResult
-
+        every {colFormatterDelegate.format(colMock)} returns colFormatResult
         // when
         val formatResult = subject.format(colMock)
         // then
         assertThat(formatResult).isEqualTo(colFormatResult)
-        verify (exactly = 1) { colFormatterMock.format(colMock) }
-        confirmVerified(colFormatterMock, colMock)
+        verify (exactly = 1) { colFormatterDelegate.format(colMock) }
+        confirmVerified(colFormatterDelegate, colMock)
     }
 
     @Test
     fun `format - Block`() {
         // given
-        val mockedFormattedBlock = "clm"
-        val blockFormatResult = FormattableList(listOf(mockedFormattedBlock))
-
+        val blockFormatResult = FormattableList(listOf("mockedFormattedBlock"))
         val blockMock: Block = mockk()
-        every {blockFormatterMock.format(blockMock)} returns blockFormatResult
-
+        every {blockFormatterDelegate.format(blockMock)} returns blockFormatResult
         // when
         val formatResult = subject.format(blockMock)
         // then
         assertThat(formatResult).isEqualTo(blockFormatResult)
-        verify (exactly = 1) { blockFormatterMock.format(blockMock) }
-        confirmVerified(blockFormatterMock, blockMock)
+        verify (exactly = 1) { blockFormatterDelegate.format(blockMock) }
+        confirmVerified(blockFormatterDelegate, blockMock)
     }
 
     @Test
     fun `format - Grid`() {
         // given
-        val mockedFormattedGrid = "clm"
-        val gridFormatResult = FormattableList(listOf(mockedFormattedGrid))
-
+        val gridFormatResult = FormattableList(listOf("mockedFormattedGrid"))
         val gridMock: Grid = mockk()
-        every {gridFormatterMock.format(gridMock)} returns gridFormatResult
-
+        every {gridFormatterDelegate.format(gridMock)} returns gridFormatResult
         // when
         val formatResult = subject.format(gridMock)
         // then
         assertThat(formatResult).isEqualTo(gridFormatResult)
-        verify (exactly = 1) { gridFormatterMock.format(gridMock) }
-        confirmVerified(gridFormatterMock, gridMock)
+        verify (exactly = 1) { gridFormatterDelegate.format(gridMock) }
+        confirmVerified(gridFormatterDelegate, gridMock)
     }
 
 }

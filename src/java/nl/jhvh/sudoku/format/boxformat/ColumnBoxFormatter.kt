@@ -6,7 +6,7 @@ import nl.jhvh.sudoku.format.element.ColumnFormatter
 import nl.jhvh.sudoku.grid.model.segment.Col
 
 /**
- * Formatter to format a [Col] using box drawing characters and numbers
+ * Formatter to format a [Col] using box drawing characters and numbers. Stateless.
  *  * Box drawing characters: ║ │ ═ ─ ╔ ╗ ╚ ╝ ╤ ╧ ╦ ╩ ╟ ╢ ╠ ╣ ╬ ┼ ╪ ╫ etc.
  *
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,

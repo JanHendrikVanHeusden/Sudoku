@@ -15,7 +15,7 @@ import nl.jhvh.sudoku.format.element.RowFormatter
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-class SudokuBoxFormatter(val formatterFactory: BoxFormatterFactory = BoxFormatterFactory.instance) :
+class SudokuBoxFormatter(val formatterFactory: BoxFormatterFactory = BoxFormatterFactory.factoryInstance) :
         SudokuFormatter,
         CellValueFormatter by formatterFactory.simpleCellValueFormatterInstance,
         CellFormatter by formatterFactory.cellBoxFormatterInstance,
