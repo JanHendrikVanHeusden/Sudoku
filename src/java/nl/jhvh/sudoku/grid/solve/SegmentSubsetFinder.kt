@@ -40,6 +40,7 @@ import java.util.HashSet
  *        But let's see... Really fiendish Sudokus exist in the world!
  *
  * So at the time of writing, this Sudoku solver is aimed to rely on only the basic rules. Let's see!
+ * TODO: verify the minimum number of fixed cells? See https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Minimum_number_of_givens
  */
 @Suppress("KDocUnresolvedReference")
 class SegmentSubsetFinder internal constructor(private val segment: GridSegment) {

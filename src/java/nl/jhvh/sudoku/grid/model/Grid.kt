@@ -59,12 +59,21 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
 
     /**
      * Construct a [Grid] and allow the caller to fix cells etc., than have the constructed [Grid] returned by the [build] method.
-     * TODO: verify the minimum number of fixed cells? See https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Minimum_number_of_givens
+     *  * Stateful. The [GridBuilder] instance holds a reference to the [Grid] being built, until [build] is called.
+     *  * No reuse. Trying to use the same [GridBuilder] instance twice results in [IllegalStateException]
+     *  * Not thread safe (should not be used across threads anyway)
      */
-    class GridBuilder(blockSize: Int = DEFAULT_BLOCK_SIZE) {
+    class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE) {
 
         /** The [Grid] to build  */
-        private val grid: Grid = Grid(blockSize)
+        private var gridInstance: Grid? = Grid(blockSize)
+
+        /** @throws IllegalStateException when the [Grid] was built already */
+        private fun grid(): Grid {
+            check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
+                    "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
+            return gridInstance!!
+        }
 
         /**
          * Flag to indicate whether the [Grid] was completed;
@@ -72,10 +81,15 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          */
         private var isBuilt: Boolean = false
 
-        /** @return The [Grid] as specified by its blockSize and by it's fixed values
+        /**
+         * @return The [Grid] as specified by its blockSize and by it's fixed values
+         * @throws IllegalStateException when the [Grid] was built already
          */
+        @Throws(IllegalStateException::class)
         fun build(): Grid {
+            val grid = grid()
             isBuilt = true
+            gridInstance = null // to allow garbage collection when grid is not used anymore
             return grid
         }
 
@@ -84,6 +98,7 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          * @param cellRef The [CellRef.cellRef] of the [Cell] whose value is to be fixed
          * @param value The value to fix the [Cell] to
          * @return "this", to allow fluent builder syntax
+         * @throws IllegalStateException when the [Grid] was built already
          */
         fun fix(cellRef: String, value: Int): GridBuilder {
             return fix(CellRef(cellRef), value)
@@ -94,9 +109,10 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          * @param cellRef The [CellRef] of the [Cell] whose value is to be fixed
          * @param value The value to fix the [Cell] to
          * @return "this", to allow fluent builder syntax
+         * @throws IllegalStateException when the [Grid] was built already
          */
         fun fix(cellRef: CellRef, value: Int): GridBuilder {
-            return fix(grid.findCell(cellRef), value)
+            return fix(grid().findCell(cellRef), value)
         }
 
         /**
@@ -104,13 +120,14 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          * @param cell The [Cell] whose value is to be fixed
          * @param value The value to fix the [Cell] to
          * @return "this", to allow fluent builder syntax
+         * @throws IllegalStateException when the [Grid] was built already
          */
+        @Throws(IllegalStateException::class)
         private fun fix(cell: Cell, value: Int): GridBuilder {
             check(!isBuilt) { "Can not fix a cell after the grid has been built!" }
-            grid.fixCell(cell, value)
+            grid().fixCell(cell, value)
             return this
         }
-
     }
 
 }
