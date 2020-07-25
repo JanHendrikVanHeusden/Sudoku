@@ -1,7 +1,9 @@
 package nl.jhvh.sudoku.grid.model
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@Disabled("Not implemented yet")
 internal class GridTest {
 
     @Test
