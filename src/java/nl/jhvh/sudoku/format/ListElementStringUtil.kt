@@ -112,7 +112,6 @@ fun concatAlignCenter(vararg lists: List<*>): List<String> {
         return emptyList()
     }
     val result = lists[0].map { "" }
-    // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
     return lists.fold(result, {current, next -> current concatEach next.alignCenter()})
 }
 
@@ -139,6 +138,5 @@ fun concatAlignRight(vararg lists: List<*>): List<String> {
         return emptyList()
     }
     val result = lists[0].map { "" }
-    // val total = listOf(1, 2, 3, 4, 5).fold(0, { total, next -> total + next })
     return lists.fold(result, {current, next -> current concatEach next.alignRight()})
 }
