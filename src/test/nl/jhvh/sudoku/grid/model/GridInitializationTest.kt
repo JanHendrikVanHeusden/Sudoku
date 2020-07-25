@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test
 
 /**
  * Tests for [Grid] initialization.
- * Is more or less a component integration test, as it tests the whole [Grid] (with [Cell]s, [Row]s, [Col]s and [Block]s)
- * for correct positions of each within the [Grid].
+ * Is more or less a component integration test, as it tests the whole [Grid] being build with [GridBuilder],
+ * and with [Cell]s, [Row]s, [Col]s and [Block]s) correctly positioned within the [Grid].
  */
 internal class GridInitializationTest {
     /**

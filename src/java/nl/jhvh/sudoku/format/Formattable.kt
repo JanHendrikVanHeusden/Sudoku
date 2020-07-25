@@ -18,9 +18,9 @@ interface Formattable {
      */
     fun format(formatter: SudokuFormatter): FormattableList
 
-    /** @return The maximum length of the value in a cell.
-     *   E.g. for a `3*3` block size, the maximum value is 9, so the length (number of digits) of that is 1.
-     *   For a `4*4` block size, the maximum value is 16, so the length is 2. Etc.
+    /** The length of the highest possible value in a cell; depending on the grid size. E.g.
+     *   * `3*3` block size (`9*9` grid): highest possible value is 9 => max length = 1
+     *   * `4*4` block size (`16*16` grid): highest possible value is 16 => max length is 2
      */
     val maxValueLength: Int
 
