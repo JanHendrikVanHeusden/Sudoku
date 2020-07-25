@@ -33,7 +33,7 @@ class `SimpleCellFormatterTest - format` {
             .fix("I6", 3) // x = 5, y = 8
             .build()
 
-    private val subject = CellBoxFormatter(simpleCellValueFormatterInstance)
+    private val subject = CellBoxFormatter(BoxFormatterFactory().simpleCellValueFormatterInstance)
 
     @Test
     fun `test format top row of 9 Cells`() {

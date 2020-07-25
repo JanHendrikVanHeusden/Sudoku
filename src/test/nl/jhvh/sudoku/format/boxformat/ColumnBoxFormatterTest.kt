@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 /** Unit integration test for [Col] formatting */
 internal class ColumnBoxFormatterTest {
 
-    private val subject = ColumnBoxFormatter(cellBoxFormatterInstance)
+    private val subject = ColumnBoxFormatter(BoxFormatterFactory().cellBoxFormatterInstance)
 
     /**
      * * `A, B, C,` etc. denote rows (top row is `A` => y = 0)

@@ -13,7 +13,7 @@ import kotlin.random.Random
 /** Unit integration test for [Cell] formatting */
 class CellBoxFormatterTest {
 
-    private val subject = CellBoxFormatter(simpleCellValueFormatterInstance)
+    private val subject = CellBoxFormatter(BoxFormatterFactory().simpleCellValueFormatterInstance)
 
     /**
      * * `A, B, C,` etc. denote rows (top row is `A` => y = 0)
