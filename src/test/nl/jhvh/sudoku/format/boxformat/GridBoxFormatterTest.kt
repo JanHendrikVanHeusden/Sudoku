@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.grid.model.Grid
-import nl.jhvh.sudoku.grid.model.GridBuilder
+import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.grid.model.Grid
-import nl.jhvh.sudoku.grid.model.GridBuilder
+import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.apache.commons.lang3.StringUtils

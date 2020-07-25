@@ -2,7 +2,7 @@ package nl.jhvh.sudoku.format.boxformat
 
 import io.mockk.every
 import io.mockk.spyk
-import nl.jhvh.sudoku.grid.model.GridBuilder
+import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.assertj.core.api.Assertions.assertThat

@@ -61,6 +61,7 @@ class SegmentSubsetFinder internal constructor(private val segment: GridSegment)
      * But the alternatives that remain in the subset (values 4 and 7 in this example) can also be removed from
      * all other [Cell]s in the [GridSegment]s this subset is part of: the "naked candidates removal".
      */
+    @Suppress("UNUSED_PARAMETER")
     fun resolveHiddenSubsets(level: Int) {
         TODO("Not implemented yet")
     }
