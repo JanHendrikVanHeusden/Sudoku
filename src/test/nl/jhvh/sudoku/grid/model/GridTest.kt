@@ -70,11 +70,11 @@ internal class GridTest {
             val blockList = grid.blockList
             assertThat(blockList.size).isEqualTo(gridSize)
             blockList.forEachIndexed {index, block ->
-                assertThat(block.leftXIndex)
-                        .`as`("Failure for block.leftXIndex=${block.leftXIndex} for blockList[$index] ")
+                assertThat(block.leftColIndex)
+                        .`as`("Failure for block.leftXIndex=${block.leftColIndex} for blockList[$index] ")
                         .isEqualTo((index * blockSize) % gridSize)
-                assertThat(block.topYIndex)
-                        .`as`("Failure for block.topYIndex=${block.topYIndex} for blockList[$index] ")
+                assertThat(block.topRowIndex)
+                        .`as`("Failure for block.topYIndex=${block.topRowIndex} for blockList[$index] ")
                         .isEqualTo((index / blockSize) * blockSize)
             }
         }

@@ -30,7 +30,7 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
     val rowList: List<Row> = incrementFromZero(gridSize).map { Row(this, rowIndex = it) }
     val colList: List<Col> = incrementFromZero(gridSize).map { Col(this, colIndex = it) }
     val blockList: List<Block> = incrementFromZero(gridSize)
-            .map { Block(this, leftXIndex = ((it * blockSize) % gridSize), topYIndex = (it / blockSize) * blockSize) }
+            .map { Block(this, leftColIndex = ((it * blockSize) % gridSize), topRowIndex = (it / blockSize) * blockSize) }
 
     fun findCell(cellRef: String): Cell {
         return with(CellRef(cellRef)) { findCell(x, y) }

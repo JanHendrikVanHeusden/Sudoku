@@ -17,7 +17,6 @@ class GridBoxFormatter(private val rowFormatter: RowBoxFormatter, private val co
 ) : GridFormatter, ElementBoxFormattable<Grid> {
 
     override fun format(grid: Grid): FormattableList {
-
         val formattedRows = mutableListOf<String>()
         val bottomBorder: List<String>
         with (rowFormatter) {

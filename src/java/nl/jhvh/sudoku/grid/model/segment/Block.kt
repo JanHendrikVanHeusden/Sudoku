@@ -20,25 +20,25 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * @constructor Construct a [Block], to be positioned at the given left horizontal
  * and the upper vertical coordinates within the [Grid].
  */
-class Block(grid: Grid, val leftXIndex: Int, val topYIndex: Int) : GridSegment(grid), Formattable {
+class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegment(grid), Formattable {
     /** The right (x-axis) coordinate of the [Block] within the [Grid]  */
-    val rightXIndex: Int = leftXIndex + grid.blockSize - 1
+    val rightColIndex: Int = leftColIndex + grid.blockSize - 1
     /** The bottom (y-axis) coordinate of the [Block] within the [Grid]  */
-    val bottomYIndex: Int = topYIndex + grid.blockSize - 1
+    val bottomRowIndex: Int = topRowIndex + grid.blockSize - 1
 
     override val cellList: List<Cell> = incrementFromZero(grid.gridSize)
-            .map { grid.findCell(x = it % grid.blockSize + leftXIndex, y = it/grid.blockSize + topYIndex) }
+            .map { grid.findCell(x = it % grid.blockSize + leftColIndex, y = it/grid.blockSize + topRowIndex) }
 
     fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCell(cell.colIndex, cell.rowIndex)
 
-    fun containsCell(x: Int, y: Int): Boolean = x in leftXIndex..rightXIndex && y in topYIndex..bottomYIndex
+    fun containsCell(x: Int, y: Int): Boolean = x in leftColIndex..rightColIndex && y in topRowIndex..bottomRowIndex
 
     override fun onEvent(gridEvent: CellSetValueEvent) {
         TODO("Not yet implemented")
     }
 
     /** Technical [toString] method; for a functional representation, see [format]  */
-    override fun toString(): String = "Block(leftXIndex=$leftXIndex, rightXIndex=$rightXIndex, upperYIndex=$topYIndex, bottomYIndex=$bottomYIndex)"
+    override fun toString(): String = "Block(leftXIndex=$leftColIndex, rightXIndex=$rightColIndex, upperYIndex=$topRowIndex, bottomYIndex=$bottomRowIndex)"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 

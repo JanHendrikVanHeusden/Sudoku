@@ -2,12 +2,12 @@ package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
+import nl.jhvh.sudoku.grid.model.segment.Block
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 /** Unit integration test for [Block] formatting */
-@Disabled("Not yet implemented")
 internal class BlockBoxFormatterTest {
 
     private val subject = BlockBoxFormatter(BoxFormatterFactory().cellBoxFormatterInstance)
@@ -42,51 +42,792 @@ internal class BlockBoxFormatterTest {
 
     @Test
     fun format() {
-        TODO("Not yet implemented")
+        var formatted: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╔═══╤═══╤═══╦
+                    ║►7 │   │   ║
+                    ╟───┼───┼───╫
+                    ║►4 │   │►2 ║
+                    ╟───┼───┼───╫
+                    ║   │   │   ║
+                    ╠═══╪═══╪═══╬
+                """.tidy())
+        block = grid9.blockList[1]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╦═══╤═══╤═══╦
+                    ║   │   │   ║
+                    ╫───┼───┼───╫
+                    ║   │   │   ║
+                    ╫───┼───┼───╫
+                    ║   │   │   ║
+                    ╬═══╪═══╪═══╬
+                """.tidy())
+        block = grid9.blockList[2]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╦═══╤═══╤═══╗
+                    ║   │   │   ║
+                    ╫───┼───┼───╢
+                    ║   │   │   ║
+                    ╫───┼───┼───╢
+                    ║►8 │   │   ║
+                    ╬═══╪═══╪═══╣
+                """.tidy())
+        block = grid9.blockList[3]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╠═══╪═══╪═══╬
+                    ║   │   │   ║
+                    ╟───┼───┼───╫
+                    ║   │   │   ║
+                    ╟───┼───┼───╫
+                    ║   │   │   ║
+                    ╠═══╪═══╪═══╬
+                """.tidy())
+        block = grid9.blockList[4]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╬═══╪═══╪═══╬
+                    ║   │   │ 4 ║
+                    ╫───┼───┼───╫
+                    ║   │   │   ║
+                    ╫───┼───┼───╫
+                    ║   │   │   ║
+                    ╬═══╪═══╪═══╬
+                """.tidy())
+        block = grid9.blockList[5]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╬═══╪═══╪═══╣
+                    ║   │ 2 │   ║
+                    ╫───┼───┼───╢
+                    ║   │   │   ║
+                    ╫───┼───┼───╢
+                    ║   │   │   ║
+                    ╬═══╪═══╪═══╣
+                """.tidy())
+        block = grid9.blockList[6]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╠═══╪═══╪═══╬
+                    ║   │   │   ║
+                    ╟───┼───┼───╫
+                    ║   │   │   ║
+                    ╟───┼───┼───╫
+                    ║   │   │   ║
+                    ╚═══╧═══╧═══╩
+                """.tidy())
+        block = grid9.blockList[7]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╬═══╪═══╪═══╬
+                    ║   │   │   ║
+                    ╫───┼───┼───╫
+                    ║   │   │   ║
+                    ╫───┼───┼───╫
+                    ║   │   │►3 ║
+                    ╩═══╧═══╧═══╩
+                """.tidy())
+        block = grid9.blockList[8]
+        formatted = subject.format(block).toString()
+        assertThat(formatted)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                """
+                    ╬═══╪═══╪═══╣
+                    ║   │   │   ║
+                    ╫───┼───┼───╢
+                    ║   │   │   ║
+                    ╫───┼───┼───╢
+                    ║   │   │   ║
+                    ╩═══╧═══╧═══╝
+                """.tidy())
     }
 
     @Test
     fun nakedFormat() {
-        TODO("Not yet implemented")
+        var nakedFormat: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ►7 │   │   
+                    ───┼───┼───
+                    ►4 │   │►2 
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[1]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[2]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                    ►8 │   │   
+                """.tidy())
+        block = grid9.blockList[3]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[4]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │ 4 
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[5]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │ 2 │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[6]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
+        block = grid9.blockList[7]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │►3 
+                """.tidy())
+        block = grid9.blockList[8]
+        nakedFormat = subject.nakedFormat(block).toString()
+        assertThat(nakedFormat)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                    ───┼───┼───
+                       │   │   
+                """.tidy())
     }
 
     @Test
     fun getLeftBorder() {
-        TODO("Not yet implemented")
+        var leftBorder: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╟
+                    ║
+                    ╟
+                    ║
+                """.tidy())
+        block = grid9.blockList[1]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[2]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[3]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╟
+                    ║
+                    ╟
+                    ║
+                """.tidy())
+        block = grid9.blockList[4]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[5]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[6]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╟
+                    ║
+                    ╟
+                    ║
+                """.tidy())
+        block = grid9.blockList[7]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[8]
+        leftBorder = subject.getLeftBorder(block).toString()
+        assertThat(leftBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
     }
 
     @Test
     fun getRightBorder() {
-        TODO("Not yet implemented")
+        var rightBorder: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[1]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[2]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╢
+                    ║
+                    ╢
+                    ║
+                """.tidy())
+        block = grid9.blockList[3]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[4]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[5]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╢
+                    ║
+                    ╢
+                    ║
+                """.tidy())
+        block = grid9.blockList[6]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[7]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╫
+                    ║
+                    ╫
+                    ║
+                """.tidy())
+        block = grid9.blockList[8]
+        rightBorder = subject.getRightBorder(block).toString()
+        assertThat(rightBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo(
+                        """
+                    ║
+                    ╢
+                    ║
+                    ╢
+                    ║
+                """.tidy())
     }
 
     @Test
     fun getTopBorder() {
-        TODO("Not yet implemented")
+        var topBorder: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╤═══╤═══")
+        block = grid9.blockList[1]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╤═══╤═══")
+        block = grid9.blockList[2]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╤═══╤═══")
+        block = grid9.blockList[3]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[4]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[5]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[6]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[7]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[8]
+        topBorder = subject.getTopBorder(block).toString()
+        assertThat(topBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
     }
 
     @Test
     fun getBottomBorder() {
-        TODO("Not yet implemented")
+        var bottomBorder: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[1]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[2]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[3]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[4]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[5]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╪═══╪═══")
+        block = grid9.blockList[6]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╧═══╧═══")
+        block = grid9.blockList[7]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╧═══╧═══")
+        block = grid9.blockList[8]
+        bottomBorder = subject.getBottomBorder(block).toString()
+        assertThat(bottomBorder)
+                .`as`("formatting fails for $block")
+                .isEqualTo("═══╧═══╧═══")
     }
 
     @Test
     fun getTopLeftEdge() {
-        TODO("Not yet implemented")
+        var topLeftEdge: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╔")
+        block = grid9.blockList[1]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╦")
+        block = grid9.blockList[2]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╦")
+        block = grid9.blockList[3]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╠")
+        block = grid9.blockList[4]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[5]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[6]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╠")
+        block = grid9.blockList[7]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[8]
+        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        assertThat(topLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
     }
 
     @Test
     fun getTopRightEdge() {
-        TODO("Not yet implemented")
+        var topRightEdge: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╦")
+        block = grid9.blockList[1]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╦")
+        block = grid9.blockList[2]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╗")
+        block = grid9.blockList[3]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[4]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[5]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╣")
+        block = grid9.blockList[6]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[7]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[8]
+        topRightEdge = subject.getTopRightEdge(block).toString()
+        assertThat(topRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╣")
     }
 
     @Test
     fun getBottomLeftEdge() {
-        TODO("Not yet implemented")
+        var bottomLeftEdge: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╠")
+        block = grid9.blockList[1]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[2]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[3]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╠")
+        block = grid9.blockList[4]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[5]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[6]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╚")
+        block = grid9.blockList[7]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╩")
+        block = grid9.blockList[8]
+        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        assertThat(bottomLeftEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╩")
     }
 
     @Test
     fun getBottomRightEdge() {
-        TODO("Not yet implemented")
+        var bottomRightEdge: String
+        var block: Block
+        // given, when
+        block = grid9.blockList[0]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[1]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[2]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╣")
+        block = grid9.blockList[3]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[4]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╬")
+        block = grid9.blockList[5]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╣")
+        block = grid9.blockList[6]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╩")
+        block = grid9.blockList[7]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╩")
+        block = grid9.blockList[8]
+        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        assertThat(bottomRightEdge)
+                .`as`("formatting fails for $block")
+                .isEqualTo("╝")
     }
+
 }
