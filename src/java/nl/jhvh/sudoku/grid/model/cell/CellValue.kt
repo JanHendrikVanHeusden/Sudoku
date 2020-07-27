@@ -29,8 +29,8 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      */
     @Throws(IllegalArgumentException::class)
     protected fun validateRange(value: Int) {
-        require(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher" }
-        require(value <= this.cell.grid.maxValue) { "A cell value must be at most ${this.cell.grid.maxValue}" }
+        require(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher but is $value" }
+        require(value <= this.cell.grid.maxValue) { "A cell value must be at most ${this.cell.grid.maxValue} but is $value" }
     }
 
     /** Value holder class to represent the fixed immutable numeric value of a [Cell]  */
@@ -60,7 +60,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
     /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
     abstract val isFixed: Boolean
 
-    /** @return Whether a known value (`!=` [VALUE_UNKNOWN] is set, either fixed or mutable */
+    /** @return Whether a known value (`!=` [VALUE_UNKNOWN]) is set, either fixed or mutable */
     fun hasValue(): Boolean = this.value != VALUE_UNKNOWN
 
     abstract fun setValue(value: Int)

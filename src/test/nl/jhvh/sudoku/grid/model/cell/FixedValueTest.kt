@@ -1,44 +1,41 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled("Not implemented yet")
-internal class CellValueTest {
-
-    @Test
-    fun getValue() {
-    }
+internal class FixedValueTest {
 
     @Test
     fun setValue() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun validateRange() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun isFixed() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun hasValue() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun testSetValue() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun testToString() {
-    }
-
-    @Test
-    fun format() {
+        TODO("Not implemented yet")
     }
 
     @Test
     fun getCell() {
+        TODO("Not implemented yet")
     }
 }
