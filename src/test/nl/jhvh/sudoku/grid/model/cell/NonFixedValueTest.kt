@@ -31,7 +31,7 @@ internal class NonFixedValueTest {
     }
 
     @Test
-    fun setValue() {
+    fun `setValue should accept values within range and reject values out of range`() {
         for (newValue in 1..gridSize) {
             subject.setValue(newValue)
             assertThat(subject.value).isEqualTo(newValue)
@@ -47,8 +47,9 @@ internal class NonFixedValueTest {
     }
 
     @Test
-    fun `test that setValue publishes an event`() {
+    fun `setValue should publish an event on change of value`() {
         // given
+        assertThat(subject.value).isNull()
         var newValue = 5
         val cellSetValueEventCapturer1: CapturingSlot<CellSetValueEvent> = slot()
         every {cellMock.publish(capture(cellSetValueEventCapturer1))} returns Unit

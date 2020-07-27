@@ -1,7 +1,12 @@
 package nl.jhvh.sudoku.grid.model.cell
 
+import io.mockk.CapturingSlot
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -14,7 +19,6 @@ internal class FixedValueTest {
     private lateinit var cellMock: Cell
     private val blockSize = 3
     private val gridSize = blockSize * blockSize
-    private val newValue = 1
 
     @BeforeEach
     fun setUp() {
@@ -22,12 +26,28 @@ internal class FixedValueTest {
         every {cellMock.grid.blockSize} returns blockSize
         every {cellMock.grid.gridSize} returns gridSize
         every {cellMock.grid.maxValue} returns gridSize
-
-        subject = FixedValue(cellMock, newValue)
     }
 
     @Test
-    fun setValue() {
+    fun `constructor should accept values within range and reject values out of range`() {
+        for (newValue in 1..gridSize) {
+            subject = FixedValue(cellMock, newValue)
+            assertThat(subject.value).isEqualTo(newValue)
+        }
+        var newValue = gridSize+1
+        with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is ${newValue}")
+        }
+        newValue = 0
+        with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
+            assertThat(message).isEqualTo("A cell value must be 1 or higher but is $newValue")
+        }
+    }
+
+    @Test
+    fun `setValue should not accept change of value`() {
+        val newValue = 1
+        subject = FixedValue(cellMock, newValue)
         // assert that setting to the same value as before is allowed (and ignored)
         subject.setValue(newValue) // unchanged, succeeds
         var anotherValue = newValue +1
@@ -45,37 +65,64 @@ internal class FixedValueTest {
     }
 
     @Test
-    fun `setValue should not publish an event`() {
-        // assert that setting to the same value as before does not publish an event
+    fun `construction of a FixedValue should publish an event on value set`() {
+        // given
+        val newValue = 5
+        val cellSetValueEventCapturer: CapturingSlot<CellSetValueEvent> = slot()
+        every {cellMock.publish(capture(cellSetValueEventCapturer))} returns Unit
+        subject = FixedValue(cellMock, newValue)
+        // then - verify the published event
+        val publishedEvent = cellSetValueEventCapturer.captured
+        verify (exactly = 1) {cellMock.publish(publishedEvent)}
+        assertThat(publishedEvent.newValue).isEqualTo(newValue)
+        assertThat(publishedEvent.eventSource).isEqualTo(cellMock)
     }
 
     @Test
-    fun validateRange() {
-        TODO("Not implemented yet")
+    fun `setValue should not publish an event when trying to set a value`() {
+        // given
+        val newValue = 5
+        subject = FixedValue(cellMock, newValue)
+        // clear recorded events
+        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+
+        every {cellMock.publish(any())} returns Unit
+        // when - setting to same value
+        subject.setValue(newValue)
+        // then - verify that no event is published
+        verify (exactly = 0) {cellMock.publish(any())}
+
+        // when - trying to set a different value
+        try {
+            subject.setValue(newValue + 1)
+        } catch (e: Exception) {
+            println("${e.javaClass.simpleName} thrown (as expected when trying to set a ${FixedValue::class.simpleName} to another value)")
+        }
+        // then - verify that unsuccessful setting does not fire an event
+        verify (exactly = 0) {cellMock.publish(any())}
     }
 
     @Test
     fun isFixed() {
-        TODO("Not implemented yet")
+        subject = FixedValue(cellMock, 2)
+        assertThat(subject.isFixed).isTrue()
     }
 
     @Test
     fun hasValue() {
-        TODO("Not implemented yet")
-    }
-
-    @Test
-    fun testSetValue() {
-        TODO("Not implemented yet")
+        subject = FixedValue(cellMock, 8)
+        assertThat(subject.hasValue()).isTrue()
     }
 
     @Test
     fun testToString() {
-        TODO("Not implemented yet")
+        subject = FixedValue(cellMock, 6)
+        assertThat(subject.toString()).contains("FixedValue ", "value=6", "isFixed()=true")
     }
 
     @Test
     fun getCell() {
-        TODO("Not implemented yet")
+        subject = FixedValue(cellMock, 9)
+        assertThat(subject.cell).isEqualTo(cellMock)
     }
 }
