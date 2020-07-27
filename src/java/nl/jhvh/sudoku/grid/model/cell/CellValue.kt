@@ -17,7 +17,8 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
     /** The mutable, numeric or unknown value of this [Cell], observed (see [CellSetValueEvent] */
     var value: Int?
-            by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, _: Int?, newValue: Int? ->
+            by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
+                // NB: setting to same value as before does not publish an event :-)
                 this.cell.publish(CellSetValueEvent(cell, newValue!!))
             }
     protected set

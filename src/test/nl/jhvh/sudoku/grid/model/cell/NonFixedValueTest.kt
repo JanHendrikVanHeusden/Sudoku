@@ -1,6 +1,7 @@
 package nl.jhvh.sudoku.grid.model.cell
 
 import io.mockk.CapturingSlot
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -48,16 +49,40 @@ internal class NonFixedValueTest {
     @Test
     fun `test that setValue publishes an event`() {
         // given
-        val newValue = 5
-        val cellSetValueEventCapturer: CapturingSlot<CellSetValueEvent> = slot()
-        every {cellMock.publish(capture(cellSetValueEventCapturer))} returns Unit
+        var newValue = 5
+        val cellSetValueEventCapturer1: CapturingSlot<CellSetValueEvent> = slot()
+        every {cellMock.publish(capture(cellSetValueEventCapturer1))} returns Unit
         // when
         subject.setValue(newValue)
         // then
-        val publishedEvent = cellSetValueEventCapturer.captured
-        verify {cellMock.publish(publishedEvent)}
-        assertThat(publishedEvent.newValue).isEqualTo(newValue)
-        assertThat(publishedEvent.eventSource).isEqualTo(cellMock)
+        val publishedEvent1 = cellSetValueEventCapturer1.captured
+        verify (exactly = 1) {cellMock.publish(publishedEvent1)}
+        assertThat(publishedEvent1.newValue).isEqualTo(newValue)
+        assertThat(publishedEvent1.eventSource).isEqualTo(cellMock)
+
+        // clear previously recorded events
+        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+
+        // when
+        subject.setValue(newValue)
+        // then - verify that setting same value again does not fire an event
+        verify (exactly = 0) {cellMock.publish(publishedEvent1)}
+        assertThat(publishedEvent1.newValue).isEqualTo(newValue)
+
+        // clear previously recorded events
+        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+
+        // given
+        newValue = 6
+        val cellSetValueEventCapturer2: CapturingSlot<CellSetValueEvent> = slot()
+        every {cellMock.publish(capture(cellSetValueEventCapturer2))} returns Unit
+        // when
+        subject.setValue(newValue)
+        // then - verify that setting it to another value publishes a new event
+        val publishedEvent2 = cellSetValueEventCapturer2.captured
+        verify (exactly = 1) {cellMock.publish(publishedEvent2)}
+        assertThat(publishedEvent2.newValue).isEqualTo(newValue)
+        assertThat(publishedEvent2.eventSource).isEqualTo(cellMock)
     }
 
     @Test
