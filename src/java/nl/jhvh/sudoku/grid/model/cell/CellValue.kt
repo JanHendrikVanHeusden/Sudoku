@@ -16,6 +16,7 @@ val VALUE_UNKNOWN: Int? = null
 sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
     /** The mutable, numeric or unknown value of this [Cell], observed (see [CellSetValueEvent] */
+    @Suppress("UNUSED_ANONYMOUS_PARAMETER")
     var value: Int?
             by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
                 // NB: setting to same value as before does not publish an event :-)
@@ -44,7 +45,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
         }
 
         override fun setValue(value: Int) {
-            require (value == this.value) { "Not allowed to change a fixed value!" }
+            require (value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
         }
     }
 
