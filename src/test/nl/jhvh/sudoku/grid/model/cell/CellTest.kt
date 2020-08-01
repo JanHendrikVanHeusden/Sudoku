@@ -1,44 +1,92 @@
 package nl.jhvh.sudoku.grid.model.cell
 
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.unmockkConstructor
+import io.mockk.verify
+import nl.jhvh.sudoku.grid.model.Grid
+import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
+import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled("Not implemented yet")
 internal class CellTest {
 
-    @Test
-    fun getValueCandidates() {
+    lateinit var grid9Mock: Grid
+
+    @BeforeEach
+    fun setUp() {
+        grid9Mock = mockk(relaxed = true)
+        every { grid9Mock.blockSize } returns 3
+        every { grid9Mock.gridSize } returns 9
+        every { grid9Mock.maxValue } returns 9
     }
 
     @Test
-    fun getEventListeners() {
+    @Disabled("Not a practical way to test that it's synchronized. Just here as a reminder...")
+    fun `assert that valueCandidates is synchronized`() {
+        // there is no really practical & reliable way to test whether it is synchronized.
+        // The implementation uses a synchronizedList(), so no annotations present that we can test on.
+        // (@Synchronized on getter or setter would not be helpful anyway, that would synchronize access
+        // to the list only, would not synchronize on the list's content)
     }
 
     @Test
-    fun getCellValue() {
+    fun `getCellValue - not fixed`() {
+        val subject = Cell(grid9Mock, 2, 5)
+        assertThat(subject.cellValue.value).isNull()
+        assertThat(subject.cellValue).isInstanceOf(NonFixedValue::class.java)
+        subject.cellValue.setValue(1)
+        assertThat(subject.cellValue.value).isEqualTo(1)
+
     }
 
     @Test
-    fun fixValue() {
+    fun `getCellValue - fixed`() {
+        val subject = Cell(grid9Mock, 8, 4, fixedValue = 7)
+        assertThat(subject.cellValue.value).isEqualTo(7)
+        assertThat(subject.cellValue).isInstanceOf(FixedValue::class.java)
     }
 
     @Test
-    fun testToString() {
+    fun `toString - fixed value Cell`() {
+        val fixedValueToString = "fixedValueToString"
+        try {
+            mockkConstructor(FixedValue::class)
+            every {anyConstructed<FixedValue>().toString()} returns fixedValueToString
+            val subject = Cell(grid9Mock, 2, 5, fixedValue = 7)
+            assertThat(subject.toString()).contains("Cell: ", "colIndex=2", "rowIndex=5", "cellValue=[$fixedValueToString]", "valueCandidates=[]")
+            verify (exactly = 1) { anyConstructed<FixedValue>().toString() }
+        } finally {
+            unmockkConstructor(FixedValue::class)
+        }
     }
 
     @Test
-    fun format() {
-    }
-
-    @Test
-    fun getColIndex() {
-    }
-
-    @Test
-    fun getRowIndex() {
+    fun `toString - non-fixed value Cell`() {
+        val nonFixedValueToString = "nonFixedValueToString"
+        try {
+            mockkConstructor(NonFixedValue::class)
+            every {anyConstructed<NonFixedValue>().toString()} returns nonFixedValueToString
+            val subject = Cell(grid9Mock, 6, 3)
+            assertThat(subject.toString()).contains("Cell: ", "colIndex=6", "rowIndex=3", "cellValue=[$nonFixedValueToString]", "valueCandidates=[")
+            verify (exactly = 1) { anyConstructed<NonFixedValue>().toString() }
+        } finally {
+            unmockkConstructor(NonFixedValue::class)
+        }
     }
 
     @Test
     fun getMaxValueLength() {
+        val gridMaxValueLength = 2 // Not correct, should actually be 1, but deliberately chosen for test purpose
+        every { grid9Mock.maxValueLength } returns gridMaxValueLength
+        val subject = Cell(grid9Mock, 7, 5, fixedValue = 1)
+        clearMocks(grid9Mock, answers = false, recordedCalls = true, verificationMarks = true)
+        assertThat(subject.maxValueLength).isEqualTo(gridMaxValueLength)
+        verify (exactly = 1) { grid9Mock.maxValueLength }
     }
 }

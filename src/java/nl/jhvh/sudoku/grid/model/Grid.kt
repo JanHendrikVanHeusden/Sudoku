@@ -17,15 +17,21 @@ import nl.jhvh.sudoku.grid.model.segment.Row
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
  */
-class Grid protected constructor (val blockSize: Int = 3) : Formattable {
+class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) : Formattable {
 
     /** The length of each side = [blockSize] * [blockSize]  */
     val gridSize: Int = blockSize * blockSize
     /** Maximum value to be entered in a cell = [blockSize] * [blockSize]  */
+
     val maxValue: Int = blockSize * blockSize
 
+    private fun colCalc (cellListIndex: Int, gridSize: Int): Int = cellListIndex % gridSize
+    private fun rowCalc (cellListIndex: Int, gridSize: Int): Int = cellListIndex / gridSize
+    private fun cellRefCalc (cellListIndex: Int, gridSize: Int): CellRef =
+            CellRef(colCalc(cellListIndex, gridSize), rowCalc(cellListIndex, gridSize))
+
     val cellList: List<Cell> = incrementFromZero(gridSize * gridSize)
-            .map { Cell(this, colIndex = it % gridSize, rowIndex = it / gridSize) }
+            .map { Cell(this, colCalc(it, gridSize), rowCalc(it, gridSize), fixedValue = fixedValues.get(cellRefCalc(it, gridSize))) }
 
     val rowList: List<Row> = incrementFromZero(gridSize).map { Row(this, rowIndex = it) }
     val colList: List<Col> = incrementFromZero(gridSize).map { Col(this, colIndex = it) }
@@ -44,11 +50,7 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
         return cellList[x + y * gridSize]
     }
 
-    fun fixCell(cell: Cell, value: Int) {
-        cell.fixValue(value)
-    }
-
-    override val maxValueLength: Int by lazy { this.maxValue.toString().length }
+    override val maxValueLength: Int = this.maxValue.toString().length
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String {
@@ -65,15 +67,7 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
      */
     class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE) {
 
-        /** The [Grid] to build  */
-        private var gridInstance: Grid? = Grid(blockSize)
-
-        /** @throws IllegalStateException when the [Grid] was built already */
-        private fun grid(): Grid {
-            check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
-                    "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
-            return gridInstance!!
-        }
+        private val fixedValues: MutableMap<CellRef, Int> = mutableMapOf()
 
         /**
          * Flag to indicate whether the [Grid] was completed;
@@ -87,9 +81,10 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          */
         @Throws(IllegalStateException::class)
         fun build(): Grid {
-            val grid = grid()
+            check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
+                    "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
+            val grid = Grid(blockSize, fixedValues)
             isBuilt = true
-            gridInstance = null // to allow garbage collection when grid is not used anymore
             return grid
         }
 
@@ -112,20 +107,7 @@ class Grid protected constructor (val blockSize: Int = 3) : Formattable {
          * @throws IllegalStateException when the [Grid] was built already
          */
         fun fix(cellRef: CellRef, value: Int): GridBuilder {
-            return fix(grid().findCell(cellRef), value)
-        }
-
-        /**
-         * Fix a given [Cell] to the given value
-         * @param cell The [Cell] whose value is to be fixed
-         * @param value The value to fix the [Cell] to
-         * @return "this", to allow fluent builder syntax
-         * @throws IllegalStateException when the [Grid] was built already
-         */
-        @Throws(IllegalStateException::class)
-        private fun fix(cell: Cell, value: Int): GridBuilder {
-            check(!isBuilt) { "Can not fix a cell after the grid has been built!" }
-            grid().fixCell(cell, value)
+            fixedValues.put(cellRef, value)
             return this
         }
     }

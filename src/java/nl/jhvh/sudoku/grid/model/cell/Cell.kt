@@ -17,7 +17,7 @@ import java.util.Collections.synchronizedSet
  *  * The [Cell] can either be empty, or filled with a single numeric value; see also [CellValue]
  *  * The [Cell] is aware of it's position within the [Grid], indicated by [colIndex] (X-axis) and [rowIndex] (Y-axis)
  */
-class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int) : GridElement(grid), CellSetValueSource, Formattable {
+class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int? = null): GridElement(grid), CellSetValueSource, Formattable {
 
     /** Thread safe [MutableSet] of possible candidate values for the [Cell.cellValue]  */
     val valueCandidates: MutableSet<Int> = synchronizedSet(mutableSetOf())
@@ -25,17 +25,11 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int) : GridElement(grid)
     /** @see [GridEventListener] */
     override val eventListeners: MutableSet<GridEventListener<Cell, CellSetValueEvent>> = mutableSetOf()
 
-    var cellValue: CellValue = NonFixedValue(this)
+    var cellValue: CellValue = if (fixedValue == null) NonFixedValue(this) else FixedValue(this, fixedValue)
         @Synchronized
         get
         @Synchronized
         private set
-
-    fun fixValue(value: Int) {
-        cellValue = FixedValue(this, value)
-        valueCandidates.clear()
-    }
-
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: colIndex=$colIndex, rowIndex=$rowIndex, cellValue=[$cellValue], valueCandidates=$valueCandidates"

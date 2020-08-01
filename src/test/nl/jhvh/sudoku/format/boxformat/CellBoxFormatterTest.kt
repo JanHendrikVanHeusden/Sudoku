@@ -436,7 +436,8 @@ class CellBoxFormatterTest {
                 }
             }
         }
-        val grid100 = gridBuilder100.build()
+        // create a Grid with at least 1 fixed value 100, so 3 digits + fixed value indicator, to make sure that that is tested
+        val grid100 = gridBuilder100.fix("A1", 100).build()
         with (grid100) {
             // set some other values
             for (x in 0..9) {
@@ -450,9 +451,8 @@ class CellBoxFormatterTest {
                 }
             }
         }
-        // To make sure that a number with 3 digits is tested (others are random, most will have 1 or digits)
+        // To make sure that a non-fixed number with 3 digits is tested (others are random, most will have 1 or 2 digits)
         grid100.cellList.last().cellValue.setValue(100)
-        grid100.cellList.last().fixValue(100)
 
         grid100.cellList.filter { it.cellValue.hasValue() }.forEach {
             assertThat(subject.nakedFormat(it).toString())
