@@ -13,7 +13,7 @@ import kotlin.test.assertFailsWith
  * Unit tests for [CellRef] including it's companion object [CellRef.CellRefCalculation].
  *
  * It should be possible to verify / mock / spyk the companion object, but could not get it working.
- * So the constructors tests are not strictly isolated unit tests, as they include calls to other non-private methods.
+ * So the constructor tests are not strictly isolated unit tests, as they include calls to other non-private methods.
  */
 internal class CellRefTest {
 
