@@ -6,5 +6,5 @@ import nl.jhvh.sudoku.format.Formattable
 abstract class GridElement(val grid: Grid): Formattable {
 
     // lazy because otherwise the [Grid] initialization is not complete yet
-    override val maxValueLength: Int by lazy { this.grid.maxValueLength }
+    final override val maxValueLength: Int by lazy { this.grid.maxValueLength }
 }

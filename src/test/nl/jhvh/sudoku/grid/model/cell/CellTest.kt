@@ -1,6 +1,7 @@
 package nl.jhvh.sudoku.grid.model.cell
 
 import io.mockk.clearMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -13,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import kotlin.random.Random
 
 internal class CellTest {
 
@@ -81,11 +83,26 @@ internal class CellTest {
 
     @Test
     fun getMaxValueLength() {
+        // given
         val gridMaxValueLength = 2 // Not correct, should actually be 1, but deliberately chosen for test purpose
         every { grid9Mock.maxValueLength } returns gridMaxValueLength
         val subject = Cell(grid9Mock, 7, 5, fixedValue = 1)
         clearMocks(grid9Mock, answers = false, recordedCalls = true, verificationMarks = true)
+        // when, then
         assertThat(subject.maxValueLength).isEqualTo(gridMaxValueLength)
         verify (exactly = 1) { grid9Mock.maxValueLength }
+
+        // given
+        val gridMock: Grid = mockk()
+        every {gridMock.gridSize} returns 12
+        for (maxValueLength in 1..5) {
+            every {gridMock.maxValueLength} returns maxValueLength
+            // when, then
+            assertThat(Cell(gridMock, Random.nextInt(0, 13), Random.nextInt(0, 13)).maxValueLength)
+                    .isEqualTo(maxValueLength)
+            verify (exactly = 1) {gridMock.maxValueLength}
+            confirmVerified(gridMock)
+            clearMocks(gridMock, answers = false, recordedCalls = true, verificationMarks = true)
+        }
     }
 }
