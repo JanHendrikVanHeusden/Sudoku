@@ -1,7 +1,9 @@
 package nl.jhvh.sudoku.grid.model
 
+import io.mockk.every
+import io.mockk.mockk
+import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 /** Unit tests for [Grid] */
@@ -81,31 +83,79 @@ internal class GridTest {
     }
 
     @Test
-    @Disabled("Not implemented yet")
-    fun findCell() {
-        TODO("Not implemented yet")
+    fun `findCell - by String`() {
+        for (grid in listOf(grid4, grid9, grid16)) {
+            val cells = HashSet(grid.cellList)
+            for (colRef in 1..grid.gridSize) {
+                for (y in 0..grid.gridSize-1) {
+                    // upper case
+                    val rowRef = ('A'+y).toString()
+                    val cellRefString = rowRef + colRef.toString()
+                    val cell = grid.findCell(cellRefString)
+                    assertThat(cell.colIndex).isEqualTo(colRef-1)
+                    assertThat(cell.rowIndex).isEqualTo(y)
+                    assertThat(cells.remove(cell)).isTrue()
+                }
+            }
+            // all cells found now, so the set should be empty now
+            assertThat(cells).isEmpty()
+        }
+        for (grid in listOf(grid4, grid9, grid16)) {
+            val cells = HashSet(grid.cellList)
+            for (colRef in 1..grid.gridSize) {
+                for (y in 0..grid.gridSize-1) {
+                    // lower case
+                    val rowRef = ('a'+y).toString()
+                    val cellRefString = rowRef + colRef.toString()
+                    val cell = grid.findCell(cellRefString)
+                    assertThat(cell.colIndex).isEqualTo(colRef-1)
+                    assertThat(cell.rowIndex).isEqualTo(y)
+                    assertThat(cells.remove(cell)).isTrue()
+                }
+            }
+            // all cells found now, so the set should be empty now
+            assertThat(cells).isEmpty()
+        }
     }
 
     @Test
-    @Disabled("Not implemented yet")
-    fun testFindCell() {
-        TODO("Not implemented yet")
+    fun `findCell - by CellRef`() {
+        for (grid in listOf(grid4, grid9, grid16)) {
+            val cells = HashSet(grid.cellList)
+            for (colIndex in 0..grid.gridSize-1) {
+                for (rowIndex in 0..grid.gridSize-1) {
+                    val cellRefMock: CellRef = mockk()
+                    every {cellRefMock.x} returns colIndex
+                    every {cellRefMock.y} returns rowIndex
+                    val cell = grid.findCell(cellRefMock)
+                    assertThat(cell.colIndex).isEqualTo(colIndex)
+                    assertThat(cell.rowIndex).isEqualTo(rowIndex)
+                    assertThat(cells.remove(cell)).isTrue()
+                }
+            }
+            // all cells found now, so the set should be empty now
+            assertThat(cells).isEmpty()
+        }
     }
 
     @Test
-    @Disabled("Not implemented yet")
-    fun testFindCell1() {
-        TODO("Not implemented yet")
+    fun `findCell - by colIndex, rowIndex`() {
+        for (grid in listOf(grid4, grid9, grid16)) {
+            val cells = HashSet(grid.cellList)
+            for (colIndex in 0..grid.gridSize-1) {
+                for (rowIndex in 0..grid.gridSize-1) {
+                    val cell = grid.findCell(colIndex, rowIndex)
+                    assertThat(cell.colIndex).isEqualTo(colIndex)
+                    assertThat(cell.rowIndex).isEqualTo(rowIndex)
+                    assertThat(cells.remove(cell)).isTrue()
+                }
+            }
+            // all cells found now, so the set should be empty now
+            assertThat(cells).isEmpty()
+        }
     }
 
     @Test
-    @Disabled("Not implemented yet")
-    fun fixCell() {
-        TODO("Not implemented yet")
-    }
-
-    @Test
-    @Disabled("Not implemented yet")
     fun getMaxValueLength() {
         assertThat(grid4.maxValueLength).isEqualTo(1)  // "4".length()
         assertThat(grid9.maxValueLength).isEqualTo(1)  // "9".length()
@@ -113,20 +163,16 @@ internal class GridTest {
     }
 
     @Test
-    @Disabled("Not implemented yet")
     fun testToString() {
-        TODO("Not implemented yet")
+        for (grid in listOf(grid4, grid9, grid16)) {
+            assertThat(grid.toString()).contains("${Grid::class.simpleName}: ", "(blockSize=${grid.blockSize}, gridSize=${grid.gridSize})")
+        }
     }
 
     @Test
-    @Disabled("Not implemented yet")
-    fun format() {
-        TODO("Not implemented yet")
-    }
-
-    @Test
-    @Disabled("Not implemented yet")
     fun getBlockSize() {
-        TODO("Not implemented yet")
+        assertThat(grid4.blockSize).isEqualTo(2)
+        assertThat(grid9.blockSize).isEqualTo(3)
+        assertThat(grid16.blockSize).isEqualTo(4)
     }
 }
