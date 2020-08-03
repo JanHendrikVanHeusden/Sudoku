@@ -42,7 +42,6 @@ internal class CellTest {
         assertThat(subject.cellValue).isInstanceOf(NonFixedValue::class.java)
         subject.cellValue.setValue(1)
         assertThat(subject.cellValue.value).isEqualTo(1)
-
     }
 
     @Test

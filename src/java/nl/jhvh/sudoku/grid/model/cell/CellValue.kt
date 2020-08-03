@@ -15,7 +15,18 @@ val VALUE_UNKNOWN: Int? = null
 /** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
 sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
-    /** The mutable, numeric or unknown value of this [Cell], observed (see [CellSetValueEvent] */
+    /**
+     * The mutable, numeric or unknown value of this [Cell], observed (see [CellSetValueEvent]).
+     *  * Should be volatile to make sure that no unneeded processing is done for a value that is set already.
+     *    Kotlin does not allow the `@Volatile` annotation on an observable field however (so maybe implementation
+     *    is volatile by nature? I could not really make sure when decompiling the code).
+     *  * Not synchronized, typically the value is set from `null` to a non-`null` value ony once,
+     *    and if so, always to the same value (and never de-/incremented)
+     *    So no need for synchronization, even when 2 threads / coroutines would try this at the same time, the result will be the same.
+     *
+     *  Even if not volatile or synchronized, it would always be set to the same value (an never de-/incremented etc.),
+     *  so atomic operations only, so concurrent setting is not really a problem
+     */
     @Suppress("UNUSED_ANONYMOUS_PARAMETER")
     var value: Int?
             by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
