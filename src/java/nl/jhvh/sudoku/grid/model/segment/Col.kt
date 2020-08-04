@@ -10,7 +10,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToColRef
 
 /**
- * A [Col] (column) represents a collection of [Cell]s within a Sudoku that are at the same horizontal axis (see [.colIndex]).
+ * A [Col] (column) represents a collection of [Cell]s within a Sudoku that are at the same horizontal axis (see [colIndex]).
  *
  * When solved, the [Cell]s within the [Col] must contain all defined values of the Sudoku.
  */
@@ -24,7 +24,7 @@ class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
 
     override val cellList: List<Cell> = incrementFromZero(grid.gridSize) .map { grid.findCell(colIndex = colIndex, rowIndex = it) }
 
-    /** Technical [toString] value; for a functional representation, see [.format]  */
+    /** Technical [toString] value; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: [colIndex=$colIndex] [colRef=$colRef]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
