@@ -3,6 +3,7 @@ package nl.jhvh.sudoku.grid.model.cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.colRefToIndex
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.getColRefFromCellRef
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.getRowRefFromCellRef
+import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToColRef
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToRowRef
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.rowRefToIndex
 import org.assertj.core.api.Assertions.assertThat
@@ -377,24 +378,24 @@ internal class CellRefTest {
 
     @Test
     fun`test CellRefCalculation - indexToColRef`() {
-        assertThat(indexToRowRef(0)).isEqualTo("A")
-        assertThat(indexToRowRef(25)).isEqualTo("Z")
-        assertThat(indexToRowRef(26)).isEqualTo("AA")
+        for (colIndex in 0..100) {
+            assertThat(indexToColRef(colIndex)).isEqualTo((colIndex+1).toString())
+        }
         val maxBlockSize = 46340
-        val BPNH = "BPNH" // correspondes with max block size, should be ok
-        assertThat(indexToRowRef(maxBlockSize-1)).isEqualTo(BPNH)
+        assertThat(indexToColRef(maxBlockSize-1)).isEqualTo(maxBlockSize.toString())
 
-        with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(maxBlockSize) })) {
-            assertThat(this.message).isEqualTo("Too high value [46340] for row index! Block size asked for is higher than 46340")
+        with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(maxBlockSize) })) {
+            assertThat(this.message).isEqualTo("Too high value [46340] for column index! Block size asked for is higher than 46340")
         }
-        with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(Int.MAX_VALUE) })) {
-            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for row index! Block size asked for is higher than 46340")
+        with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(Int.MAX_VALUE) })) {
+            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for column index! Block size asked for is higher than 46340")
         }
-        with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(-1) })) {
-            assertThat(this.message).isEqualTo("Negative row index [-1] is not allowed")
+        with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(-1) })) {
+            assertThat(this.message).isEqualTo("Negative column index [-1] is not allowed")
         }
-        with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(Int.MIN_VALUE) })) {
-            assertThat(this.message).isEqualTo("Negative row index [${Int.MIN_VALUE}] is not allowed")
+        with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(Int.MIN_VALUE) })) {
+            assertThat(this.message).isEqualTo("Negative column index [${Int.MIN_VALUE}] is not allowed")
         }
     }
+
 }
