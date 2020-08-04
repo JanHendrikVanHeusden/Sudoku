@@ -9,16 +9,18 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 
 /**
- * A [Block] represents a collection of [Cell]s within a Sudoku that are form a square
+ * A [Block] represents a collection of [Cell]s within a Sudoku that form a square
  * with each side having the square root number of [Cell]s as the [Grid] the [Block].
- * <br></br>E.g. for a 9x9 grid, each [Block] is a 2x3 square of [Cell]s.
+ *  * E.g. for a 9x9 grid, each [Block] is a 3x3 square of [Cell]s.
+ *  * Functional synonyms for [Block] are **Box** or **Region**.
  *
  * When solved, the [Cell]s within the [Block] must contain all defined values of the Sudoku.
  *
- * Functional synonyms for [Block] are **Box** or **Region**.
- *
  * @constructor Construct a [Block], to be positioned at the given left horizontal
  * and the upper vertical coordinates within the [Grid].
+ * @param grid
+ * @param leftColIndex The left (x-axis) coordinate of the [Block] within the [Grid]
+ * @param topRowIndex The top (y-axis) coordinate of the [Block] within the [Grid]
  */
 class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegment(grid), Formattable {
     /** The right (x-axis) coordinate of the [Block] within the [Grid]  */
@@ -27,18 +29,18 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
     val bottomRowIndex: Int = topRowIndex + grid.blockSize - 1
 
     override val cellList: List<Cell> = incrementFromZero(grid.gridSize)
-            .map { grid.findCell(x = it % grid.blockSize + leftColIndex, y = it/grid.blockSize + topRowIndex) }
+            .map { grid.findCell(colIndex = it % grid.blockSize + leftColIndex, rowIndex = it/grid.blockSize + topRowIndex) }
 
     fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCell(cell.colIndex, cell.rowIndex)
 
-    fun containsCell(x: Int, y: Int): Boolean = x in leftColIndex..rightColIndex && y in topRowIndex..bottomRowIndex
+    fun containsCell(colIndex: Int, rowIndex: Int): Boolean = colIndex in leftColIndex..rightColIndex && rowIndex in topRowIndex..bottomRowIndex
 
     override fun onEvent(gridEvent: CellSetValueEvent) {
         TODO("Not yet implemented")
     }
 
     /** Technical [toString] method; for a functional representation, see [format]  */
-    override fun toString(): String = "Block(leftXIndex=$leftColIndex, rightXIndex=$rightColIndex, upperYIndex=$topRowIndex, bottomYIndex=$bottomRowIndex)"
+    override fun toString(): String = "${this.javaClass.simpleName}: [leftColIndex=$leftColIndex], [rightColIndex=$rightColIndex], [upperRowIndex=$topRowIndex], [bottomRowIndex=$bottomRowIndex]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 

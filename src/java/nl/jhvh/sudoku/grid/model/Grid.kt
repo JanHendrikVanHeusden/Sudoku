@@ -46,8 +46,8 @@ class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<C
         return findCell(cellRef.x, cellRef.y)
     }
 
-    fun findCell(x: Int, y: Int): Cell {
-        return cellList[x + y * gridSize]
+    fun findCell(colIndex: Int, rowIndex: Int): Cell {
+        return cellList[colIndex + rowIndex * gridSize]
     }
 
     override val maxValueLength: Int = this.maxValue.toString().length
