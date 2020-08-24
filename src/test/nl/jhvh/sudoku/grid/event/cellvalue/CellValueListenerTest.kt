@@ -5,7 +5,6 @@ import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 /**
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test
  * Is not a unit test but rather a component integration test, as it tests the results
  * of the listener actions all over the[Cell]s in the [Grid].
  */
-@Disabled("Not implemented yet")
 internal class CellValueListenerTest {
     /**
      * Test method for the whole cycle of setting values, firing the appropriate [CellSetValueEvent]

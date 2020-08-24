@@ -15,7 +15,7 @@ abstract class AbstractGridSegmentTest {
     protected abstract val gridSize: Int
 
     @BeforeEach
-    fun setUp() {
+    fun gridSegmentSetUp() {
         gridMock = mockk()
         every {gridMock.blockSize} returns blockSize
         every {gridMock.gridSize} returns gridSize
@@ -28,6 +28,7 @@ abstract class AbstractGridSegmentTest {
             every { cellMock.grid } returns gridMock
             every {cellMock.colIndex} returns cellColIndexCapturer.captured
             every {cellMock.rowIndex} returns cellRowIndexCapturer.captured
+            every {cellMock.subscribe(any())} returns Unit
             cellMock
         }
 

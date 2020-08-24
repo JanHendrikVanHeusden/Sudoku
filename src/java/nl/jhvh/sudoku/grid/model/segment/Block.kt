@@ -4,7 +4,6 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 
@@ -36,13 +35,13 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
 
     fun containsCell(colIndex: Int, rowIndex: Int): Boolean = colIndex in leftColIndex..rightColIndex && rowIndex in topRowIndex..bottomRowIndex
 
-    override fun onEvent(gridEvent: CellSetValueEvent) {
-        TODO("Not yet implemented")
-    }
-
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: [leftColIndex=$leftColIndex], [rightColIndex=$rightColIndex], [upperRowIndex=$topRowIndex], [bottomRowIndex=$bottomRowIndex]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
+
+    init {
+        subscribeToSetValueEvents()
+    }
 
 }

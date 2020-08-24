@@ -6,5 +6,5 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
 /** Interface to define [CellSetValueListener]<[Cell], [CellSetValueEvent]> */
 interface CellSetValueListener : GridEventListener<Cell, CellSetValueEvent> {
 
-    override fun onEvent(gridEvent: CellSetValueEvent)
+    override fun onEvent(setValueEvent: CellSetValueEvent)
 }

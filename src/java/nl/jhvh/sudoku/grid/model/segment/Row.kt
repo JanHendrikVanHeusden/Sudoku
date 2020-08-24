@@ -4,7 +4,6 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToRowRef
@@ -16,10 +15,6 @@ import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToRowRef
  */
 class Row(grid: Grid, val rowIndex: Int) : GridSegment(grid), Formattable {
 
-    override fun onEvent(gridEvent: CellSetValueEvent) {
-        val eventSource: Cell = gridEvent.eventSource
-    }
-
     val rowRef: String = indexToRowRef(rowIndex)
 
     override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize).map { grid.findCell(colIndex = it, rowIndex = rowIndex) })
@@ -28,5 +23,9 @@ class Row(grid: Grid, val rowIndex: Int) : GridSegment(grid), Formattable {
     override fun toString(): String = "${this.javaClass.simpleName}: [rowIndex=$rowIndex] [rowRef=$rowRef]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
+
+    init {
+        subscribeToSetValueEvents()
+    }
 
 }

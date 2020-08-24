@@ -4,7 +4,6 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToColRef
@@ -16,10 +15,6 @@ import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToColRef
  */
 class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
 
-    override fun onEvent(gridEvent: CellSetValueEvent) {
-        TODO("Not yet implemented")
-    }
-
     val colRef: String = indexToColRef(colIndex)
 
     override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize).map { grid.findCell(colIndex = colIndex, rowIndex = it) })
@@ -28,5 +23,9 @@ class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
     override fun toString(): String = "${this.javaClass.simpleName}: [colIndex=$colIndex] [colRef=$colRef]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
+
+    init {
+        subscribeToSetValueEvents()
+    }
 
 }

@@ -5,6 +5,7 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -84,6 +85,8 @@ class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<C
             check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
                     "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
             val grid = Grid(blockSize, fixedValues)
+            // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
+            grid.cellList.filter { it.isFixed }.forEach { it.publish(CellSetValueEvent(it, it.fixedValue)) }
             isBuilt = true
             return grid
         }
