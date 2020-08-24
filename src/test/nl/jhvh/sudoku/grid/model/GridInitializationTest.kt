@@ -17,7 +17,7 @@ internal class GridInitializationTest {
     /**
      * Test that correct [Block] positions are assigned.
      * <br></br>The
-     * [Grid] has a [Size.DEFAULT_GRID_SIZE]
+     * [Grid] has a default grid size
      */
     @Test
     fun `test correctly initialized Block positions are assigned`() {
@@ -63,8 +63,8 @@ internal class GridInitializationTest {
     }
 
     /**
-     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.getGridSize]s:
-     * test that [Cell.getColIndex] and [Cell.getRowIndex] correspond to the [Block] positions.
+     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.gridSize]s:
+     * test that [Cell.colIndex] and [Cell.rowIndex] correspond to the [Block] positions.
      */
     @Test
     fun `test correctly initialized Cell positions`() {
@@ -73,7 +73,7 @@ internal class GridInitializationTest {
             val blockList = grid.blockList
             for (block in blockList) {
                 for (x in 0 until grid.gridSize) {
-                    val cell = block.cellList[x]
+                    val cell = block.cells.toList()[x]
                     assertThat(cell.rowIndex in block.topRowIndex..block.bottomRowIndex)
                             .`as`("Wrong rowIndex! Block: $block\t Cell:$cell")
                             .isTrue()
@@ -92,7 +92,7 @@ internal class GridInitializationTest {
     }
 
     /**
-     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.getGridSize]s:
+     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.gridSize]s:
      * test that correct [Col] positions are assigned.
      */
     @Test
@@ -107,7 +107,7 @@ internal class GridInitializationTest {
     }
 
     /**
-     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.getGridSize]s:
+     * Test method for [GridBuilder.build] -> [Grid] constructor, with different [Grid.gridSize]s:
      * test that correct [Row] positions are assigned.
      */
     @Test

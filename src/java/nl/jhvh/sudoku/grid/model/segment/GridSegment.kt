@@ -15,5 +15,5 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  */
 abstract class GridSegment protected constructor(grid: Grid) : GridElement(grid), CellSetValueListener {
 
-    abstract val cellList: List<Cell>
+    abstract val cells: LinkedHashSet<Cell>
 }

@@ -8,6 +8,7 @@ import nl.jhvh.sudoku.grid.model.GridElement
  * @param E The [GridEvent] sub type being emitted
 */
 interface GridEventSource<S : GridElement, E : GridEvent<S>> {
+
     /**
      * Subscribe an [GridEventListener] for [GridEvent]s emitted by this [GridEventSource]
      * @param eventListener The [GridEventListener] interested in [GridEvent]s of this [GridEventSource]

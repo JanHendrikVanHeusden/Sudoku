@@ -28,11 +28,11 @@ internal class BlockTest: AbstractGridSegmentTest() {
     }
 
     @Test
-    fun getCellList() {
+    fun getCells() {
         for (leftColIndex in listOf(0, 3, 6)) {
             for (topRowIndex in listOf(0, 3, 6)) {
                 val subject = Block(gridMock, leftColIndex, topRowIndex)
-                subject.cellList.forEachIndexed { index, cell ->
+                subject.cells.forEachIndexed { index, cell ->
                     assertThat(index)
                             .`as`("index should be $index for: leftColIndex=$leftColIndex, topRowIndex=$topRowIndex, cell.colIndex=${cell.colIndex}, cell.rowIndex=${cell.rowIndex}")
                             .isEqualTo((cell.colIndex-leftColIndex)%blockSize + (cell.rowIndex-topRowIndex)*blockSize)
@@ -50,8 +50,8 @@ internal class BlockTest: AbstractGridSegmentTest() {
                 for (topRowIndex in listOf(0, 3, 6)) {
                     val subject = Block(gridMock, leftColIndex, topRowIndex)
                     val shouldContainCellByIndex =
-                            cell.colIndex in leftColIndex..leftColIndex+blockSize-1
-                                && cell.rowIndex in topRowIndex..topRowIndex+blockSize-1
+                            cell.colIndex in leftColIndex until leftColIndex+blockSize
+                                && cell.rowIndex in topRowIndex until topRowIndex+blockSize
                     assertThat(subject.containsCell(cell))
                             .`as`("Expected shouldContainCellByIndex=$shouldContainCellByIndex for leftColIndex=$leftColIndex, topRowIndex=$topRowIndex, cell.colIndex=${cell.colIndex}, cell.rowIndex=${cell.rowIndex}")
                             .isEqualTo(shouldContainCellByIndex)
@@ -65,8 +65,8 @@ internal class BlockTest: AbstractGridSegmentTest() {
         for (leftColIndex in listOf(0, 3, 6)) {
             for (topRowIndex in listOf(0, 3, 6)) {
                 val subject = Block(gridMock, leftColIndex, topRowIndex)
-                for (colIndex in 0..gridSize - 1) {
-                    for (rowIndex in 0..gridSize - 1) {
+                for (colIndex in 0 until gridSize) {
+                    for (rowIndex in 0 until gridSize) {
                         val inBlock = colIndex in subject.leftColIndex..subject.rightColIndex
                                 && rowIndex in subject.topRowIndex..subject.bottomRowIndex
                         assertThat(subject.containsCell(colIndex, rowIndex)).isEqualTo(inBlock)

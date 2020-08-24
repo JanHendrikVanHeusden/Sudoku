@@ -1,12 +1,6 @@
 package nl.jhvh.sudoku.grid.model.segment
 
-import io.mockk.CapturingSlot
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.slot
-import io.mockk.unmockkObject
-import io.mockk.verify
+import io.mockk.*
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation
 import org.assertj.core.api.Assertions
@@ -40,14 +34,14 @@ internal class RowTest: AbstractGridSegmentTest() {
     }
 
     @Test
-    fun getCellList() {
+    fun getCells() {
         for (rowIndex in 0 until gridSize) {
             val subject = Row(gridMock, rowIndex)
-            val cellList = subject.cellList
+            val cellList = subject.cells
             Assertions.assertThat(cellList).hasSize(gridSize)
             cellList.forEachIndexed { index, cell ->
-                Assertions.assertThat(cellList[index].rowIndex).isEqualTo(rowIndex)
-                Assertions.assertThat(cellList[index].colIndex).isEqualTo(index)
+                Assertions.assertThat(cellList.toList()[index].rowIndex).isEqualTo(rowIndex)
+                Assertions.assertThat(cellList.toList()[index].colIndex).isEqualTo(index)
             }
         }
     }

@@ -31,7 +31,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
         val formattedCellsBySubRow = mutableListOf<FormattableList>()
         for (x in 0..block.grid.blockSize-1) {
             cellsBySubRow.add(mutableListOf())
-            cellsBySubRow[x].addAll(block.cellList.filter { x == it.rowIndex - block.topRowIndex })
+            cellsBySubRow[x].addAll(block.cells.filter { x == it.rowIndex - block.topRowIndex })
 
             val leftCellsWithRightBorder = concatEach(*cellsBySubRow[x].dropLast(1).map {
                 cellFormatter.nakedFormat(it) concatEach cellFormatter.getRightBorder(it)
@@ -52,7 +52,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
     }
 
     override fun getLeftBorder(block: Block): FormattableList {
-        val leftColCells = block.cellList.filter { it.colIndex == block.leftColIndex }
+        val leftColCells = block.cells.filter { it.colIndex == block.leftColIndex }
         val result = mutableListOf<String>()
         leftColCells.dropLast(1).forEach {
             result.addAll(cellFormatter.getLeftBorder(it) + listOf(cellFormatter.getBottomLeftEdge(it)))
@@ -62,7 +62,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
     }
 
     override fun getRightBorder(block: Block): FormattableList {
-        val rightColCells = block.cellList.filter { it.colIndex == block.rightColIndex }
+        val rightColCells = block.cells.filter { it.colIndex == block.rightColIndex }
         val result = mutableListOf<String>()
         rightColCells.dropLast(1).forEach {
             result.addAll(cellFormatter.getRightBorder(it) + listOf(cellFormatter.getBottomRightEdge(it)))
@@ -72,7 +72,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
     }
 
     override fun getTopBorder(block: Block): FormattableList {
-        val topRowCells = block.cellList.subList(0, block.grid.blockSize)
+        val topRowCells = block.cells.toList().subList(0, block.grid.blockSize)
         val topBorder = concatEach(*topRowCells.map {
             cellFormatter.getTopBorder(it) concatEach
                     if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellFormatter.getTopRightEdge(it))
@@ -81,7 +81,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
     }
 
     override fun getBottomBorder(block: Block): FormattableList {
-        val bottomRowCells = block.cellList.subList(block.grid.gridSize - block.grid.blockSize, block.grid.gridSize)
+        val bottomRowCells = block.cells.toList().subList(block.grid.gridSize - block.grid.blockSize, block.grid.gridSize)
         val bottomBorder = concatEach(*bottomRowCells.map {
             cellFormatter.getBottomBorder(it) concatEach
                     if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellFormatter.getBottomRightEdge(it))
@@ -90,18 +90,18 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
     }
 
     override fun getTopLeftEdge(block: Block): String {
-        return cellFormatter.getTopLeftEdge(block.cellList.first())
+        return cellFormatter.getTopLeftEdge(block.cells.first())
     }
 
     override fun getTopRightEdge(block: Block): String {
-        return cellFormatter.getTopRightEdge(block.cellList[block.grid.blockSize-1])
+        return cellFormatter.getTopRightEdge(block.cells.toList()[block.grid.blockSize-1])
     }
 
     override fun getBottomLeftEdge(block: Block): String {
-        return cellFormatter.getBottomLeftEdge(block.cellList[block.grid.gridSize - block.grid.blockSize])
+        return cellFormatter.getBottomLeftEdge(block.cells.toList()[block.grid.gridSize - block.grid.blockSize])
     }
 
     override fun getBottomRightEdge(block: Block): String {
-        return cellFormatter.getBottomRightEdge(block.cellList.last())
+        return cellFormatter.getBottomRightEdge(block.cells.last())
     }
 }

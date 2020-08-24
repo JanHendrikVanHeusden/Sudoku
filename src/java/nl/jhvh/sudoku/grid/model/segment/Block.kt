@@ -28,8 +28,9 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
     /** The bottom (y-axis) coordinate of the [Block] within the [Grid]  */
     val bottomRowIndex: Int = topRowIndex + grid.blockSize - 1
 
-    override val cellList: List<Cell> = incrementFromZero(grid.gridSize)
+    override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize)
             .map { grid.findCell(colIndex = it % grid.blockSize + leftColIndex, rowIndex = it/grid.blockSize + topRowIndex) }
+    )
 
     fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCell(cell.colIndex, cell.rowIndex)
 

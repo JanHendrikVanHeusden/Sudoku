@@ -31,13 +31,13 @@ abstract class AbstractGridSegmentTest {
             cellMock
         }
 
-        val gridCellList = mutableListOf<Cell>()
+        val gridCells = mutableListOf<Cell>()
         for (x in 0..gridSize-1) {
             for (y in 0.. gridSize-1) {
-                gridCellList.add(gridMock.findCell(x, y))
+                gridCells.add(gridMock.findCell(x, y))
             }
         }
-        every {gridMock.cellList} returns gridCellList
+        every {gridMock.cellList} returns gridCells
     }
 
 }

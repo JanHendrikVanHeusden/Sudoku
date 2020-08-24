@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Tests for [Grid] initialization.
- * Is not a unit tst but rather a component integration test, as it tests the results
+ * Is not a unit test but rather a component integration test, as it tests the results
  * of the listener actions all over the[Cell]s in the [Grid].
  */
 @Disabled("Not implemented yet")

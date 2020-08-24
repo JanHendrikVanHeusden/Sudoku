@@ -26,43 +26,43 @@ class RowBoxFormatter(private val cellFormatter: CellBoxFormatter) : RowFormatte
     }
 
     override fun nakedFormat(row: Row): FormattableList {
-        val leftCellsWithRightBorder = concatEach(*row.cellList.dropLast(1).map {
+        val leftCellsWithRightBorder = concatEach(*row.cells.toList().dropLast(1).map {
             cellFormatter.nakedFormat(it) concatEach cellFormatter.getRightBorder(it)
         }.toTypedArray())
-        val rightCellNaked = cellFormatter.nakedFormat(row.cellList.last())
+        val rightCellNaked = cellFormatter.nakedFormat(row.cells.last())
         return FormattableList(leftCellsWithRightBorder concatEach rightCellNaked)
     }
 
     override fun getLeftBorder(row: Row): FormattableList {
-        return cellFormatter.getLeftBorder(row.cellList.first())
+        return cellFormatter.getLeftBorder(row.cells.first())
     }
 
     override fun getRightBorder(row: Row): FormattableList {
-        return cellFormatter.getRightBorder(row.cellList.last())
+        return cellFormatter.getRightBorder(row.cells.last())
     }
 
     override fun getTopBorder(row: Row): FormattableList {
-        val leftCellsTopBordersWithRightEdge = concatEach(*row.cellList.dropLast(1).map {
+        val leftCellsTopBordersWithRightEdge = concatEach(*row.cells.toList().dropLast(1).map {
             cell -> cellFormatter.getTopBorder(cell).map { border -> border + cellFormatter.getTopRightEdge(cell)}
         }.toTypedArray())
-        val rightCellTopBorder = cellFormatter.getTopBorder(row.cellList.last()) as List<String>
+        val rightCellTopBorder = cellFormatter.getTopBorder(row.cells.last()) as List<String>
         return FormattableList(leftCellsTopBordersWithRightEdge concatEach rightCellTopBorder)
     }
 
     override fun getBottomBorder(row: Row): FormattableList {
-        val leftCellsBottomBordersWithRightEdge = concatEach(*row.cellList.dropLast(1).map {
+        val leftCellsBottomBordersWithRightEdge = concatEach(*row.cells.toList().dropLast(1).map {
             cell -> cellFormatter.getBottomBorder(cell).map { border -> border + cellFormatter.getBottomRightEdge(cell)}
         }.toTypedArray())
-        val rightCellBottomBorder = cellFormatter.getBottomBorder(row.cellList.last()) as List<String>
+        val rightCellBottomBorder = cellFormatter.getBottomBorder(row.cells.last()) as List<String>
         return FormattableList(leftCellsBottomBordersWithRightEdge concatEach rightCellBottomBorder)
     }
 
-    override fun getTopLeftEdge(row: Row): String = cellFormatter.getTopLeftEdge(row.cellList.first())
+    override fun getTopLeftEdge(row: Row): String = cellFormatter.getTopLeftEdge(row.cells.first())
 
-    override fun getTopRightEdge(row: Row): String = cellFormatter.getTopRightEdge(row.cellList.last())
+    override fun getTopRightEdge(row: Row): String = cellFormatter.getTopRightEdge(row.cells.last())
 
-    override fun getBottomLeftEdge(row: Row): String = cellFormatter.getBottomLeftEdge(row.cellList.first())
+    override fun getBottomLeftEdge(row: Row): String = cellFormatter.getBottomLeftEdge(row.cells.first())
 
-    override fun getBottomRightEdge(row: Row): String = cellFormatter.getBottomRightEdge(row.cellList.last())
+    override fun getBottomRightEdge(row: Row): String = cellFormatter.getBottomRightEdge(row.cells.last())
 
 }
