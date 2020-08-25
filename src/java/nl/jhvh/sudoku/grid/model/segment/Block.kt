@@ -31,10 +31,6 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
             .map { grid.findCell(colIndex = it % grid.blockSize + leftColIndex, rowIndex = it/grid.blockSize + topRowIndex) }
     )
 
-    fun containsCell(cell: Cell): Boolean = grid === cell.grid && containsCell(cell.colIndex, cell.rowIndex)
-
-    fun containsCell(colIndex: Int, rowIndex: Int): Boolean = colIndex in leftColIndex..rightColIndex && rowIndex in topRowIndex..bottomRowIndex
-
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: [leftColIndex=$leftColIndex], [rightColIndex=$rightColIndex], [upperRowIndex=$topRowIndex], [bottomRowIndex=$bottomRowIndex]"
 

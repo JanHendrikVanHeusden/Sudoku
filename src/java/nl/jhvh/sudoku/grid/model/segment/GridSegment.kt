@@ -14,18 +14,18 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  *
  * A functional synonym for [GridSegment] is **Group**.
  */
-abstract class GridSegment protected constructor(grid: Grid) : GridElement(grid), CellSetValueListener {
+abstract class GridSegment constructor(grid: Grid) : GridElement(grid), CellSetValueListener {
 
     abstract val cells: LinkedHashSet<Cell>
 
-    override fun onEvent(setValueEvent: CellSetValueEvent) {
-        if (cells.contains(setValueEvent.eventSource)) {
+    override fun onEvent(gridEvent: CellSetValueEvent) {
+        if (cells.contains(gridEvent.eventSource)) {
             cells.forEach {
-                it.valueCandidates.remove(setValueEvent.newValue)
+                it.valueCandidates.remove(gridEvent.newValue)
                 // Consider if it is better (performance wise) to unsubscribe the listener.
                 // Note however that no setValueEvent will ever come from a cell anymore once it's value is set.
-                // So probably it does not make much sense, probably it adds load rather than gaining performance.
-                // If you want to unsubscribe, the implementation MUST be made thread safe!
+                // So probably it does not make much sense, maybe it adds load rather than gaining performance.
+                // If you want to unsubscribe, the implementation of the collection of listeners MUST be made thread safe!
 
                 // it.unsubscribe(this)
             }

@@ -13,15 +13,16 @@ import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import java.util.Collections.synchronizedSet
 
+@Suppress("SameParameterValue")
+private fun valueSet(minVal: Int, maxVal: Int): MutableSet<Int>
+        = HashSet(IntRange(start = minVal, endInclusive = maxVal).toList())
+
 /**
  * A [Cell] in a Sudoku represents a single square in a [Grid]
  *  * On construction, the [Cell] can either be empty, or filled with a single numeric value; see also [CellValue]
  *  * The [Cell] is aware of it's position within the [Grid], indicated by [colIndex] (X-axis) and [rowIndex] (Y-axis)
  */
 class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int? = null): GridElement(grid), CellSetValueSource, Formattable {
-
-    // lazy so no unnecessary initialization in case it's a fixed values
-    private val valueCandidatesInit: MutableSet<Int> by lazy { synchronizedSet(IntRange(start = CELL_MIN_VALUE, endInclusive = grid.maxValue).toSet()) }
 
     val isFixed: Boolean = fixedValue != null
 
@@ -31,7 +32,7 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
     val cellValue: CellValue = if (isFixed) FixedValue(this, fixedValue!!) else NonFixedValue(this)
 
     /** Thread safe [MutableSet] of possible candidate values for the [Cell.cellValue]  */
-    val valueCandidates: MutableSet<Int> = if (isFixed) mutableSetOf() else synchronizedSet(HashSet(valueCandidatesInit))
+    val valueCandidates: MutableSet<Int> = if (isFixed) mutableSetOf() else synchronizedSet(valueSet(CELL_MIN_VALUE, grid.maxValue))
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: colIndex=$colIndex, rowIndex=$rowIndex, cellValue=[$cellValue], valueCandidates=$valueCandidates"

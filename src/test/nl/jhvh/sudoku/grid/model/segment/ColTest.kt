@@ -8,9 +8,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-internal class ColTest: AbstractGridSegmentTest() {
+internal class ColTest: GridSegmentTestBase() {
 
-    override lateinit var gridMock: Grid // initialized in setUp() of AbstractGridSegmentTest
+    /** grid mock and cell mocks initialized in [GridSegmentTestBase.gridSetUp] */
+    override lateinit var gridMock: Grid
     override val blockSize = 3
     override val gridSize = 9
 

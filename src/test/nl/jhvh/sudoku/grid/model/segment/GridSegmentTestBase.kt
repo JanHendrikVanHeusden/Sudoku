@@ -8,14 +8,14 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import org.junit.jupiter.api.BeforeEach
 
-abstract class AbstractGridSegmentTest {
+abstract class GridSegmentTestBase {
 
     protected abstract var gridMock: Grid
     protected abstract val blockSize: Int
     protected abstract val gridSize: Int
 
     @BeforeEach
-    fun gridSegmentSetUp() {
+    fun gridSetUp() {
         gridMock = mockk()
         every {gridMock.blockSize} returns blockSize
         every {gridMock.gridSize} returns gridSize
@@ -26,9 +26,9 @@ abstract class AbstractGridSegmentTest {
         every {gridMock.findCell(capture(cellColIndexCapturer), capture(cellRowIndexCapturer))} answers {
             val cellMock: Cell = mockk()
             every { cellMock.grid } returns gridMock
-            every {cellMock.colIndex} returns cellColIndexCapturer.captured
-            every {cellMock.rowIndex} returns cellRowIndexCapturer.captured
-            every {cellMock.subscribe(any())} returns Unit
+            every { cellMock.colIndex } returns cellColIndexCapturer.captured
+            every { cellMock.rowIndex } returns cellRowIndexCapturer.captured
+            every { cellMock.subscribe(any()) } returns Unit
             cellMock
         }
 
