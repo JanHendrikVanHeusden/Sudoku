@@ -1,13 +1,9 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import io.mockk.CapturingSlot
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
+import io.mockk.*
+import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
+import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,42 +44,57 @@ internal class NonFixedValueTest {
 
     @Test
     fun `setValue should publish an event on change of value`() {
+        val gridSegmentMock: GridSegment = mockk(relaxed = true)
+        subject.subscribe(gridSegmentMock)
+        // This test is brittle! The GridSegment should not be needed, but without it,
+        // the test fails with  io.mockk.MockKException: Failed matching mocking signature for left matchers: [any()]
+        // mockk seems to have quite some bugs / flaws causing that exception (mockk version: 1.10.0)
+
         // given
         assertThat(subject.value).isNull()
         var newValue = 5
-        val cellSetValueEventCapturer1: CapturingSlot<CellSetValueEvent> = slot()
-        every {cellMock.publish(capture(cellSetValueEventCapturer1))} returns Unit
         // when
         subject.setValue(newValue)
         // then
-        val publishedEvent1 = cellSetValueEventCapturer1.captured
-        verify (exactly = 1) {cellMock.publish(publishedEvent1)}
+        // due to (probably) asynchronous behaviour of Delegates.observable, the publish event maybe delayed, so first verify with timeout
+        verify (timeout = 1000) {subject.publish(any())}
+        val setCellValueEventCapturer1: CapturingSlot<SetCellValueEvent> = slot()
+        verify (exactly = 1) { subject.publish(capture(setCellValueEventCapturer1)) }
+        assertThat(setCellValueEventCapturer1.isCaptured).isTrue()
+        val publishedEvent1 = setCellValueEventCapturer1.captured
         assertThat(publishedEvent1.newValue).isEqualTo(newValue)
-        assertThat(publishedEvent1.eventSource).isEqualTo(cellMock)
+        assertThat(publishedEvent1.eventSource).isEqualTo(subject)
 
         // clear previously recorded events
-        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+        clearAllMocks(answers = false, recordedCalls = true)
+        // Need to exclude this here, otherwise mockk will fail saying that onEvent happened while not verified
+        // Actually, we never wanted / asked to verify that, so seems to be a bug too?? (mockk version: 1.10.0)
+        excludeRecords { gridSegmentMock.onEvent(any())}
 
         // when
         subject.setValue(newValue)
         // then - verify that setting same value again does not fire an event
-        verify (exactly = 0) {cellMock.publish(publishedEvent1)}
-        assertThat(publishedEvent1.newValue).isEqualTo(newValue)
+        val setCellValueEventCapturer2: CapturingSlot<SetCellValueEvent> = slot()
+        verify (exactly = 0, timeout = 100) {subject.publish(capture(setCellValueEventCapturer2))}
+        assertThat(setCellValueEventCapturer2.isCaptured).isFalse()
 
         // clear previously recorded events
-        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+        clearAllMocks(answers = false, recordedCalls = true)
 
-        // given
+        // given - different value now
         newValue = 6
-        val cellSetValueEventCapturer2: CapturingSlot<CellSetValueEvent> = slot()
-        every {cellMock.publish(capture(cellSetValueEventCapturer2))} returns Unit
+
         // when
         subject.setValue(newValue)
+
         // then - verify that setting it to another value publishes a new event
-        val publishedEvent2 = cellSetValueEventCapturer2.captured
-        verify (exactly = 1) {cellMock.publish(publishedEvent2)}
-        assertThat(publishedEvent2.newValue).isEqualTo(newValue)
-        assertThat(publishedEvent2.eventSource).isEqualTo(cellMock)
+        verify (timeout = 1000) {subject.publish(any())}
+        val setCellValueEventCapturer3: CapturingSlot<SetCellValueEvent> = slot()
+        verify (exactly = 1) {subject.publish(capture(setCellValueEventCapturer3))}
+        assertThat(setCellValueEventCapturer3.isCaptured).isTrue()
+        val publishedEvent3 = setCellValueEventCapturer3.captured
+        assertThat(publishedEvent3.newValue).isEqualTo(newValue)
+        assertThat(publishedEvent3.eventSource).isEqualTo(subject)
     }
 
     @Test

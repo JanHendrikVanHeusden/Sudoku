@@ -4,7 +4,9 @@ import nl.jhvh.sudoku.base.CELL_MIN_VALUE
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
+import nl.jhvh.sudoku.grid.event.GridEventListener
+import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
+import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueSource
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import kotlin.properties.Delegates
@@ -13,10 +15,12 @@ import kotlin.reflect.KProperty
 val VALUE_UNKNOWN: Int? = null
 
 /** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
-sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
+sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), SetCellValueSource {
+
+    override val eventListeners: MutableSet<GridEventListener<CellValue, SetCellValueEvent>> = mutableSetOf()
 
     /**
-     * The mutable, numeric or unknown value of this [Cell], observed (see [CellSetValueEvent]).
+     * The mutable, numeric or unknown value of this [Cell], observed in case of for non-fixed value.
      *  * Should be volatile to make sure that no unneeded processing is done for a value that is set already.
      *    Kotlin does not allow the `@Volatile` annotation on an observable field however (so maybe implementation
      *    is volatile by nature? I could not really make sure when decompiling the code).
@@ -27,12 +31,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      *  Even if not volatile or synchronized, it would always be set to the same value (an never de-/incremented etc.),
      *  so atomic operations only, so concurrent setting is not really a problem
      */
-    @Suppress("UNUSED_ANONYMOUS_PARAMETER")
-    var value: Int?
-            by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
-                // NB: setting to same value as before does not publish an event :-)
-                this.cell.publish(CellSetValueEvent(cell, newValue!!))
-            }
+    abstract var value: Int?
     protected set
 
     /**
@@ -50,19 +49,26 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
     class FixedValue(cell: Cell, value: Int) : CellValue(cell) {
         override val isFixed: Boolean = true
 
+        override var value: Int? = null
+
         init {
             validateRange(value)
             this.value = value
         }
 
-        override fun setValue(value: Int) {
-            require (value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
-        }
+        override fun setValue(value: Int) = require (value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
     }
 
     /** Simple value holder class to represent the non-fixed value of a [Cell]  */
     class NonFixedValue(cell: Cell) : CellValue(cell) {
         override val isFixed: Boolean = false
+
+        @Suppress("UNUSED_ANONYMOUS_PARAMETER")
+        override var value: Int?
+                by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
+                    // NB: setting to same value as before does not publish an event :-)
+                    publish(SetCellValueEvent(this, newValue!!))
+                }
 
         override fun setValue(value: Int) {
             validateRange(value)

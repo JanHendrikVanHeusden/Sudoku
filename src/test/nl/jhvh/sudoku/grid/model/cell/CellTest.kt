@@ -1,10 +1,6 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkConstructor
-import io.mockk.unmockkConstructor
-import io.mockk.verify
+import io.mockk.*
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
@@ -28,10 +24,12 @@ internal class CellTest {
     @Test
     @Disabled("Not a practical way to test that it's synchronized. Just here as a reminder...")
     fun `assert that valueCandidates is synchronized`() {
+
         // there is no really practical & reliable way to test whether it is synchronized.
         // The implementation uses a synchronizedList(), so no annotations present that we can test on.
         // (@Synchronized on getter or setter would not be helpful anyway, that would synchronize access
         // to the list only, would not synchronize on the list's content)
+        Cell(grid9Mock, 2, 5).getValueCandidates()
     }
 
     @Test

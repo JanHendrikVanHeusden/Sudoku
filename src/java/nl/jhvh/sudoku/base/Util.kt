@@ -5,3 +5,5 @@ fun incrementFromZero(size: Int): List<Int> {
     require(size >= 0, { "Negative size $size not allowed" })
     return IntRange(start = 0, endInclusive = size - 1).toList()
 }
+
+fun intRangeSet(minVal: Int, maxVal: Int): Set<Int> = IntRange(start = minVal, endInclusive = maxVal).toSet()

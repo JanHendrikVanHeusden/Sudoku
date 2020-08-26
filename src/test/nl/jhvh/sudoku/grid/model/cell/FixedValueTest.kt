@@ -1,12 +1,9 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -62,20 +59,6 @@ internal class FixedValueTest {
         with (assertFailsWith<IllegalArgumentException> { subject.setValue(500) }) {
             assertThat(message).isEqualTo("Not allowed to change a fixed value! (value = $anotherValue)")
         }
-    }
-
-    @Test
-    fun `construction of a FixedValue should publish an event on value set`() {
-        // given
-        val newValue = 5
-        val cellSetValueEventCapturer: CapturingSlot<CellSetValueEvent> = slot()
-        every {cellMock.publish(capture(cellSetValueEventCapturer))} returns Unit
-        subject = FixedValue(cellMock, newValue)
-        // then - verify the published event
-        val publishedEvent = cellSetValueEventCapturer.captured
-        verify (exactly = 1) {cellMock.publish(publishedEvent)}
-        assertThat(publishedEvent.newValue).isEqualTo(newValue)
-        assertThat(publishedEvent.eventSource).isEqualTo(cellMock)
     }
 
     @Test

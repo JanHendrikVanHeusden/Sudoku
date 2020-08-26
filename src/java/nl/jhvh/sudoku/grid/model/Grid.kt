@@ -5,7 +5,7 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
+import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -18,7 +18,7 @@ import nl.jhvh.sudoku.grid.model.segment.Row
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
  */
-class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) : Formattable {
+class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) : Formattable {
 
     /** The length of each side = [blockSize] * [blockSize]  */
     val gridSize: Int = blockSize * blockSize
@@ -38,6 +38,11 @@ class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<C
     val colList: List<Col> = incrementFromZero(gridSize).map { Col(this, colIndex = it) }
     val blockList: List<Block> = incrementFromZero(gridSize)
             .map { Block(this, leftColIndex = ((it * blockSize) % gridSize), topRowIndex = (it / blockSize) * blockSize) }
+
+    init {
+        // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
+        this.cellList.filter { it.isFixed }.map { it.cellValue }.forEach { it.publish(SetCellValueEvent(it, it.value!!)) }
+    }
 
     fun findCell(cellRef: String): Cell {
         return with(CellRef(cellRef)) { findCell(x, y) }
@@ -86,7 +91,6 @@ class Grid protected constructor (val blockSize: Int = 3, val fixedValues: Map<C
                     "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
             val grid = Grid(blockSize, fixedValues)
             // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
-            grid.cellList.filter { it.isFixed }.forEach { it.publish(CellSetValueEvent(it, it.fixedValue)) }
             isBuilt = true
             return grid
         }

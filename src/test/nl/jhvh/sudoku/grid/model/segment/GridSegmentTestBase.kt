@@ -24,11 +24,10 @@ abstract class GridSegmentTestBase {
         val cellColIndexCapturer: CapturingSlot<Int> = slot()
         val cellRowIndexCapturer: CapturingSlot<Int> = slot()
         every {gridMock.findCell(capture(cellColIndexCapturer), capture(cellRowIndexCapturer))} answers {
-            val cellMock: Cell = mockk()
+            val cellMock: Cell = mockk(relaxed = true)
             every { cellMock.grid } returns gridMock
             every { cellMock.colIndex } returns cellColIndexCapturer.captured
             every { cellMock.rowIndex } returns cellRowIndexCapturer.captured
-            every { cellMock.subscribe(any()) } returns Unit
             cellMock
         }
 

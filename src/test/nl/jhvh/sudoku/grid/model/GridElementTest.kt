@@ -1,21 +1,16 @@
 package nl.jhvh.sudoku.grid.model
 
-import io.mockk.clearMocks
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-val gridMock: Grid = mockk()
-
 internal class GridElementTest {
 
     @Test
     fun getMaxValueLength() {
+        val gridMock: Grid = mockk()
         for (valueLength in 1..10) {
             // given
             every { gridMock.maxValueLength } returns valueLength

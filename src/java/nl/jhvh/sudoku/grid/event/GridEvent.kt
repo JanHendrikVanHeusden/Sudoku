@@ -11,4 +11,5 @@ interface GridEvent<S : GridElement> {
 
     /** @return The source [GridElement] that emitted this [GridEvent] */
     val eventSource: S
+
 }

@@ -1,12 +1,12 @@
 package nl.jhvh.sudoku.grid.model.segment
 
 import io.mockk.every
+import io.mockk.verify
 import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.CellSetValueEvent
+import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
@@ -28,7 +28,7 @@ internal class GridSegmentTest : GridSegmentTestBase() {
             override fun format(formatter: SudokuFormatter): FormattableList = FormattableList(emptyList())
         }
         subject.cells.forEach {cellMock ->
-            every { cellMock.valueCandidates } returns HashSet(IntRange(1, gridSize).toList())
+            every { cellMock.getValueCandidates() } returns HashSet(IntRange(1, gridSize).toList())
         }
     }
 
@@ -37,18 +37,12 @@ internal class GridSegmentTest : GridSegmentTestBase() {
         // given
         val newValue = Random.nextInt(1, gridSize+1)
         val valueSet = IntRange(1, gridSize).toSet()
-        // precondition: for all cells assert that valueCandidates contains all values
-        subject.cells.forEach { assertThat(it.valueCandidates).hasSameElementsAs(valueSet) }
-        subject.cells.forEach { assertThat(it.valueCandidates).contains(newValue) }
-
         // grab a random cell of the GridSegment's cells
         val eventCell = subject.cells.toList()[Random.nextInt(0, gridSize)]
         // when
-        subject.onEvent(CellSetValueEvent(eventCell, newValue))
-        println()
-        println()
+        subject.onEvent(SetCellValueEvent(eventCell.cellValue, newValue))
         // then: for all cells assert that valueCandidates contains all values except the event's newValue
-        subject.cells.forEach { assertThat(it.valueCandidates).doesNotContain(newValue) }
-        subject.cells.forEach { assertThat(it.valueCandidates).hasSameElementsAs(valueSet.filter { it != newValue }) }
+        subject.cells.filter { it !== eventCell } .forEach { verify (exactly = 1) { it.removeValueCandidate(newValue) } }
+        verify (exactly = 0) { eventCell.removeValueCandidate(newValue) }
     }
 }

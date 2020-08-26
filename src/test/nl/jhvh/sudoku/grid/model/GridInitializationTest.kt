@@ -33,6 +33,7 @@ internal class GridInitializationTest {
         assertThat(blockList[6].leftColIndex).isEqualTo(0)
         assertThat(blockList[7].leftColIndex).isEqualTo(3)
         assertThat(blockList[8].leftColIndex).isEqualTo(6)
+
         assertThat(blockList[0].rightColIndex).isEqualTo(2)
         assertThat(blockList[1].rightColIndex).isEqualTo(5)
         assertThat(blockList[2].rightColIndex).isEqualTo(8)
@@ -42,6 +43,7 @@ internal class GridInitializationTest {
         assertThat(blockList[6].rightColIndex).isEqualTo(2)
         assertThat(blockList[7].rightColIndex).isEqualTo(5)
         assertThat(blockList[8].rightColIndex).isEqualTo(8)
+
         assertThat(blockList[0].topRowIndex).isEqualTo(0)
         assertThat(blockList[1].topRowIndex).isEqualTo(0)
         assertThat(blockList[2].topRowIndex).isEqualTo(0)
@@ -51,6 +53,7 @@ internal class GridInitializationTest {
         assertThat(blockList[6].topRowIndex).isEqualTo(6)
         assertThat(blockList[7].topRowIndex).isEqualTo(6)
         assertThat(blockList[8].topRowIndex).isEqualTo(6)
+
         assertThat(blockList[0].bottomRowIndex).isEqualTo(2)
         assertThat(blockList[1].bottomRowIndex).isEqualTo(2)
         assertThat(blockList[2].bottomRowIndex).isEqualTo(2)
