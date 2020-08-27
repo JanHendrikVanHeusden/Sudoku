@@ -18,7 +18,7 @@ import nl.jhvh.sudoku.grid.model.segment.Row
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
  */
-class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) : Formattable {
+class Grid private constructor (val blockSize: Int = 3, private val fixedValues: Map<CellRef, Int>) : Formattable {
 
     /** The length of each side = [blockSize] * [blockSize]  */
     val gridSize: Int = blockSize * blockSize
@@ -32,7 +32,7 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
             CellRef(colCalc(cellListIndex, gridSize), rowCalc(cellListIndex, gridSize))
 
     val cellList: List<Cell> = incrementFromZero(gridSize * gridSize)
-            .map { Cell(this, colCalc(it, gridSize), rowCalc(it, gridSize), fixedValue = fixedValues.get(cellRefCalc(it, gridSize))) }
+            .map { Cell(this, colCalc(it, gridSize), rowCalc(it, gridSize), fixedValue = fixedValues[cellRefCalc(it, gridSize)]) }
 
     val rowList: List<Row> = incrementFromZero(gridSize).map { Row(this, rowIndex = it) }
     val colList: List<Col> = incrementFromZero(gridSize).map { Col(this, colIndex = it) }
@@ -114,7 +114,7 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
          * @throws IllegalStateException when the [Grid] was built already
          */
         fun fix(cellRef: CellRef, value: Int): GridBuilder {
-            fixedValues.put(cellRef, value)
+            fixedValues[cellRef] = value
             return this
         }
     }

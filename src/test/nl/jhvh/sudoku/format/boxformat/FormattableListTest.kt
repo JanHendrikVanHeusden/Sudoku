@@ -35,43 +35,40 @@ class FormattableListTest {
     fun `test that FormattableList equals List of String with same content`() {
         val formattableList = FormattableList(listOf("Mary", "William", "Jane", "Harry"))
         // equal to itself
-        assertThat(formattableList.equals(formattableList)).isTrue()
+        assertThat(formattableList == formattableList).isTrue()
         // equal to another FormattableList with same content
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).equals(FormattableList(listOf("Mary", "William", "Jane", "Harry"))))
-                .isTrue()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
+                .isEqualTo(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
         // not equal to FormattableList with same elements but in different order
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).equals(FormattableList(listOf("William", "Mary", "Jane", "Harry"))))
-                .isFalse()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
+                .isNotEqualTo(FormattableList(listOf("William", "Mary", "Jane", "Harry")))
         // equal to another List with same content...
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).equals(listOf("Mary", "William", "Jane", "Harry")))
-                .isTrue()
-        // ... and also the other way around
-        assertThat(listOf("Mary", "William", "Jane", "Harry").equals(FormattableList(listOf("Mary", "William", "Jane", "Harry"))))
-                .isTrue()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
+                .isEqualTo(listOf("Mary", "William", "Jane", "Harry"))
         // equal to ArrayList with same content, both sides
-        assertThat(ArrayList(listOf("Mary", "William", "Jane", "Harry")).equals(FormattableList(listOf("Mary", "William", "Jane", "Harry"))))
-                .isTrue()
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).equals(ArrayList(listOf("Mary", "William", "Jane", "Harry"))))
-                .isTrue()
+        assertThat(ArrayList(listOf("Mary", "William", "Jane", "Harry")))
+                .isEqualTo(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")))
+                .isEqualTo(ArrayList(listOf("Mary", "William", "Jane", "Harry")))
     }
 
     @Test
     fun `test that FormattableList hashCode is same as List of String with same content`() {
         val formattableList = FormattableList(listOf("Mary", "William", "Jane", "Harry"))
         // same hashCode when called again on itself
-        assertThat(formattableList.hashCode() == formattableList.hashCode()).isTrue()
+        assertThat(formattableList.hashCode()).isEqualTo(formattableList.hashCode())
         // equal to hashcode of another FormattableList with same content
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode() == FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
-                .isTrue()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
+                .isEqualTo(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
         // not equal to hashcode of FormattableList with same elements but in different order
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode() == FormattableList(listOf("William", "Mary", "Jane", "Harry")).hashCode())
-                .isFalse()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
+                .isNotEqualTo(FormattableList(listOf("William", "Mary", "Jane", "Harry")).hashCode())
         // equal to hashcode of another List with same content...
-        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode() == listOf("Mary", "William", "Jane", "Harry").hashCode())
-                .isTrue()
+        assertThat(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
+                .isEqualTo(listOf("Mary", "William", "Jane", "Harry").hashCode())
         // equal to hashcode of ArrayList with same content, both sides
-        assertThat(ArrayList(listOf("Mary", "William", "Jane", "Harry")).hashCode() == FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
-                .isTrue()
+        assertThat(ArrayList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
+                .isEqualTo(FormattableList(listOf("Mary", "William", "Jane", "Harry")).hashCode())
     }
 
 }

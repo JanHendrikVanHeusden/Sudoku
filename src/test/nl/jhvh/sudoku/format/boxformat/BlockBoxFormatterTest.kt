@@ -628,47 +628,47 @@ internal class BlockBoxFormatterTest {
         var block: Block
         // given, when
         block = grid9.blockList[0]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╔")
         block = grid9.blockList[1]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╦")
         block = grid9.blockList[2]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╦")
         block = grid9.blockList[3]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╠")
         block = grid9.blockList[4]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[5]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[6]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╠")
         block = grid9.blockList[7]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[8]
-        topLeftEdge = subject.getTopLeftEdge(block).toString()
+        topLeftEdge = subject.getTopLeftEdge(block)
         assertThat(topLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
@@ -680,47 +680,47 @@ internal class BlockBoxFormatterTest {
         var block: Block
         // given, when
         block = grid9.blockList[0]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╦")
         block = grid9.blockList[1]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╦")
         block = grid9.blockList[2]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╗")
         block = grid9.blockList[3]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[4]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[5]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╣")
         block = grid9.blockList[6]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[7]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[8]
-        topRightEdge = subject.getTopRightEdge(block).toString()
+        topRightEdge = subject.getTopRightEdge(block)
         assertThat(topRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╣")
@@ -732,47 +732,47 @@ internal class BlockBoxFormatterTest {
         var block: Block
         // given, when
         block = grid9.blockList[0]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╠")
         block = grid9.blockList[1]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[2]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[3]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╠")
         block = grid9.blockList[4]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[5]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[6]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╚")
         block = grid9.blockList[7]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╩")
         block = grid9.blockList[8]
-        bottomLeftEdge = subject.getBottomLeftEdge(block).toString()
+        bottomLeftEdge = subject.getBottomLeftEdge(block)
         assertThat(bottomLeftEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╩")
@@ -784,47 +784,47 @@ internal class BlockBoxFormatterTest {
         var block: Block
         // given, when
         block = grid9.blockList[0]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[1]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[2]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╣")
         block = grid9.blockList[3]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[4]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╬")
         block = grid9.blockList[5]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╣")
         block = grid9.blockList[6]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╩")
         block = grid9.blockList[7]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╩")
         block = grid9.blockList[8]
-        bottomRightEdge = subject.getBottomRightEdge(block).toString()
+        bottomRightEdge = subject.getBottomRightEdge(block)
         assertThat(bottomRightEdge)
                 .`as`("formatting fails for $block")
                 .isEqualTo("╝")

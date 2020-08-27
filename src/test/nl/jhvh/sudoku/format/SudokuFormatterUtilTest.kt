@@ -32,7 +32,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.gridSize} returns gridSize
-            for (colIndex in 0..gridSize - 1) {
+            for (colIndex in 0 until gridSize) {
                 every { cell.colIndex } returns colIndex
                 when (colIndex) {
                     0 -> assertThat(cell.leftBorderIsGridBorder())
@@ -89,7 +89,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.gridSize} returns gridSize
-            for (colIndex in 0..gridSize - 1) {
+            for (colIndex in 0 until gridSize) {
                 every { cell.colIndex } returns colIndex
                 when (colIndex) {
                     gridSize-1 -> assertThat(cell.rightBorderIsGridBorder())
@@ -146,7 +146,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.gridSize} returns gridSize
-            for (rowIndex in 0..gridSize - 1) {
+            for (rowIndex in 0 until gridSize) {
                 every { cell.rowIndex } returns rowIndex
                 when (rowIndex) {
                     0 -> assertThat(cell.topBorderIsGridBorder())
@@ -203,7 +203,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.gridSize} returns gridSize
-            for (rowIndex in 0..gridSize - 1) {
+            for (rowIndex in 0 until gridSize) {
                 every { cell.rowIndex } returns rowIndex
                 when (rowIndex) {
                     gridSize-1 -> assertThat(cell.bottomBorderIsGridBorder())
@@ -297,7 +297,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.blockSize} returns blockSize
-            for (colIndex in 0..gridSize - 1) {
+            for (colIndex in 0 until gridSize) {
                 every { cell.colIndex } returns colIndex
                 when {
                     colIndex % blockSize == 0 -> assertThat(cell.leftBorderIsBlockBorder())
@@ -317,7 +317,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.blockSize} returns blockSize
-            for (colIndex in 0..gridSize - 1) {
+            for (colIndex in 0 until gridSize) {
                 every { cell.colIndex } returns colIndex
                 when {
                     (colIndex+1) % blockSize == 0 -> assertThat(cell.rightBorderIsBlockBorder())
@@ -374,7 +374,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.blockSize} returns blockSize
-            for (rowIndex in 0..gridSize - 1) {
+            for (rowIndex in 0 until gridSize) {
                 every { cell.rowIndex } returns rowIndex
                 when {
                     rowIndex % blockSize == 0 -> assertThat(cell.topBorderIsBlockBorder())
@@ -431,7 +431,7 @@ class SudokuFormatterUtilTest {
         for (blockSize in 2..10) {
             val gridSize = blockSize * blockSize
             every {cell.grid.blockSize} returns blockSize
-            for (rowIndex in 0..gridSize - 1) {
+            for (rowIndex in 0 until gridSize) {
                 every { cell.rowIndex } returns rowIndex
                 when {
                     (rowIndex+1) % blockSize == 0 -> assertThat(cell.bottomBorderIsBlockBorder())
@@ -708,11 +708,11 @@ class SudokuFormatterUtilTest {
         val gridSize = cellMock.grid.gridSize
         val blockSize = cellMock.grid.blockSize
         // no block border or grid borders
-        for (x in 0..gridSize-1) {
+        for (x in 0 until gridSize) {
             if (x % blockSize == 0) {
                 continue
             }
-            for (y in 0..gridSize-1) {
+            for (y in 0 until gridSize) {
                 if (y % blockSize == 0) {
                     continue
                 }
@@ -846,11 +846,11 @@ class SudokuFormatterUtilTest {
         val gridSize = cellMock.grid.gridSize
         val blockSize = cellMock.grid.blockSize
         // no block border or grid borders
-        for (x in 0..gridSize-1) {
+        for (x in 0 until gridSize) {
             if ((x+1) % blockSize == 0) {
                 continue
             }
-            for (y in 0..gridSize-1) {
+            for (y in 0 until gridSize) {
                 if ((y+1) % blockSize == 0) {
                     continue
                 }
@@ -984,11 +984,11 @@ class SudokuFormatterUtilTest {
         val gridSize = cellMock.grid.gridSize
         val blockSize = cellMock.grid.blockSize
         // no block border or grid borders
-        for (x in 0..gridSize-1) {
+        for (x in 0 until gridSize) {
             if (x % blockSize == 0) {
                 continue
             }
-            for (y in 0..gridSize-1) {
+            for (y in 0 until gridSize) {
                 if ((y+1) % blockSize == 0) {
                     continue
                 }
@@ -1122,11 +1122,11 @@ class SudokuFormatterUtilTest {
         val gridSize = cellMock.grid.gridSize
         val blockSize = cellMock.grid.blockSize
         // no block border or grid borders
-        for (x in 0..gridSize-1) {
+        for (x in 0 until gridSize) {
             if ((x+1) % blockSize == 0) {
                 continue
             }
-            for (y in 0..gridSize-1) {
+            for (y in 0 until gridSize) {
                 if ((y+1) % blockSize == 0) {
                     continue
                 }

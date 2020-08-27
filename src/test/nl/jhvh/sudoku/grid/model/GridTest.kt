@@ -87,7 +87,7 @@ internal class GridTest {
         for (grid in listOf(grid4, grid9, grid16)) {
             val cells = HashSet(grid.cellList)
             for (colRef in 1..grid.gridSize) {
-                for (y in 0..grid.gridSize-1) {
+                for (y in 0 until grid.gridSize) {
                     // upper case
                     val rowRef = ('A'+y).toString()
                     val cellRefString = rowRef + colRef.toString()
@@ -103,7 +103,7 @@ internal class GridTest {
         for (grid in listOf(grid4, grid9, grid16)) {
             val cells = HashSet(grid.cellList)
             for (colRef in 1..grid.gridSize) {
-                for (y in 0..grid.gridSize-1) {
+                for (y in 0 until grid.gridSize) {
                     // lower case
                     val rowRef = ('a'+y).toString()
                     val cellRefString = rowRef + colRef.toString()
@@ -122,8 +122,8 @@ internal class GridTest {
     fun `findCell - by CellRef`() {
         for (grid in listOf(grid4, grid9, grid16)) {
             val cells = HashSet(grid.cellList)
-            for (colIndex in 0..grid.gridSize-1) {
-                for (rowIndex in 0..grid.gridSize-1) {
+            for (colIndex in 0 until grid.gridSize) {
+                for (rowIndex in 0 until grid.gridSize) {
                     val cellRefMock: CellRef = mockk()
                     every {cellRefMock.x} returns colIndex
                     every {cellRefMock.y} returns rowIndex
@@ -142,8 +142,8 @@ internal class GridTest {
     fun `findCell - by colIndex, rowIndex`() {
         for (grid in listOf(grid4, grid9, grid16)) {
             val cells = HashSet(grid.cellList)
-            for (colIndex in 0..grid.gridSize-1) {
-                for (rowIndex in 0..grid.gridSize-1) {
+            for (colIndex in 0 until grid.gridSize) {
+                for (rowIndex in 0 until grid.gridSize) {
                     val cell = grid.findCell(colIndex, rowIndex)
                     assertThat(cell.colIndex).isEqualTo(colIndex)
                     assertThat(cell.rowIndex).isEqualTo(rowIndex)

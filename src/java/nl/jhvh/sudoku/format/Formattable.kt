@@ -39,7 +39,7 @@ interface Formattable {
 
         /** [equals] based [List.equals] */
         override fun equals(other: Any?): Boolean {
-            return this.toList().equals(other)
+            return this.toList() == other
         }
 
         /** [hashCode] based [List.hashCode] */

@@ -1,6 +1,12 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import io.mockk.*
+import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.excludeRecords
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
@@ -34,7 +40,7 @@ internal class NonFixedValueTest {
         }
         var newValue = gridSize+1
         with (assertFailsWith<IllegalArgumentException>{ subject.setValue(newValue) }) {
-            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is ${newValue}")
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue")
         }
         newValue = 0
         with (assertFailsWith<IllegalArgumentException>{ subject.setValue(newValue) }) {

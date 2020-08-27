@@ -33,7 +33,7 @@ internal class FixedValueTest {
         }
         var newValue = gridSize+1
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
-            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is ${newValue}")
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue")
         }
         newValue = 0
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {

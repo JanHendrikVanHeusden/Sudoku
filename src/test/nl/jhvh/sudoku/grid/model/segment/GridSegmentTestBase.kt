@@ -32,8 +32,8 @@ abstract class GridSegmentTestBase {
         }
 
         val gridCells = mutableListOf<Cell>()
-        for (x in 0..gridSize-1) {
-            for (y in 0.. gridSize-1) {
+        for (x in 0 until gridSize) {
+            for (y in 0 until gridSize) {
                 gridCells.add(gridMock.findCell(x, y))
             }
         }

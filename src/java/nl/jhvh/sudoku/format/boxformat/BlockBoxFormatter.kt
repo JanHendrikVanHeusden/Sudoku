@@ -29,7 +29,7 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
         // Create 2 lists-of-lists with identical structure, 1 with cells, 1 with formatted cells
         val cellsBySubRow = mutableListOf(mutableListOf<Cell>())
         val formattedCellsBySubRow = mutableListOf<FormattableList>()
-        for (x in 0..block.grid.blockSize-1) {
+        for (x in 0 until block.grid.blockSize) {
             cellsBySubRow.add(mutableListOf())
             cellsBySubRow[x].addAll(block.cells.filter { x == it.rowIndex - block.topRowIndex })
 

@@ -1,6 +1,12 @@
 package nl.jhvh.sudoku.grid.model.segment
 
-import io.mockk.*
+import io.mockk.CapturingSlot
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.slot
+import io.mockk.unmockkObject
+import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToColRef
@@ -39,11 +45,11 @@ internal class ColTest: GridSegmentTestBase() {
     fun getCells() {
         for (colIndex in 0 until gridSize) {
             val subject = Col(gridMock, colIndex)
-            val cellList = subject.cells
-            assertThat(cellList).hasSize(gridSize)
-            cellList.forEachIndexed { index, cell ->
-                assertThat(cellList.toList()[index].colIndex).isEqualTo(colIndex)
-                assertThat(cellList.toList()[index].rowIndex).isEqualTo(index)
+            val cellSet = subject.cells
+            assertThat(cellSet).hasSize(gridSize)
+            cellSet.forEachIndexed { index, cell ->
+                assertThat(cell.colIndex).isEqualTo(colIndex)
+                assertThat(cell.rowIndex).isEqualTo(index)
             }
         }
     }

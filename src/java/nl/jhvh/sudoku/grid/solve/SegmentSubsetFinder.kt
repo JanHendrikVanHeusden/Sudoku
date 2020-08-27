@@ -1,7 +1,6 @@
 package nl.jhvh.sudoku.grid.solve
 
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
-import java.util.HashSet
 
 /**
  * Sudoku structure, base rules

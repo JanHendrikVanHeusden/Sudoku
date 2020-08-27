@@ -28,13 +28,13 @@ data class CellRef(val x: Int, val y: Int) {
     val colRef: String = indexToColRef(x)
     val cellRef: String = rowRef + colRef
 
-    constructor(cellRef: String) : this(getRowRefFromCellRef(cellRef), getColRefFromCellRef(cellRef)) {}
+    constructor(cellRef: String) : this(getRowRefFromCellRef(cellRef), getColRefFromCellRef(cellRef))
     constructor(rowRef: String, colRef: String) : this(colRefToIndex(colRef.trim { it <= ' ' }.toUpperCase()),
-            rowRefToIndex(rowRef.trim { it <= ' ' }.toUpperCase())) {}
+            rowRefToIndex(rowRef.trim { it <= ' ' }.toUpperCase()))
 
     companion object CellRefCalculation {
 
-        private val maxBlockSizeStringLength = MAX_BLOCK_SIZE.toString().length
+        private const val maxBlockSizeStringLength = MAX_BLOCK_SIZE.toString().length
         private const val A: Char = 'A'
         private const val AInt: Int = 'A'.toInt()
         private const val rowGroupInCellPattern: Int = 1
