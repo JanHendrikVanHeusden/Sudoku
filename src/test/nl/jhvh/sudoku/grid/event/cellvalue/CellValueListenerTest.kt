@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test
  */
 internal class CellValueListenerTest {
     /**
-     * Test method for the whole cycle of setting values, firing the appropriate [SetCellValueEvent]
-     * by the [Cell]s (in their role as [SetCellValueSource], and having these observed and handled
-     * the [GridSegment]s (in their role as [SetCellValueListener]s).
+     * Test method for the whole cycle of setting values, firing the appropriate [SetCellValueEvent]s
+     * by the [Cell]s (in their role as [GridEventSource], and having these observed and handled
+     * by the [GridSegment]s (in their role as [GridEventListener]s).
      *
-     * In this method, the setting of values is checked for the build phase, so the [Cell.getValueCandidates()]
+     * In this method, the setting of values is checked after the Grid was built, so the [Cell.getValueCandidates()]
      * are checked after fixing the values up to the [GridBuilder.build].
      */
     @Test
@@ -34,11 +34,11 @@ internal class CellValueListenerTest {
                 .fix(CellRef(5, 6), 4)
                 .fix(CellRef(4, 4), 9)
                 .build()
-        // for (int y = 0; y < grid.getGridSize(); y++) {
-        //     for (int x = 0; x < grid.getGridSize(); x++) {
-        //         System.out.println("("+ x + "," + y + ")\t\t" + grid.findCell(x, y).getValueCandidates()());
-        //     }
-        // }
+         // for (y in 0 until grid.gridSize) {
+         //     for (x in 0 until grid.gridSize) {
+         //         println("("+ x + "," + y + ")\t\t" + grid.findCell(x, y).getValueCandidates());
+         //     }
+         // }
         assertThat(grid.findCell(CellRef(0, 0)).getValueCandidates()).isEmpty()
         assertThat(grid.findCell(CellRef(0, 0)).getValueCandidates()).isEqualTo(setOf<Int>())
         assertThat(grid.findCell(CellRef(1, 0)).getValueCandidates()).isEqualTo(setOf(1, 4, 5, 6, 7, 9))

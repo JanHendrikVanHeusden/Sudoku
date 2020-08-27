@@ -4,9 +4,7 @@ import nl.jhvh.sudoku.base.CELL_MIN_VALUE
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.event.GridEventListener
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
-import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueSource
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import kotlin.properties.Delegates
@@ -15,9 +13,7 @@ import kotlin.reflect.KProperty
 val VALUE_UNKNOWN: Int? = null
 
 /** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
-sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), SetCellValueSource {
-
-    override val eventListeners: MutableSet<GridEventListener<CellValue, SetCellValueEvent>> = mutableSetOf()
+sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
     /**
      * The mutable, numeric or unknown value of this [Cell], observed in case of for non-fixed value.
@@ -56,7 +52,9 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Se
             this.value = value
         }
 
-        override fun setValue(value: Int) = require (value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
+        override fun setValue(value: Int) {
+            require(value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
+        }
     }
 
     /** Simple value holder class to represent the non-fixed value of a [Cell]  */

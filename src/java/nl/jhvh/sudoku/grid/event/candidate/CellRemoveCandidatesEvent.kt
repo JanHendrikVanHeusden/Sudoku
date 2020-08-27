@@ -9,7 +9,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * @property removedCandidates The values being removed from the [Cell.valueCandidates]
  * @constructor
  */
-class CellRemoveCandidatesEvent (override val eventSource: Cell, val removedCandidates: Set<Int>) : GridEvent<Cell> {
+class CellRemoveCandidatesEvent (override val eventSource: Cell, val removedCandidates: Set<Int>) : GridEvent {
 
     override fun toString(): String {
         return "${this.javaClass.simpleName}: (eventSource=$eventSource, removedCandidates=$removedCandidates)"

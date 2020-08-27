@@ -26,6 +26,7 @@ internal class GridSegmentTest : GridSegmentTestBase() {
             // the cells are mocks, initialized in
             override val cells = LinkedHashSet(incrementFromZero(gridSize).map { gridMock.findCell(colIndex = it, rowIndex = it) })
             override fun format(formatter: SudokuFormatter): FormattableList = FormattableList(emptyList())
+            override fun toString() = "GridElement for testing"
         }
         subject.cells.forEach {cellMock ->
             every { cellMock.getValueCandidates() } returns HashSet(IntRange(1, gridSize).toList())
@@ -36,7 +37,6 @@ internal class GridSegmentTest : GridSegmentTestBase() {
     fun onEvent() {
         // given
         val newValue = Random.nextInt(1, gridSize+1)
-        val valueSet = IntRange(1, gridSize).toSet()
         // grab a random cell of the GridSegment's cells
         val eventCell = subject.cells.toList()[Random.nextInt(0, gridSize)]
         // when

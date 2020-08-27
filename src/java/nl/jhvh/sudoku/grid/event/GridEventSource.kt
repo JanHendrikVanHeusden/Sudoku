@@ -1,38 +1,37 @@
 package nl.jhvh.sudoku.grid.event
 
-import nl.jhvh.sudoku.grid.model.GridElement
-
-/**
- * Base interface for sources that may emit [GridEvent]s
- * @param S The source [GridElement] sub type
- * @param E The [GridEvent] sub type being emitted
-*/
-interface GridEventSource<S : GridElement, E : GridEvent<S>> {
+/** Base interface for sources that may emit [GridEvent]s */
+interface GridEventSource {
 
     /**
-     * Subscribe an [GridEventListener] for [GridEvent]s emitted by this [GridEventSource]
-     * @param eventListener The [GridEventListener] interested in [GridEvent]s of this [GridEventSource]
+     * The [Set] of [GridEventListener]s that have subscribed to [GridEvent]s of this [GridEventSource].
+     * Should be synchronized to allow concurrent [unsubscribe].
      */
-    fun subscribe(eventListener: GridEventListener<S, E>) {
+    val eventListeners: MutableSet<GridEventListener>
+
+    /**
+     * Subscribe on [GridEvent]s emitted by this [GridEventSource]
+     * @param eventListener The interested [GridEventListener]
+     */
+    fun subscribe(eventListener: GridEventListener) {
         eventListeners.add(eventListener)
     }
 
     /**
-     * Unsubscribe a [GridEventListener] for [GridEvent]s emitted by this [GridEventSource]
-     * @param eventListener The [GridEventListener] not longer interested in [GridEvent]s of this [GridEventSource]
+     * Unsubscribe of [GridEvent]s emitted by this [GridEventSource]
+     * @param eventListener The [GridEventListener] that is not anymore interested
      */
-    fun unsubscribe(eventListener: GridEventListener<S, E>) {
+    fun unsubscribe(eventListener: GridEventListener) {
         eventListeners.remove(eventListener)
     }
 
     /**
-     * Publish a [GridEvent] that a subscribing [GridEventListener] may react on
+     * Publish a [GridEvent] to subscripted [GridEventListener]s
      * @param gridEvent The [GridEvent] being published
      */
-    fun publish(gridEvent: E) {
-        eventListeners.forEach { l: GridEventListener<S, E> -> l.onEvent(gridEvent) }
+    fun publish(gridEvent: GridEvent) {
+        eventListeners.forEach { l: GridEventListener -> l.onEvent(gridEvent) }
     }
 
-    /** @return The [Set] of [GridEventListener]s that have subscribed to [GridEvent]s of this [GridEventSource] */
-    val eventListeners: MutableSet<GridEventListener<S, E>>
+    override fun toString(): String
 }
