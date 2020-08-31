@@ -21,7 +21,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      *    Kotlin does not allow the `@Volatile` annotation on an observable field however (so maybe implementation
      *    is volatile by nature? I could not really make sure when decompiling the code).
      *  * Not synchronized, typically the value is set from `null` to a non-`null` value ony once,
-     *    and if so, always to the same value (and never de-/incremented)
+     *    and if so, always to the same value (and never updated)
      *    So no need for synchronization, even when 2 threads / coroutines would try this at the same time, the result will be the same.
      *
      *  Even if not volatile or synchronized, it would always be set to the same value (an never de-/incremented etc.),
@@ -29,6 +29,9 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      */
     abstract var value: Int?
     protected set
+
+    val isSet: Boolean
+        get() = value != VALUE_UNKNOWN
 
     /**
      * Cell values are numbers from [CELL_MIN_VALUE] = 1 up to and including [Grid.maxValue]
@@ -45,7 +48,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
     class FixedValue(cell: Cell, value: Int) : CellValue(cell) {
         override val isFixed: Boolean = true
 
-        override var value: Int? = null
+        override var value: Int? = VALUE_UNKNOWN
 
         init {
             validateRange(value)

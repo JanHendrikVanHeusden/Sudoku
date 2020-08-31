@@ -7,5 +7,7 @@ interface GridEvent {
 
     val eventSource: GridElement
 
+    val type: GridEventType
+
     override fun toString(): String
 }

@@ -40,7 +40,7 @@ internal class GridElementTest {
     }
 
     @Test
-    fun `assert that eventListeners is synchronized`() {
+    fun `assert that eventListeners is thread safe`() {
         val gridElement = object: GridElement(gridMock) {
             override fun format(formatter: SudokuFormatter): FormattableList {
                 return mockk()
@@ -48,7 +48,7 @@ internal class GridElementTest {
             override fun toString() = "GridElement for testing"
         }
         assertThat(gridElement.eventListeners.javaClass.name)
-                .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
+                .isEqualTo("java.util.concurrent.ConcurrentHashMap")
     }
 
 }

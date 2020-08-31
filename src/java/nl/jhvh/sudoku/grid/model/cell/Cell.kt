@@ -25,7 +25,7 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
 
     // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
     // synchronizedSet gives better read consistency, but slightly worse write performance,
-    // and worse: it may throw ConcurrentModificationException when iterating over it while updated concurrently
+    // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
     private val valueCandidates: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
 
     init {
@@ -36,20 +36,23 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
     fun getValueCandidates(): Set<Int> = valueCandidates
 
     fun removeValueCandidate(value: Int): Boolean {
-        let { valueCandidates.remove(value) }
-                .also {removed ->
-                    if (removed) {
-                        publish(CellRemoveCandidatesEvent(this, setOf(value)))
-                    }
-                }
-                .also { return it }
-    }
-    fun clearValueCandidates() {
-        val oldValues = HashSet(valueCandidates)
-        if (oldValues.isNotEmpty()) {
-            valueCandidates.clear()
-            publish(CellRemoveCandidatesEvent(this, oldValues))
+        if (valueCandidates.contains(value)) {
+            val oldValues = HashSet(valueCandidates)
+            if (valueCandidates.remove(value)) {
+                publish(CellRemoveCandidatesEvent(this, oldValues, valueCandidates))
+                return true
+            }
         }
+        return false
+    }
+
+    fun clearValueCandidates() {
+        if (valueCandidates.isEmpty()) {
+            return
+        }
+        val oldValues = HashSet(valueCandidates)
+        valueCandidates.clear()
+        publish(CellRemoveCandidatesEvent(this, oldValues, valueCandidates))
     }
 
     /** Technical [toString] method; for a functional representation, see [format]  */

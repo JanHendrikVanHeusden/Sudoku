@@ -25,7 +25,7 @@ internal class CellTest {
     }
 
     @Test
-    fun `assert that valueCandidates is synchronized`() {
+    fun `assert that valueCandidates is thread safe`() {
         assertThat(Cell(mockk(relaxed = true), 2, 5).getValueCandidates().javaClass.name)
                 .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
     }

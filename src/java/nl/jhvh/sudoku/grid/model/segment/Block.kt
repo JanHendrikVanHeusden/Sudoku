@@ -22,6 +22,7 @@ import nl.jhvh.sudoku.grid.model.cell.Cell
  * @param topRowIndex The top (y-axis) coordinate of the [Block] within the [Grid]
  */
 class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegment(grid), Formattable {
+
     /** The right (x-axis) coordinate of the [Block] within the [Grid]  */
     val rightColIndex: Int = leftColIndex + grid.blockSize - 1
     /** The bottom (y-axis) coordinate of the [Block] within the [Grid]  */

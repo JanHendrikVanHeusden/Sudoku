@@ -45,4 +45,5 @@ internal class GridSegmentTest : GridSegmentTestBase() {
         subject.cells.filter { it !== eventCell } .forEach { verify (exactly = 1) { it.removeValueCandidate(newValue) } }
         verify (exactly = 0) { eventCell.removeValueCandidate(newValue) }
     }
+
 }

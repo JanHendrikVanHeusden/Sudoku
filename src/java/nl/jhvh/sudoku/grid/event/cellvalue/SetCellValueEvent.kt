@@ -1,6 +1,8 @@
 package nl.jhvh.sudoku.grid.event.cellvalue
 
 import nl.jhvh.sudoku.grid.event.GridEvent
+import nl.jhvh.sudoku.grid.event.GridEventType
+import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellValue
 
@@ -11,6 +13,8 @@ import nl.jhvh.sudoku.grid.model.cell.CellValue
  * @constructor
  */
 class SetCellValueEvent (override val eventSource: CellValue, val newValue: Int) : GridEvent {
+
+    override val type: GridEventType = SET_CELL_VALUE
 
     override fun toString(): String {
         return "${this.javaClass.simpleName}: (eventSource=$eventSource, newValue=$newValue)"
