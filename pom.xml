@@ -22,7 +22,6 @@
         <!-- Test -->
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
         <junit.platform.version>1.0.3</junit.platform.version>
-        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
         <assertj-core.version>3.16.1</assertj-core.version>
         <mockk.version>1.10.0</mockk.version>
 
@@ -104,13 +103,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>${junit-platform-surefire-provider.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
         </plugins>
