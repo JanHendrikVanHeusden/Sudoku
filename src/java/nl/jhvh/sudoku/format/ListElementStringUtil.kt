@@ -3,7 +3,7 @@ package nl.jhvh.sudoku.format
 import org.apache.commons.lang3.StringUtils
 
 /** @return The length of the longest [toString] of all elements in the collection */
-fun Collection<*>.maxStringLength(): Int = this.map { s -> s.toString().length } .max()!!
+fun Collection<*>.maxStringLength(): Int = this.map { s -> s.toString().length } .maxOrNull()!!
 
 fun List<*>.alignRight(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<String> {
     require(extraLeftPad >= 0, { "extraLeftPad must be non-negative or omitted (current: $extraLeftPad)" })
