@@ -1,4 +1,4 @@
-package nl.jhvh.sudoku.grid.model.segment
+package nl.jhvh.sudoku.grid
 
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -8,7 +8,17 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import org.junit.jupiter.api.BeforeEach
 
-abstract class GridSegmentTestBase {
+/**
+ * Base class for tests that require a [Grid] mock populated with [Cell] mocks.
+ *  * NB: it does NOT provide [Row]s, [Col]s or [Block]s !!
+ *  * The [gridMock] is newly constructed before each test, see [gridSetUp]
+ *  * The [Cell]s can be retrieved by one of these methods:
+ *     * [Grid.cellList].
+ *       This always returns the same cells, so repeatedly calling [cellist]`[3]` always returns the same [Cell] mock.
+ *     * [Grid.findCell]`(x, y)`.
+ *       Every call of [Grid.findCell]`(x, y)` constructs a new [Cell], even with the same input params.
+ */
+abstract class GridTestBase {
 
     protected abstract var gridMock: Grid
     protected abstract val blockSize: Int
@@ -17,9 +27,9 @@ abstract class GridSegmentTestBase {
     @BeforeEach
     fun gridSetUp() {
         gridMock = mockk()
-        every {gridMock.blockSize} returns blockSize
-        every {gridMock.gridSize} returns gridSize
-        every {gridMock.maxValue} returns gridSize
+        every { gridMock.blockSize } returns blockSize
+        every { gridMock.gridSize } returns gridSize
+        every { gridMock.maxValue } returns gridSize
 
         val cellColIndexCapturer: CapturingSlot<Int> = slot()
         val cellRowIndexCapturer: CapturingSlot<Int> = slot()

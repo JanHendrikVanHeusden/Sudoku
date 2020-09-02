@@ -11,6 +11,8 @@ import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.Row
+import nl.jhvh.sudoku.grid.solve.GridSolvable
+import nl.jhvh.sudoku.grid.solve.GridSolver
 
 /**
  * Class to represent a Sudoku grid.
@@ -18,7 +20,8 @@ import nl.jhvh.sudoku.grid.model.segment.Row
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
  */
-class Grid private constructor (val blockSize: Int = 3, private val fixedValues: Map<CellRef, Int>) : Formattable {
+class Grid private constructor (val blockSize: Int = 3, private val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver = GridSolver())
+    : Formattable, GridSolvable by gridSolver {
 
     /** The length of each side = [blockSize] * [blockSize]  */
     val gridSize: Int = blockSize * blockSize

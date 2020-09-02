@@ -1,13 +1,14 @@
 package nl.jhvh.sudoku.grid.model.segment
 
+import nl.jhvh.sudoku.grid.GridTestBase
 import nl.jhvh.sudoku.grid.model.Grid
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-internal class BlockTest: GridSegmentTestBase() {
+internal class BlockTest: GridTestBase() {
 
-    /** grid mock and cell mocks initialized in [GridSegmentTestBase.gridSetUp] */
+    /** grid mock and cell mocks initialized in [GridTestBase.gridSetUp] */
     override lateinit var gridMock: Grid
     override val blockSize = 3
     override val gridSize = 9

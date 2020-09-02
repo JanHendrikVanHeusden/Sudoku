@@ -4,13 +4,10 @@ import nl.jhvh.sudoku.grid.event.GridEvent
 import nl.jhvh.sudoku.grid.event.GridEventListener
 import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
-import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEventHandler
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
-import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEventHandler
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.Cell
-import nl.jhvh.sudoku.grid.solve.GridSolver
 import nl.jhvh.sudoku.util.log
 
 /**
@@ -21,8 +18,7 @@ import nl.jhvh.sudoku.util.log
  *
  * A functional synonym for [GridSegment] is **Group**.
  */
-abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEventListener,
-        SetCellValueEventHandler by GridSolver(), CellRemoveCandidatesEventHandler by GridSolver() {
+abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEventListener {
 
     abstract val cells: LinkedHashSet<Cell>
 
@@ -30,12 +26,14 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEven
         log().trace { "$this received event: $gridEvent" }
         when (gridEvent) {
             is SetCellValueEvent -> {
-                handleEvent(gridEvent, this)
+                grid.handleCellSetValueEvent(gridEvent, this)
             }
             is CellRemoveCandidatesEvent -> {
-                handleEvent(gridEvent, this)
+                grid.handleCellRemoveCandidatesEvent(gridEvent, this)
             }
-            else -> {log().trace { "Unhandled event type: ${gridEvent.javaClass.simpleName}" }}
+            else -> {log().warn { "Unhandled event type: ${gridEvent.javaClass.simpleName}" }}
+            // not expected to be called, so warning:
+            // it would mean we subscribed to an event type that we are not willing to handle
         }
     }
 

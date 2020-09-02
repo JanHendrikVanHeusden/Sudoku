@@ -4,9 +4,9 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
-import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.GridTestBase
 import nl.jhvh.sudoku.grid.event.GridEvent
 import nl.jhvh.sudoku.grid.event.GridEventType.CELL_REMOVE_CANDIDATES
 import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
@@ -14,11 +14,13 @@ import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
+import kotlin.collections.HashSet
 import kotlin.random.Random
 
-internal class GridSegmentTest : GridSegmentTestBase() {
+internal class GridSegmentTest : GridTestBase() {
 
-    /** grid mock and cell mocks initialized in [GridSegmentTestBase.gridSetUp] */
+    /** grid mock and cell mocks initialized in [GridTestBase.gridSetUp] */
     override lateinit var gridMock: Grid
     override val blockSize = 3
     override val gridSize = 9
@@ -28,14 +30,16 @@ internal class GridSegmentTest : GridSegmentTestBase() {
     @BeforeEach
     fun setUp() {
         subject = object : GridSegment(gridMock) {
-            // the cells are mocks, initialized in
-            override val cells = LinkedHashSet(incrementFromZero(gridSize).map { gridMock.findCell(colIndex = it, rowIndex = it) })
+            // Just grab some of the (mocked) cells to populate our mocked GridSegment
+            override val cells = LinkedHashSet(gridMock.cellList.filter { it.colIndex == it.rowIndex })
             override fun format(formatter: SudokuFormatter): FormattableList = FormattableList(emptyList())
             override fun toString() = "GridElement for testing"
         }
         subject.cells.forEach {cellMock ->
             every { cellMock.getValueCandidates() } returns HashSet(IntRange(1, gridSize).toList())
         }
+        every { gridMock.handleCellRemoveCandidatesEvent(any(), any()) } returns Unit
+        every { gridMock.handleCellSetValueEvent(any(), any()) } returns Unit
     }
 
     @Test
@@ -49,22 +53,21 @@ internal class GridSegmentTest : GridSegmentTestBase() {
         // when
         spiedSubject.onEvent(setCellValueEvent)
         // then
-        verify (exactly = 1) {spiedSubject.handleEvent(setCellValueEvent, spiedSubject)}
+        verify (exactly = 1) {gridMock.handleCellSetValueEvent(setCellValueEvent, spiedSubject)}
     }
 
     @Test
     fun `onEvent - CellRemoveCandidatesEvent`() {
         // given
         val spiedSubject = spyk(subject)
+        every { spiedSubject.grid } returns subject.grid
         // grab a random cell of the GridSegment's cells
         val eventCellMock = spiedSubject.cells.toList()[Random.nextInt(0, gridSize)]
-        val oldCandidateValues = setOf(1, 4, 6)
-        val newCandidateValues = setOf(1, 6)
-        val cellRemoveCandidatesEvent = CellRemoveCandidatesEvent(eventCellMock, oldCandidateValues, newCandidateValues)
+        val cellRemoveCandidatesEvent = CellRemoveCandidatesEvent(eventCellMock, setOf(1, 4, 6), setOf(1, 6))
         // when
         spiedSubject.onEvent(cellRemoveCandidatesEvent)
         // then
-        verify (exactly = 1) {spiedSubject.handleEvent(cellRemoveCandidatesEvent, spiedSubject)}
+        verify (exactly = 1) {gridMock.handleCellRemoveCandidatesEvent(cellRemoveCandidatesEvent, spiedSubject)}
     }
 
     @Test

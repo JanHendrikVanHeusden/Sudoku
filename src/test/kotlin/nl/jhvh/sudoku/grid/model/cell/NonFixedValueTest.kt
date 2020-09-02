@@ -54,13 +54,16 @@ internal class NonFixedValueTest {
 
     @Test
     fun `setValue should publish an event on change of value`() {
-        // Verification of subject.publish(...) does not work anymore since eventType was added to GridEventSource methods.
-        // Unclear why this happens ??? Note that the event IS published.
-        // Anyhow verifying behaviour on async / observable stuff seems not very reliable with mockk...
+        // Verification of subject.publish(...) does not work anymore since eventType was added
+        // to GridEventSource methods.
+        // Unclear why this happens ??? Note that the event IS published, and before the change
+        // it actually could be verified (albeit with some vague workarounds).
+        // Anyhow verifying behaviour on async / observable stuff seems not very reliable with mockk
+        // (also based on experience with other projects)...
         //
-        // So we can not actually verify the publish call. So instead we test the onEvent result,
-        // which is called by the publish method...
-        // This way it is an integration test rather than a unit test :-(
+        // So we can not actually verify the publish call. Instead we test the onEvent result; onEvent is called by
+        // the publish method...
+        // So now it is an integration test rather than a unit test :-(
         // ... but at least we can reliably verify the behaviour this way :-)
 
         // given
@@ -113,7 +116,6 @@ internal class NonFixedValueTest {
                 .untilAtomic(eventCounter, equalTo(1))
         assertThat(eventCapturer.isCaptured).isFalse()
         assertThat(eventCounter.get()).isEqualTo(1) // not incremented
-
 
         // given - different value now
         newValue = 6
