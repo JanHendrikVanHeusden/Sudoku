@@ -1,10 +1,15 @@
 package nl.jhvh.sudoku.grid.model.segment
 
+import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.event.GridEvent
+import nl.jhvh.sudoku.grid.event.GridEventType.CELL_REMOVE_CANDIDATES
+import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import org.junit.jupiter.api.BeforeEach
@@ -34,16 +39,47 @@ internal class GridSegmentTest : GridSegmentTestBase() {
     }
 
     @Test
-    fun onEvent() {
+    fun `onEvent - SetCellValueEvent`() {
         // given
+        val spiedSubject = spyk(subject)
         val newValue = Random.nextInt(1, gridSize+1)
         // grab a random cell of the GridSegment's cells
-        val eventCell = subject.cells.toList()[Random.nextInt(0, gridSize)]
+        val eventCellMock = spiedSubject.cells.toList()[Random.nextInt(0, gridSize)]
+        val setCellValueEvent = SetCellValueEvent(eventCellMock.cellValue, newValue)
         // when
-        subject.onEvent(SetCellValueEvent(eventCell.cellValue, newValue))
-        // then: for all cells assert that valueCandidates contains all values except the event's newValue
-        subject.cells.filter { it !== eventCell } .forEach { verify (exactly = 1) { it.removeValueCandidate(newValue) } }
-        verify (exactly = 0) { eventCell.removeValueCandidate(newValue) }
+        spiedSubject.onEvent(setCellValueEvent)
+        // then
+        verify (exactly = 1) {spiedSubject.handleEvent(setCellValueEvent, spiedSubject)}
+    }
+
+    @Test
+    fun `onEvent - CellRemoveCandidatesEvent`() {
+        // given
+        val spiedSubject = spyk(subject)
+        // grab a random cell of the GridSegment's cells
+        val eventCellMock = spiedSubject.cells.toList()[Random.nextInt(0, gridSize)]
+        val oldCandidateValues = setOf(1, 4, 6)
+        val newCandidateValues = setOf(1, 6)
+        val cellRemoveCandidatesEvent = CellRemoveCandidatesEvent(eventCellMock, oldCandidateValues, newCandidateValues)
+        // when
+        spiedSubject.onEvent(cellRemoveCandidatesEvent)
+        // then
+        verify (exactly = 1) {spiedSubject.handleEvent(cellRemoveCandidatesEvent, spiedSubject)}
+    }
+
+    @Test
+    fun `onEvent should ignore event types it is not interested in`() {
+        val spiedSubject = spyk(subject)
+        val someGridEventSubType: GridEvent = spyk(object : GridEvent {
+            override val eventSource = spiedSubject
+            override val type = CELL_REMOVE_CANDIDATES
+            override fun toString() = "Some anonymous subtype"
+        })
+        spiedSubject.onEvent(someGridEventSubType)
+        verify { spiedSubject.onEvent(someGridEventSubType) }
+        // verify that no further calls were made
+        confirmVerified(spiedSubject)
+        confirmVerified(someGridEventSubType)
     }
 
 }

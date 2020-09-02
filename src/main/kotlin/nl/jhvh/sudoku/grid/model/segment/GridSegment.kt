@@ -35,7 +35,7 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEven
             is CellRemoveCandidatesEvent -> {
                 handleEvent(gridEvent, this)
             }
-            else -> throw NotImplementedError("Unimplemented type of gridEvent: $gridEvent (class: ${gridEvent.javaClass.simpleName})")
+            else -> {log().trace { "Unhandled event type: ${gridEvent.javaClass.simpleName}" }}
         }
     }
 

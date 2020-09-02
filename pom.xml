@@ -17,7 +17,6 @@
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <log4j.version>2.13.3</log4j.version>
         <kotlin-logging.version>1.8.3</kotlin-logging.version>
-        <awaitility.version>4.0.3</awaitility.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -28,6 +27,7 @@
         <junit.platform.version>1.0.3</junit.platform.version>
         <assertj-core.version>3.16.1</assertj-core.version>
         <mockk.version>1.10.0</mockk.version>
+        <awaitility.version>4.0.3</awaitility.version>
 
     </properties>
 
@@ -200,7 +200,6 @@
             <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
