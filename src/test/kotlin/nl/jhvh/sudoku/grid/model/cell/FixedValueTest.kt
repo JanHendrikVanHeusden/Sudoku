@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
+import nl.jhvh.sudoku.util.log
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -79,7 +80,7 @@ internal class FixedValueTest {
         try {
             subject.setValue(newValue + 1)
         } catch (e: Exception) {
-            println("${e.javaClass.simpleName} thrown (as expected when trying to set a ${FixedValue::class.simpleName} to another value)")
+            log().info { "${e.javaClass.simpleName} thrown (as expected when trying to set a ${FixedValue::class.simpleName} to another value)" }
         }
         // then - verify that unsuccessful setting does not fire an event
         verify (exactly = 0) {cellMock.publish(any())}

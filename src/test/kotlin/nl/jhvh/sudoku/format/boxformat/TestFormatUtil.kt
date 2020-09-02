@@ -3,7 +3,9 @@ package nl.jhvh.sudoku.format.boxformat
 import nl.jhvh.sudoku.format.lineSeparator
 import kotlin.math.max
 
-fun String.tidy(): String = this.trimIndent().replace(Regex("""([\r\n])+"""), lineSeparator)
+private val lineEndPattern: Regex = Regex("""[\r\n]+""")
+
+fun String.tidy(): String = this.trimIndent().replace(lineEndPattern, lineSeparator)
 
 fun cellContentLength(maxValue: Int): Int = max(maxValue.toString().length, 3)
 /**
