@@ -63,7 +63,7 @@ internal class FixedValueTest {
     }
 
     @Test
-    fun `setValue should not publish an event when trying to set a value`() {
+    fun `setValue should publish an event when setting to a different value`() {
         // given
         val newValue = 5
         subject = FixedValue(cellMock, newValue)

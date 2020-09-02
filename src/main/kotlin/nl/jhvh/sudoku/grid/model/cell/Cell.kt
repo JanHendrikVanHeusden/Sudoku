@@ -21,8 +21,6 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
 
     val isFixed: Boolean = fixedValue != null
 
-    val cellValue: CellValue = if (isFixed) FixedValue(this, fixedValue!!) else NonFixedValue(this)
-
     // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
     // synchronizedSet gives better read consistency, but slightly worse write performance,
     // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
@@ -54,6 +52,8 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
         valueCandidates.clear()
         publish(CellRemoveCandidatesEvent(this, oldValues, valueCandidates))
     }
+
+    val cellValue: CellValue = if (isFixed) FixedValue(this, fixedValue!!) else NonFixedValue(this)
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: colIndex=$colIndex, rowIndex=$rowIndex, cellValue=[$cellValue], valueCandidates=${getValueCandidates()}"

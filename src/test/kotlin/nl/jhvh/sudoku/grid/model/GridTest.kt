@@ -2,16 +2,19 @@ package nl.jhvh.sudoku.grid.model
 
 import io.mockk.every
 import io.mockk.mockk
+import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import kotlin.random.Random
 
 /** Unit tests for [Grid] */
 internal class GridTest {
 
-    private val grid4 = Grid.GridBuilder(2).build()
-    private val grid9 = Grid.GridBuilder(3).build()
-    private val grid16 = Grid.GridBuilder(4).build()
+    private val grid4 = GridBuilder(2).build()
+    private val grid9 = GridBuilder(3).build()
+    private val grid16 = GridBuilder(4).build()
 
     @Test
     fun gridSize() {
@@ -139,6 +142,29 @@ internal class GridTest {
     }
 
     @Test
+    fun `findCell - coordinates outside of Grid should throw Exception`() {
+        val blockSize = 4
+        val gridSize = blockSize * blockSize
+
+        val grid = GridBuilder(blockSize).build()
+
+        // edge values OK
+        grid.findCell(0, 0)
+        grid.findCell(gridSize-1, 0)
+        grid.findCell(0, gridSize-1)
+        grid.findCell(gridSize-1, gridSize-1)
+
+        // Outside Grid - exception
+        assertThrows<IllegalArgumentException> { grid.findCell(-1, -1) }
+        assertThrows<IllegalArgumentException> { grid.findCell(-1, 0) }
+        assertThrows<IllegalArgumentException> { grid.findCell(0, -1) }
+        assertThrows<IllegalArgumentException> { grid.findCell(gridSize, 0) }
+        assertThrows<IllegalArgumentException> { grid.findCell(gridSize, gridSize) }
+        assertThrows<IllegalArgumentException> { grid.findCell(Random.nextInt(gridSize, Int.MAX_VALUE), 0) }
+        assertThrows<IllegalArgumentException> { grid.findCell(0, Random.nextInt(gridSize, Int.MAX_VALUE)) }
+    }
+
+    @Test
     fun `findCell - by colIndex, rowIndex`() {
         for (grid in listOf(grid4, grid9, grid16)) {
             val cells = HashSet(grid.cellList)
@@ -175,4 +201,42 @@ internal class GridTest {
         assertThat(grid9.blockSize).isEqualTo(3)
         assertThat(grid16.blockSize).isEqualTo(4)
     }
+
+    @Test
+    fun fixedValues() {
+        // given
+        val gridBuilder = GridBuilder(5)
+        val expected: MutableMap<CellRef, Int> = mutableMapOf()
+
+        let {CellRef("A8")}
+                .also { gridBuilder.fix(it, 17) }
+                .also { expected[it] = 17 }
+
+        let {CellRef("B24")}
+                .also { gridBuilder.fix(it, 25) }
+                .also { expected[it] = 25 }
+
+        let {CellRef("X9")}
+                .also { gridBuilder.fix(it, 2) }
+                .also { expected[it] = 2 }
+
+        let {CellRef("Y25")}
+                .also { gridBuilder.fix(it, 3) }
+                .also { expected[it] = 3 }
+
+        // when
+        val grid = gridBuilder.build()
+        // then
+        assertThat(grid.fixedValues).isEqualTo(expected)
+        // loop through cells and assert correctly fixed / non fixed values
+        for (x in 0 until grid.gridSize) {
+            for (y in 0 until grid.gridSize) {
+                val cellRef = CellRef(x, y)
+                let {grid.findCell(cellRef)}
+                        .also { assertThat(it.isFixed).isEqualTo(expected.containsKey(cellRef)) }
+                        .also { assertThat(it.fixedValue).isEqualTo(expected[cellRef]) }
+            }
+        }
+    }
+
 }

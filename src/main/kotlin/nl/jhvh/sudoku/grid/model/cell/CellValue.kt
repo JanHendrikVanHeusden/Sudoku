@@ -7,6 +7,7 @@ import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
+import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
 import nl.jhvh.sudoku.util.log
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
@@ -75,9 +76,19 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
                     }
                 }
 
+        fun validateCandidate(value: Int) {
+            if (!cell.getValueCandidates().contains(value)) {
+                throw GridNotSolvableException("Grid is not solvable: trying to set cell to value '$value'" +
+                        " but this value is not present anymore in value candidates of ${cell}")
+            }
+        }
+
         override fun setValue(value: Int) {
-            validateRange(value)
-            this.value = value
+            if (value != this.value) {
+                validateRange(value)
+                validateCandidate(value)
+                this.value = value
+            }
         }
     }
 

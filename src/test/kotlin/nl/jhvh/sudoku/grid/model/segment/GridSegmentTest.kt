@@ -76,10 +76,11 @@ internal class GridSegmentTest : GridTestBase() {
         val someGridEventSubType: GridEvent = spyk(object : GridEvent {
             override val eventSource = spiedSubject
             override val type = CELL_REMOVE_CANDIDATES
-            override fun toString() = "Some anonymous subtype"
+            override fun toString() = "Some unknown event type for test"
         })
         spiedSubject.onEvent(someGridEventSubType)
         verify { spiedSubject.onEvent(someGridEventSubType) }
+        verify { someGridEventSubType.toString() } // in the Exception message
         // verify that no further calls were made
         confirmVerified(spiedSubject)
         confirmVerified(someGridEventSubType)

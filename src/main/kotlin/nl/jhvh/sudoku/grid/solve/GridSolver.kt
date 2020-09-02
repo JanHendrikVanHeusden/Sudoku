@@ -23,7 +23,24 @@ class GridSolver: GridSolvable {
 
     override fun handleCellRemoveCandidatesEvent(gridEvent: CellRemoveCandidatesEvent, segment: GridSegment) {
         log().trace { "$gridEvent handled by $segment" }
-//        TODO("Not implemented yet")
+        val eventSource = gridEvent.eventSource
+        when (eventSource.getValueCandidates().size) {
+            0 -> {
+                if (!eventSource.cellValue.isSet) {
+                    throw GridNotSolvableException("Grid is not solvable: no candidate values anymore in $eventSource ")
+                }
+            }
+            1 -> {
+                // allow null because the valueCandidates might be cleared by a concurrent thread / coroutine
+                val cellValue = eventSource.getValueCandidates().firstOrNull()
+                if (cellValue != null) {
+                    eventSource.cellValue.setValue(cellValue)
+                }
+            }
+            else -> {
+                // TODO("Not implemented yet")
+            }
+        }
     }
 
 }

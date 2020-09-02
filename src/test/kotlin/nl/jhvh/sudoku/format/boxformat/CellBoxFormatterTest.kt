@@ -4,6 +4,7 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
+import nl.jhvh.sudoku.grid.model.cell.CellValue
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -41,6 +42,20 @@ class CellBoxFormatterTest {
 
         grid9.findCell(5, 3).cellValue.setValue(4)
         grid9.findCell(7, 3).cellValue.setValue(2)
+    }
+
+    private fun randomCellValueSetter(cellValue: CellValue): Int? {
+        try {
+            if (!cellValue.isFixed && !cellValue.cell.getValueCandidates().isEmpty()) {
+                val index = Random.nextInt(0, cellValue.cell.getValueCandidates().size)
+                let { cellValue.cell.getValueCandidates().toList()[index] }
+                        .also { cellValue.setValue(it) }
+            }
+        } catch (e: Exception) {
+            // ignore; value candidates might be empty causing IndexOutOfBoundsException
+            // due to asynchronous event handling
+        }
+        return cellValue.value
     }
 
     @Test
@@ -401,12 +416,13 @@ class CellBoxFormatterTest {
                         val cellValue = this.findCell(x, y).cellValue
                         if (!cellValue.isFixed) {
                             numSet++
-                            cellValue.setValue(Random.nextInt(1, 4))
+                            randomCellValueSetter(cellValue)
                         }
                     }
                 }
             }
         }
+        // println(grid4)
 
         grid4.cellList.filter { it.cellValue.hasValue() }.forEach {
             assertThat(subject.nakedFormat(it).toString())
@@ -423,34 +439,39 @@ class CellBoxFormatterTest {
 
     @Test
     fun `nakedFormat - grid 100*100`() {
-        val gridBuilder100 = GridBuilder(10)
+        val blockSize = 10
+        val gridSize = blockSize * blockSize
+        val gridBuilder100 = GridBuilder(blockSize)
+
+        val cellsToFix = 500 // of 10000
+        val cellsToSet = 200 // of 10000
+
         with (gridBuilder100) {
             // fix some values
-            for (x in 0..9) {
-                for (y in 0..9) {
-                    if ((x + 3*y) % 7 == 0) {
-                        this.fix(CellRef(x, y), Random.nextInt(1,101))
-                    }
-                }
+            for (count in 1..cellsToFix) {
+                val i = Random.nextInt(0, gridSize*gridSize) // last cell is never fixed!
+                val x = i % gridSize
+                val y = i / gridSize
+                this.fix(CellRef(x, y), Random.nextInt(1, gridSize+1))
             }
         }
         // create a Grid with at least 1 fixed value 100, so 3 digits + fixed value indicator, to make sure that that is tested
-        val grid100 = gridBuilder100.fix("A1", 100).build()
+        val grid100 = gridBuilder100.fix("A1", gridSize).build()
+
+        // To make sure that a non-fixed number with 3 digits is tested (others are random, most will have 1 or 2 digits)
+        grid100.cellList.last().cellValue.setValue(gridSize)
+
         with (grid100) {
             // set some other values
-            for (x in 0..9) {
-                for (y in 0..9) {
-                    if ((x + 4*y) % 5 == 0) {
-                        val cellValue = this.findCell(x, y).cellValue
-                        if (!cellValue.isFixed) {
-                            cellValue.setValue(Random.nextInt(1, 101))
-                        }
-                    }
-                }
+            for (count in 1..cellsToSet) {
+                val i = Random.nextInt(0, gridSize * gridSize) // last cell is never set!
+                val x = i % gridSize
+                val y = i / gridSize
+                val cellValue = this.findCell(x, y).cellValue
+                randomCellValueSetter(cellValue)
             }
         }
-        // To make sure that a non-fixed number with 3 digits is tested (others are random, most will have 1 or 2 digits)
-        grid100.cellList.last().cellValue.setValue(100)
+        // println(grid100.format(defaultGridToStringFormatter))
 
         grid100.cellList.filter { it.cellValue.hasValue() }.forEach {
             assertThat(subject.nakedFormat(it).toString())

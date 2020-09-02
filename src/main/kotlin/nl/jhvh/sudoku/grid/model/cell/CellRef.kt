@@ -7,28 +7,41 @@ import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.equals
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.hashCode
 
 /**
- * A [CellRef] can be constructed (and represented) by a combination of:
- *  * digits (usually a single digit) for the row number of a [Cell],
- *  * letters (usually a single letter) for the column indicator of a [Cell].
- *
- * E.g. `C2` would indicate a [Cell] on the intercept of the 3rd row ([Row]) with the 2nd column ([Col])
- *
- * This class is intended to keep and calculate alphanumeric references only. and has
- * no reference to any [Cell] or [Grid].
+ * [CellRef] is intended to keep and calculate between alphanumeric references and numeric references only.
+ * It has no reference to any [Cell] or [Grid].
  *  * So 2 [CellRef] objects are considered equal when they have the same coordinates, regardless
  *    of any context (`Cell`, `Grid`, etc.) they are used in.
  *
- * @param x The internal, technical representation of the [Row]'s sequence number; zero based.
+ * @constructor Construct a [CellRef] by its internal technical coordinates
+ * @param x The internal, technical representation of the [Col]'s sequence number; zero based.
  *          So the 2nd column (indicated by "`2`") would correspond with [x]-value **`1`**.
- * @param y The internal, technical representation of the [Col]'s sequence number; zero based.
+ * @param y The internal, technical representation of the [Row]'s sequence number; zero based.
  *          So the 5th row (indicated by "`E`") would correspond with [y]-value **`4`**.
  */
 data class CellRef(val x: Int, val y: Int) {
-    val rowRef: String = indexToRowRef(y)
     val colRef: String = indexToColRef(x)
+    val rowRef: String = indexToRowRef(y)
     val cellRef: String = rowRef + colRef
 
+    /**
+     * Construct a [CellRef] by a combination of:
+     *  * digits (usually a single digit) for the row number of a [Cell],
+     *  * letters (usually a single letter) for the column indicator of a [Cell].
+     *
+     * E.g. `C2` would indicate a [Cell] on the intercept of the 3rd row ([Row]) with the 2nd column ([Col])
+     * @param cellRef The combination of letter(s) and digit(s) to indicate the cell position
+     */
     constructor(cellRef: String) : this(getRowRefFromCellRef(cellRef), getColRefFromCellRef(cellRef))
+
+    /**
+     * Construct a [CellRef] by a combination of:
+     *  * digits (usually a single digit) for the row number of a [Cell],
+     *  * letters (usually a single letter) for the column indicator of a [Cell].
+     *
+     * E.g. (`C`, `2`) would indicate a [Cell] on the intercept of the 3rd row ([Row]) with the 2nd column ([Col])
+     * @param rowRef the letter(s) to indicate the cell's row
+     * @param colRef the digit(s) to indicate the cell's column
+     */
     constructor(rowRef: String, colRef: String) : this(colRefToIndex(colRef.trim { it <= ' ' }.toUpperCase()),
             rowRefToIndex(rowRef.trim { it <= ' ' }.toUpperCase()))
 

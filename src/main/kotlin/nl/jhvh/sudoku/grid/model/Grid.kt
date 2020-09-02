@@ -5,6 +5,7 @@ import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
@@ -13,6 +14,8 @@ import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolvable
 import nl.jhvh.sudoku.grid.solve.GridSolver
+import nl.jhvh.sudoku.util.log
+import java.util.Collections.unmodifiableMap
 
 /**
  * Class to represent a Sudoku grid.
@@ -20,7 +23,7 @@ import nl.jhvh.sudoku.grid.solve.GridSolver
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
  */
-class Grid private constructor (val blockSize: Int = 3, private val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver = GridSolver())
+class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver = GridSolver())
     : Formattable, GridSolvable by gridSolver {
 
     /** The length of each side = [blockSize] * [blockSize]  */
@@ -47,15 +50,19 @@ class Grid private constructor (val blockSize: Int = 3, private val fixedValues:
         this.cellList.filter { it.isFixed }.map { it.cellValue }.forEach { it.publish(SetCellValueEvent(it, it.value!!)) }
     }
 
+    @Throws(IllegalArgumentException::class)
     fun findCell(cellRef: String): Cell {
         return with(CellRef(cellRef)) { findCell(x, y) }
     }
 
+    @Throws(IllegalArgumentException::class)
     fun findCell(cellRef: CellRef): Cell {
         return findCell(cellRef.x, cellRef.y)
     }
 
+    @Throws(IllegalArgumentException::class)
     fun findCell(colIndex: Int, rowIndex: Int): Cell {
+        validateCellCoordinates(colIndex, rowIndex, gridSize)
         return cellList[colIndex + rowIndex * gridSize]
     }
 
@@ -63,7 +70,9 @@ class Grid private constructor (val blockSize: Int = 3, private val fixedValues:
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String {
-        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize)"
+        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize)" +
+                // if not too big, we also add the formatted grid
+                if (gridSize <= 16) ", grid = \n" + format(defaultGridToStringFormatter) else ""
     }
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
@@ -76,13 +85,14 @@ class Grid private constructor (val blockSize: Int = 3, private val fixedValues:
      */
     class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE) {
 
-        private val fixedValues: MutableMap<CellRef, Int> = mutableMapOf()
+        private val fixedValueMap: MutableMap<CellRef, Int> = mutableMapOf()
 
         /**
          * Flag to indicate whether the [Grid] was completed;
          *  * If so, no structural changes possible anymore (e.g. not possible to fix [Cell]s anymore)
          */
-        private var isBuilt: Boolean = false
+        var isBuilt: Boolean = false
+            private set
 
         /**
          * @return The [Grid] as specified by its blockSize and by it's fixed values
@@ -92,8 +102,7 @@ class Grid private constructor (val blockSize: Int = 3, private val fixedValues:
         fun build(): Grid {
             check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
                     "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
-            val grid = Grid(blockSize, fixedValues)
-            // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
+            val grid = Grid(blockSize, unmodifiableMap(fixedValueMap))
             isBuilt = true
             return grid
         }
@@ -117,9 +126,23 @@ class Grid private constructor (val blockSize: Int = 3, private val fixedValues:
          * @throws IllegalStateException when the [Grid] was built already
          */
         fun fix(cellRef: CellRef, value: Int): GridBuilder {
-            fixedValues[cellRef] = value
+            validateCellCoordinates(colIndex = cellRef.x, rowIndex = cellRef.y, gridSize = blockSize*blockSize)
+
+            val oldValue = fixedValueMap[cellRef]
+            if (oldValue != null && value != oldValue) {
+                log().warn { "About to override fixed value for $cellRef: old value = $oldValue, new value =$value" }
+            }
+            fixedValueMap[cellRef] = value
             return this
         }
     }
 
+}
+
+private fun validateCellCoordinates(colIndex: Int, rowIndex: Int, gridSize: Int) {
+    if (colIndex < 0 ||colIndex >= gridSize || rowIndex < 0 || rowIndex >= gridSize) {
+        throw IllegalArgumentException("The indicated ${Cell::class.simpleName} coordinates are outside" +
+                " the ${Grid::class.simpleName} (gridSize = ${gridSize}: cellRef = ${CellRef(x = colIndex, y = rowIndex)}," +
+                " colIndex=$colIndex, rowIndex=$rowIndex")
+    }
 }

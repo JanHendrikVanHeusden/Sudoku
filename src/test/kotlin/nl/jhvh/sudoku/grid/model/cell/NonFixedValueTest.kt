@@ -4,6 +4,7 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import nl.jhvh.sudoku.base.intRangeSet
 import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
@@ -25,6 +26,9 @@ internal class NonFixedValueTest {
     private lateinit var cellMock: Cell
     private val blockSize = 3
     private val gridSize = blockSize * blockSize
+    private val maxValue = gridSize
+
+    private val valueCandidates = intRangeSet(1, maxValue)
 
     @BeforeEach
     fun setUp() {
@@ -32,6 +36,8 @@ internal class NonFixedValueTest {
         every {cellMock.grid.blockSize} returns blockSize
         every {cellMock.grid.gridSize} returns gridSize
         every {cellMock.grid.maxValue} returns gridSize
+        every { cellMock.getValueCandidates() } returns valueCandidates
+        every { cellMock.clearValueCandidates() } returns Unit
 
         subject = NonFixedValue(cellMock)
     }
@@ -76,10 +82,9 @@ internal class NonFixedValueTest {
             eventCapturer = slot()
             every { gridSegmentMock.onEvent(capture(eventCapturer)) } answers {
                 eventCounter.incrementAndGet()
-                log().warn {"mocked '$this' received event, eventCounter = $eventCounter"}
+                log().warn {"IGNORE THIS! Just for testing: mocked '$this' received event, eventCounter = $eventCounter"}
                 Unit
             }
-
         }
 
         initMock()

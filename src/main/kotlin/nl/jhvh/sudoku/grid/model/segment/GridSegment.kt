@@ -31,7 +31,7 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEven
             is CellRemoveCandidatesEvent -> {
                 grid.handleCellRemoveCandidatesEvent(gridEvent, this)
             }
-            else -> {log().warn { "Unhandled event type: ${gridEvent.javaClass.simpleName}" }}
+            else -> {log().warn { "Unhandled event type: ${gridEvent.javaClass.simpleName}; event=$gridEvent" }}
             // not expected to be called, so warning:
             // it would mean we subscribed to an event type that we are not willing to handle
         }
