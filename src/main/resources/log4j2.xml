@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS z} [thread:%t] %highlight{%level}{FATAL=bg_red, ERROR=red, WARN=violet, INFO=black, DEBUG=blue} %logger{-2} - %msg%n"/>
+        </Console>
+        <Console name="Root" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss.SSS z} [thread:%t] %highlight{%level}{FATAL=bg_red, ERROR=red, WARN=violet, INFO=black, DEBUG=blue} %logger - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="nl.jhvh.sudoku" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="warn" additivity="false">
+            <AppenderRef ref="Root"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -11,6 +11,7 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.solve.GridSolver
+import nl.jhvh.sudoku.util.log
 
 /**
  * A [GridSegment] is an abstraction (super class) of the collections of [Cell]s that each, when solved,
@@ -26,6 +27,7 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEven
     abstract val cells: LinkedHashSet<Cell>
 
     override fun onEvent(gridEvent: GridEvent) {
+        log().trace { "$this received event: $gridEvent" }
         when (gridEvent) {
             is SetCellValueEvent -> {
                 handleEvent(gridEvent, this)

@@ -1,5 +1,6 @@
 package nl.jhvh.sudoku.grid.event
 
+import nl.jhvh.sudoku.util.log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
@@ -20,6 +21,7 @@ interface GridEventSource {
     fun subscribe(eventListener: GridEventListener, eventType: GridEventType) {
         eventListeners.putIfAbsent(eventType, ConcurrentHashSet())
         eventListeners[eventType]?.add(eventListener)
+        log().trace { "$eventListener subscribed for eventType $eventType" }
     }
 
     /**
@@ -29,6 +31,7 @@ interface GridEventSource {
      */
     fun unsubscribe(eventListener: GridEventListener, eventType: GridEventType) {
         eventListeners[eventType]?.remove(eventListener)
+        log().trace { "$eventListener unsubscribed for eventType $eventType" }
     }
 
     /**
@@ -37,6 +40,7 @@ interface GridEventSource {
      */
     fun publish(gridEvent: GridEvent) {
         eventListeners[gridEvent.type]?.forEach { l: GridEventListener -> l.onEvent(gridEvent) }
+        log().trace { "Publishing event: $gridEvent" }
     }
 
     override fun toString(): String

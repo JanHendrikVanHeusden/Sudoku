@@ -391,7 +391,6 @@ class CellBoxFormatterTest {
                 }
             }
         }
-        println("numFixed: $numFixed")
         val grid4 = gridBuilder4.build()
         var numSet = 0
         with (grid4) {
@@ -408,7 +407,6 @@ class CellBoxFormatterTest {
                 }
             }
         }
-        println("numSet: $numSet")
 
         grid4.cellList.filter { it.cellValue.hasValue() }.forEach {
             assertThat(subject.nakedFormat(it).toString())

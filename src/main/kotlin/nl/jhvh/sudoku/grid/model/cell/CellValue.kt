@@ -7,6 +7,7 @@ import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
+import nl.jhvh.sudoku.util.log
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
@@ -67,8 +68,11 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
         @Suppress("UNUSED_ANONYMOUS_PARAMETER")
         override var value: Int?
                 by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
-                    // NB: setting to same value as before does not publish an event :-)
-                    publish(SetCellValueEvent(this, newValue!!))
+                    if (newValue != oldValue) {
+                        let { SetCellValueEvent(this, newValue!!) }
+                                .also { log().trace { "'$this' - about to publish event: $it" } }
+                                .also { publish(it) }
+                    }
                 }
 
         override fun setValue(value: Int) {

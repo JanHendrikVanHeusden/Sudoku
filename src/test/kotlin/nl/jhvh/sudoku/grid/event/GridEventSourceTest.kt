@@ -124,7 +124,7 @@ class GridEventSourceTest {
     fun `subscription List should be thread safe`() {
         val gridSegmentMock: GridSegment = mockk()
         subject.subscribe(gridSegmentMock, SET_CELL_VALUE)
-        assertThat(subject.eventListeners[GridEventType.SET_CELL_VALUE]!!.javaClass.name)
+        assertThat(subject.eventListeners[SET_CELL_VALUE]!!.javaClass.name)
                 .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
     }
 
