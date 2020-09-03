@@ -9,6 +9,7 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
 import nl.jhvh.sudoku.util.log
+import nl.jhvh.sudoku.util.requireAndLog
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
@@ -42,8 +43,8 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      */
     @Throws(IllegalArgumentException::class)
     protected fun validateRange(value: Int) {
-        require(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher but is $value" }
-        require(value <= this.cell.grid.maxValue) { "A cell value must be at most ${this.cell.grid.maxValue} but is $value" }
+        requireAndLog(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher but is $value" }
+        requireAndLog(value <= this.cell.grid.maxValue) { "A cell value must be at most ${this.cell.grid.maxValue} but is $value (gridSize = ${grid.gridSize})" }
     }
 
     /** Value holder class to represent the fixed immutable numeric value of a [Cell]  */
@@ -58,7 +59,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
         }
 
         override fun setValue(value: Int) {
-            require(value == this.value) { "Not allowed to change a fixed value! (value = $value)" }
+            requireAndLog(value == this.value) { "Not allowed to change a fixed value! (fixed value = ${this.value}, new value = $value, cellRef = ${CellRef(cell.colIndex, cell.rowIndex)})" }
         }
     }
 

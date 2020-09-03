@@ -1,7 +1,6 @@
 package nl.jhvh.sudoku.grid.model.cell
 
 import nl.jhvh.sudoku.base.CELL_MIN_VALUE
-import nl.jhvh.sudoku.base.intRangeSet
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
@@ -10,6 +9,7 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
+import nl.jhvh.sudoku.util.intRangeSet
 import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
 /**

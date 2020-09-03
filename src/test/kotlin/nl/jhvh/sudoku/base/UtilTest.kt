@@ -1,5 +1,6 @@
 package nl.jhvh.sudoku.base
 
+import nl.jhvh.sudoku.util.incrementFromZero
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
@@ -11,7 +12,7 @@ class UtilTest {
         assertThat(incrementFromZero(3)).isEqualTo(listOf(0, 1, 2))
         assertThat(incrementFromZero(0)).isEmpty()
         assertThat(incrementFromZero(1)).isEqualTo(listOf(0))
-        assertFailsWith<IllegalArgumentException> { incrementFromZero(-10)}
+        assertFailsWith<IllegalArgumentException> { incrementFromZero(-10) }
         assertThat(incrementFromZero(500))
                 .startsWith(0)
                 .endsWith(499)

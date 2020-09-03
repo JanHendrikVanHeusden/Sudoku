@@ -1,12 +1,12 @@
 package nl.jhvh.sudoku.grid.model.segment
 
-import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.indexToRowRef
+import nl.jhvh.sudoku.util.incrementFromZero
 
 /**
  * A [Row]represents a collection of [Cell]s within a Sudoku that are at the same vertical axis (see [rowIndex]).

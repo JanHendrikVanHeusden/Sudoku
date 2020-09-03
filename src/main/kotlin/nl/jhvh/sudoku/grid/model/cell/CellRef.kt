@@ -5,6 +5,8 @@ package nl.jhvh.sudoku.grid.model.cell
 import nl.jhvh.sudoku.base.MAX_BLOCK_SIZE
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.equals
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation.hashCode
+import nl.jhvh.sudoku.util.requireAndLog
+import org.slf4j.event.Level
 
 /**
  * [CellRef] is intended to keep and calculate between alphanumeric references and numeric references only.
@@ -68,8 +70,8 @@ data class CellRef(val x: Int, val y: Int) {
             val groupValues = cellRefRegex.find(tidiedCellRef)?.groupValues
             // if matching then groupValues != null. groupValues[0] then contains the whole matching String,
             // groupValues[1], [2], ... etc. contain the matches of the groups in the pattern
-            require(groupValues != null && groupValues[0] == tidiedCellRef) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
-            return groupValues
+            requireAndLog(groupValues != null && groupValues[0] == tidiedCellRef, Level.WARN) {"""Invalid format, can not parse cell reference [$cellRef]. Format must be "A1", "J12", "AC23" etc."""}
+            return groupValues!!
         }
 
         fun getRowRefFromCellRef(cellRef: String): String {
@@ -82,8 +84,8 @@ data class CellRef(val x: Int, val y: Int) {
 
         fun rowRefToIndex(rowRef: String): Int {
             val rowRefUpper = rowRef.trimSpacesAndControlChars().toUpperCase()
-            require(rowRefUpper.isNotBlank()) {"""Row reference must not be blank. Format must be "A", "J", "AC" etc."""}
-            require(rowRefRegex.matches(rowRefUpper)) {"""Invalid format, can not parse row reference [$rowRef]. Format must be "A", "J", "AC" etc."""}
+            requireAndLog(rowRefUpper.isNotBlank()) {"""Row reference must not be blank. Format must be "A", "J", "AC" etc."""}
+            requireAndLog(rowRefRegex.matches(rowRefUpper)) {"""Invalid format, can not parse row reference [$rowRef]. Format must be "A", "J", "AC" etc."""}
             var value = 0
             for (x in 0 until rowRefUpper.length) {
                 // +1 because the references have no zero A = 1, Z = 26, AA = 27 (no A0!) -> no zeros!
@@ -91,7 +93,7 @@ data class CellRef(val x: Int, val y: Int) {
                 value = value * 26 + charWeight
                 // If we reach this value, we better break, we can not handle Sudoku's that that large
                 // (would cause Int overflow)
-                require(value <= MAX_BLOCK_SIZE) {
+                requireAndLog(value <= MAX_BLOCK_SIZE) {
                     "Too high value [$rowRef] for row reference! Block size asked for is [${MAX_BLOCK_SIZE+1}] or higher but must be between 1 and $MAX_BLOCK_SIZE"
                 }
             }
@@ -99,8 +101,8 @@ data class CellRef(val x: Int, val y: Int) {
         }
 
         fun indexToRowRef(rowIndex: Int): String {
-            require(rowIndex >= 0) {"Negative row index [$rowIndex] is not allowed"}
-            require(rowIndex < MAX_BLOCK_SIZE) {"Too high value [$rowIndex] for row index! Block size asked for is higher than $MAX_BLOCK_SIZE"}
+            requireAndLog(rowIndex >= 0) {"Negative row index [$rowIndex] is not allowed"}
+            requireAndLog(rowIndex < MAX_BLOCK_SIZE) {"Too high value [$rowIndex] for row index! Block size asked for is higher than $MAX_BLOCK_SIZE"}
             val sb = StringBuilder()
             var num = rowIndex
             while (num >= 0) {
@@ -115,17 +117,17 @@ data class CellRef(val x: Int, val y: Int) {
         fun colRefToIndex(colRef: String): Int {
             // trim all spaces and control characters, and make uppercase
             val colRefUpper = colRef.trimSpacesAndControlChars().toUpperCase()
-            require(colRefUpper.isNotBlank()) {"""Column reference must not be blank. Format must be "A", "J", "AC" etc."""}
-            require(colRefRegex.matches(colRefUpper)) {"""Invalid format, can not parse column reference [$colRef]. Format must be "1", "8", "11" etc."""}
-            require(colRefUpper.length <= maxBlockSizeStringLength && colRefUpper.toInt() <= MAX_BLOCK_SIZE) {
+            requireAndLog(colRefUpper.isNotBlank()) {"""Column reference must not be blank. Format must be "A", "J", "AC" etc."""}
+            requireAndLog(colRefRegex.matches(colRefUpper)) {"""Invalid format, can not parse column reference [$colRef]. Format must be "1", "8", "11" etc."""}
+            requireAndLog(colRefUpper.length <= maxBlockSizeStringLength && colRefUpper.toInt() <= MAX_BLOCK_SIZE) {
                 "Too high value [$colRef] for column reference! Block size asked for is [${MAX_BLOCK_SIZE+1}] or higher but must be between 1 and $MAX_BLOCK_SIZE"
             }
             return colRefUpper.toInt() - 1 // -1 to make it zero-based
         }
 
         fun indexToColRef(colIndex: Int): String {
-            require(colIndex >= 0) {"Negative column index [$colIndex] is not allowed"}
-            require(colIndex < MAX_BLOCK_SIZE) {
+            requireAndLog(colIndex >= 0) {"Negative column index [$colIndex] is not allowed"}
+            requireAndLog(colIndex < MAX_BLOCK_SIZE) {
                 "Too high value [$colIndex] for column index! Block size asked for is higher than $MAX_BLOCK_SIZE"
             }
             return (colIndex + 1).toString() // +1 to make it one-based

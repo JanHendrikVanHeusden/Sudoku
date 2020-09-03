@@ -186,6 +186,7 @@ internal class GridTest {
         assertThat(grid4.maxValueLength).isEqualTo(1)  // "4".length()
         assertThat(grid9.maxValueLength).isEqualTo(1)  // "9".length()
         assertThat(grid16.maxValueLength).isEqualTo(2) // "16".length()
+        assertThat(GridBuilder(10).build().maxValueLength).isEqualTo(3) // "100".length()
     }
 
     @Test

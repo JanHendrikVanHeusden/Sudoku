@@ -1,7 +1,6 @@
 package nl.jhvh.sudoku.grid.model
 
 import nl.jhvh.sudoku.base.DEFAULT_BLOCK_SIZE
-import nl.jhvh.sudoku.base.incrementFromZero
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
@@ -14,6 +13,7 @@ import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolvable
 import nl.jhvh.sudoku.grid.solve.GridSolver
+import nl.jhvh.sudoku.util.incrementFromZero
 import nl.jhvh.sudoku.util.log
 import java.util.Collections.unmodifiableMap
 
@@ -51,6 +51,11 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
     }
 
     @Throws(IllegalArgumentException::class)
+    private fun validateBlockSize() {
+        // TODO
+    }
+
+    @Throws(IllegalArgumentException::class)
     fun findCell(cellRef: String): Cell {
         return with(CellRef(cellRef)) { findCell(x, y) }
     }
@@ -62,7 +67,12 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
 
     @Throws(IllegalArgumentException::class)
     fun findCell(colIndex: Int, rowIndex: Int): Cell {
-        validateCellCoordinates(colIndex, rowIndex, gridSize)
+        try {
+            validateCellCoordinates(colIndex, rowIndex, gridSize)
+        } catch (e: IllegalArgumentException) {
+            log().warn {e.message}
+            throw e
+        }
         return cellList[colIndex + rowIndex * gridSize]
     }
 
@@ -112,7 +122,7 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
          * @param cellRef The [CellRef.cellRef] of the [Cell] whose value is to be fixed
          * @param value The value to fix the [Cell] to
          * @return "this", to allow fluent builder syntax
-         * @throws IllegalStateException when the [Grid] was built already
+         * @throws IllegalArgumentException when the [cellRef] coordinates are outside the intended [Grid]
          */
         fun fix(cellRef: String, value: Int): GridBuilder {
             return fix(CellRef(cellRef), value)
@@ -123,10 +133,15 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
          * @param cellRef The [CellRef] of the [Cell] whose value is to be fixed
          * @param value The value to fix the [Cell] to
          * @return "this", to allow fluent builder syntax
-         * @throws IllegalStateException when the [Grid] was built already
+         * @throws IllegalArgumentException when the [cellRef] coordinates are outside the intended [Grid]
          */
         fun fix(cellRef: CellRef, value: Int): GridBuilder {
-            validateCellCoordinates(colIndex = cellRef.x, rowIndex = cellRef.y, gridSize = blockSize*blockSize)
+            try {
+                validateCellCoordinates(colIndex = cellRef.x, rowIndex = cellRef.y, gridSize = blockSize * blockSize)
+            } catch (e: IllegalArgumentException) {
+                log().warn {e.message}
+                throw e
+            }
 
             val oldValue = fixedValueMap[cellRef]
             if (oldValue != null && value != oldValue) {
@@ -139,10 +154,10 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
 
 }
 
+@Throws(IllegalArgumentException::class)
 private fun validateCellCoordinates(colIndex: Int, rowIndex: Int, gridSize: Int) {
-    if (colIndex < 0 ||colIndex >= gridSize || rowIndex < 0 || rowIndex >= gridSize) {
-        throw IllegalArgumentException("The indicated ${Cell::class.simpleName} coordinates are outside" +
-                " the ${Grid::class.simpleName} (gridSize = ${gridSize}: cellRef = ${CellRef(x = colIndex, y = rowIndex)}," +
-                " colIndex=$colIndex, rowIndex=$rowIndex")
+    require(colIndex in 0 until gridSize && rowIndex in 0 until gridSize) {
+        "The indicated ${Cell::class.simpleName} coordinates are outside the ${Grid::class.simpleName}" +
+                " (gridSize = ${gridSize}: cellRef = ${CellRef(x = colIndex, y = rowIndex)}, colIndex=$colIndex, rowIndex=$rowIndex)"
     }
 }

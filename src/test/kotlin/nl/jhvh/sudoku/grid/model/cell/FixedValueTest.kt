@@ -34,7 +34,7 @@ internal class FixedValueTest {
         }
         var newValue = gridSize+1
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
-            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue")
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue (gridSize = $gridSize)")
         }
         newValue = 0
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
@@ -50,15 +50,15 @@ internal class FixedValueTest {
         subject.setValue(newValue) // unchanged, succeeds
         var anotherValue = newValue +1
         with (assertFailsWith<IllegalArgumentException> { subject.setValue(newValue+1) }) {
-            assertThat(message).isEqualTo("Not allowed to change a fixed value! (value = $anotherValue)")
+            assertThat(message).startsWith("Not allowed to change a fixed value! (fixed value = $newValue, new value = $anotherValue, cellRef = ")
         }
         anotherValue = -10
         with (assertFailsWith<IllegalArgumentException> { subject.setValue(-10) }) {
-            assertThat(message).isEqualTo("Not allowed to change a fixed value! (value = $anotherValue)")
+            assertThat(message).startsWith("Not allowed to change a fixed value! (fixed value = $newValue, new value = $anotherValue, cellRef = ")
         }
         anotherValue = 500
         with (assertFailsWith<IllegalArgumentException> { subject.setValue(500) }) {
-            assertThat(message).isEqualTo("Not allowed to change a fixed value! (value = $anotherValue)")
+            assertThat(message).startsWith("Not allowed to change a fixed value! (fixed value = $newValue, new value = $anotherValue, cellRef = ")
         }
     }
 

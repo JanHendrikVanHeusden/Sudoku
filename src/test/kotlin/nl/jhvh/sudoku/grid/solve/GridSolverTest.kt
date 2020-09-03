@@ -10,10 +10,12 @@ internal class GridSolverTest {
     }
 
     @Test
-    fun handleEvent() {
+    fun handleCellSetValueEvent() {
+        // TODO
     }
 
     @Test
-    fun testHandleEvent() {
+    fun handleCellRemoveCandidatesEvent() {
+        // TODO
     }
 }

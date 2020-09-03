@@ -11,8 +11,13 @@ import kotlin.random.Random
 internal class GridBuilderTest {
 
     @Test
+    fun constructor() {
+        // TODO
+    }
+
+    @Test
     fun isBuilt() {
-        val blockSize = 2
+        val blockSize = 3
         val subject: GridBuilder = GridBuilder(blockSize)
         // TODO
     }

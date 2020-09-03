@@ -31,10 +31,9 @@ fun List<*>.alignCenter(extraLeftPad: Int = 0, extraRightPad: Int = 0): List<Str
     return this.map { padAction(it.toString()) }
 }
 
+@Throws(IllegalArgumentException::class)
 private fun Collection<*>.validateEqualSize(other: Collection<*>) {
-    if (other.size != this.size) {
-        throw IllegalArgumentException("Both collections must have equal sizes! Sizes: left=${this.size}, right=${other.size}")
-    }
+    require(other.size == this.size) { "Both collections must have equal sizes! Sizes: left=${this.size}, right=${other.size}" }
 }
 
 /**

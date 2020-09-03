@@ -4,12 +4,12 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import nl.jhvh.sudoku.base.intRangeSet
 import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
+import nl.jhvh.sudoku.util.intRangeSet
 import nl.jhvh.sudoku.util.log
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
@@ -52,7 +52,7 @@ internal class NonFixedValueTest {
         }
         var newValue = gridSize+1
         with(assertFailsWith<IllegalArgumentException> { subject.setValue(newValue) }) {
-            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue")
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue (gridSize = $gridSize)")
         }
         newValue = 0
         with(assertFailsWith<IllegalArgumentException> { subject.setValue(newValue) }) {

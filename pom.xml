@@ -14,6 +14,11 @@
         <java.version>13</java.version>
         <kotlin.version>1.4.0</kotlin.version>
         <commons-lang3.version>3.10</commons-lang3.version>
+
+        <!-- Take care when upgrading slf4j to version 1.8 or higher!
+             Compatibility with log4j 2 may be broken, see https://logging.apache.org/log4j/2.x/log4j-slf4j-impl/ !!
+             So another implementation for log4j-slf4j-impl will probably be required (log4j-slf4j18-impl)
+        -->
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <log4j.version>2.13.3</log4j.version>
         <kotlin-logging.version>1.8.3</kotlin-logging.version>
@@ -157,6 +162,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <!-- Take care when upgrading slf4j to version 1.8 or higher!
+                 Compatibility with log4j 2 may be broken, see https://logging.apache.org/log4j/2.x/log4j-slf4j-impl/ !!
+                 So another implementation for log4j-slf4j-impl will probably be required (log4j-slf4j18-impl)
+            -->
             <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
