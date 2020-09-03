@@ -76,7 +76,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
                     }
                 }
 
-        fun validateCandidate(value: Int) {
+        private fun validateCandidate(value: Int) {
             if (!cell.getValueCandidates().contains(value)) {
                 throw GridNotSolvableException("Grid is not solvable: trying to set cell to value '$value'" +
                         " but this value is not present anymore in value candidates of ${cell}")

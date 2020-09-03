@@ -9,6 +9,7 @@ import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
+import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
 import nl.jhvh.sudoku.util.log
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.streams.toList
 import kotlin.test.assertFailsWith
 
 
@@ -56,6 +58,25 @@ internal class NonFixedValueTest {
         with(assertFailsWith<IllegalArgumentException> { subject.setValue(newValue) }) {
             assertThat(message).isEqualTo("A cell value must be 1 or higher but is $newValue")
         }
+    }
+
+    @Test
+    fun `setValue should fail with 'not solvable' when trying to set a value while no such value candidate is present`() {
+        // given
+        val valueRange = intRangeSet(1, maxValue)
+        val removedCandidate = 4
+        val valuesWithoutRemovedCandidate = valueRange.stream().filter { it != removedCandidate }.toList().toSet()
+        every { cellMock.getValueCandidates() } returns valuesWithoutRemovedCandidate
+
+        // assert that values within candidate set can be assigned
+        for (value in valuesWithoutRemovedCandidate) {
+            // when
+            subject.setValue(value)
+            // then
+            assertThat(subject.value).isEqualTo(value)
+        }
+        // when, then: assert that it throws the exception when assigning value that is not in candidate set
+        assertFailsWith<GridNotSolvableException> { subject.setValue(removedCandidate)}
     }
 
     @Test
