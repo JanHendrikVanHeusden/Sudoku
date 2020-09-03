@@ -449,7 +449,7 @@ class CellBoxFormatterTest {
         with (gridBuilder100) {
             // fix some values
             for (count in 1..cellsToFix) {
-                val i = Random.nextInt(0, gridSize*gridSize) // last cell is never fixed!
+                val i = Random.nextInt(0, gridSize*gridSize-1) // last cell is never fixed!
                 val x = i % gridSize
                 val y = i / gridSize
                 this.fix(CellRef(x, y), Random.nextInt(1, gridSize))
