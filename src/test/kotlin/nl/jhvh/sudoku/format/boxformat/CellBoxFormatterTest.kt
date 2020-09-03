@@ -452,7 +452,7 @@ class CellBoxFormatterTest {
                 val i = Random.nextInt(0, gridSize*gridSize) // last cell is never fixed!
                 val x = i % gridSize
                 val y = i / gridSize
-                this.fix(CellRef(x, y), Random.nextInt(1, gridSize+1))
+                this.fix(CellRef(x, y), Random.nextInt(1, gridSize))
             }
         }
         // create a Grid with at least 1 fixed value 100, so 3 digits + fixed value indicator, to make sure that that is tested
