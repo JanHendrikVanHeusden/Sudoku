@@ -6,10 +6,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
+import nl.jhvh.sudoku.grid.model.cell.CellValue
 import org.junit.jupiter.api.BeforeEach
 
 /**
- * Base class for tests that require a [Grid] mock populated with [Cell] mocks.
+ * Base class for tests that require a [Grid] mock populated with [Cell] and [CellValue] mocks.
  *  * NB: it does NOT provide [Row]s, [Col]s or [Block]s !!
  *  * The [gridMock] is newly constructed before each test, see [gridSetUp]
  *  * The [Cell]s can be retrieved by one of these methods:
@@ -18,11 +19,10 @@ import org.junit.jupiter.api.BeforeEach
  *     * [Grid.findCell]`(x, y)`.
  *       Every call of [Grid.findCell]`(x, y)` constructs a new [Cell], even with the same input params.
  */
-abstract class GridTestBase {
+abstract class GridWithCellsTestBase(protected val blockSize: Int) {
 
-    protected abstract var gridMock: Grid
-    protected abstract val blockSize: Int
-    protected abstract val gridSize: Int
+    protected lateinit var gridMock: Grid
+    protected val gridSize = blockSize * blockSize
 
     @BeforeEach
     fun gridSetUp() {
@@ -38,6 +38,9 @@ abstract class GridTestBase {
             every { cellMock.grid } returns gridMock
             every { cellMock.colIndex } returns cellColIndexCapturer.captured
             every { cellMock.rowIndex } returns cellRowIndexCapturer.captured
+            val nonFixedValueMock: CellValue.NonFixedValue = mockk(relaxed = true)
+            every { cellMock.cellValue } returns nonFixedValueMock
+            every {nonFixedValueMock.cell} returns cellMock
             cellMock
         }
 

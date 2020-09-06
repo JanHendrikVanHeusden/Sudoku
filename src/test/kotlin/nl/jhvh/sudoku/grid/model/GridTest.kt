@@ -2,12 +2,14 @@ package nl.jhvh.sudoku.grid.model
 
 import io.mockk.every
 import io.mockk.mockk
+import nl.jhvh.sudoku.base.MAX_BLOCK_SIZE
 import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
+import kotlin.test.assertFailsWith
 
 /** Unit tests for [Grid] */
 internal class GridTest {
@@ -187,6 +189,18 @@ internal class GridTest {
         assertThat(grid9.maxValueLength).isEqualTo(1)  // "9".length()
         assertThat(grid16.maxValueLength).isEqualTo(2) // "16".length()
         assertThat(GridBuilder(10).build().maxValueLength).isEqualTo(3) // "100".length()
+    }
+
+    @Test
+    fun validateBlockSize() {
+        // Blocksize 1 is not very useful, but should not fail
+        GridBuilder(1).build()
+        // should fail
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(0).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(-1).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(Int.MIN_VALUE).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(MAX_BLOCK_SIZE+1).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(Int.MAX_VALUE).build() }
     }
 
     @Test

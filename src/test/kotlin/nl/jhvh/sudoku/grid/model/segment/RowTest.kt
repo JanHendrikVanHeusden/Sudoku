@@ -7,19 +7,14 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import nl.jhvh.sudoku.grid.GridTestBase
-import nl.jhvh.sudoku.grid.model.Grid
+import nl.jhvh.sudoku.grid.GridWithCellsTestBase
 import nl.jhvh.sudoku.grid.model.cell.CellRef.CellRefCalculation
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-internal class RowTest: GridTestBase() {
-
-    /** grid mock and cell mocks initialized in [GridTestBase.gridSetUp] */
-    override lateinit var gridMock: Grid
-    override val blockSize = 3
-    override val gridSize = 9
+/** grid mock and cell mocks initialized in [GridWithCellsTestBase.gridSetUp] */
+internal class RowTest: GridWithCellsTestBase(blockSize = 3) {
 
     @Test
     fun getRowRef() {

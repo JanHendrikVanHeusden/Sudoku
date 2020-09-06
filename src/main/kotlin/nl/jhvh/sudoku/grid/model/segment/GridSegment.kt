@@ -26,7 +26,7 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEven
         log().trace { "$this received event: $gridEvent" }
         when (gridEvent) {
             is SetCellValueEvent -> {
-                grid.handleCellSetValueEvent(gridEvent, this)
+                grid.handleSetCellValueEvent(gridEvent, this)
             }
             is CellRemoveCandidatesEvent -> {
                 grid.handleCellRemoveCandidatesEvent(gridEvent, this)

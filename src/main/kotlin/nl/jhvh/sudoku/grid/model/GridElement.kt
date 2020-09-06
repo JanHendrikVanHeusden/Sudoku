@@ -14,4 +14,6 @@ abstract class GridElement(val grid: Grid): Formattable, GridEventSource {
 
     final override val eventListeners: ConcurrentHashMap<GridEventType, MutableSet<GridEventListener>> = ConcurrentHashMap()
 
+    abstract override fun toString(): String
+
 }

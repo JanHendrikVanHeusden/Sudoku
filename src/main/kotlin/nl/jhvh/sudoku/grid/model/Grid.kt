@@ -1,6 +1,7 @@
 package nl.jhvh.sudoku.grid.model
 
 import nl.jhvh.sudoku.base.DEFAULT_BLOCK_SIZE
+import nl.jhvh.sudoku.base.MAX_BLOCK_SIZE
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
@@ -15,6 +16,7 @@ import nl.jhvh.sudoku.grid.solve.GridSolvable
 import nl.jhvh.sudoku.grid.solve.GridSolver
 import nl.jhvh.sudoku.util.incrementFromZero
 import nl.jhvh.sudoku.util.log
+import nl.jhvh.sudoku.util.requireAndLog
 import java.util.Collections.unmodifiableMap
 
 /**
@@ -25,6 +27,10 @@ import java.util.Collections.unmodifiableMap
  */
 class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver = GridSolver())
     : Formattable, GridSolvable by gridSolver {
+
+    init {
+        validateBlockSize()
+    }
 
     /** The length of each side = [blockSize] * [blockSize]  */
     val gridSize: Int = blockSize * blockSize
@@ -52,7 +58,8 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
 
     @Throws(IllegalArgumentException::class)
     private fun validateBlockSize() {
-        // TODO
+        requireAndLog(blockSize > 0) { "Given blocksize is $blockSize but must be positive ( > 0 )" }
+        requireAndLog(blockSize <= MAX_BLOCK_SIZE) { "Given blocksize is $blockSize but must be at most $MAX_BLOCK_SIZE" }
     }
 
     @Throws(IllegalArgumentException::class)

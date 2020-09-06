@@ -6,24 +6,19 @@ import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.GridTestBase
+import nl.jhvh.sudoku.grid.GridWithCellsTestBase
 import nl.jhvh.sudoku.grid.event.GridEvent
 import nl.jhvh.sudoku.grid.event.GridEventType.CELL_REMOVE_CANDIDATES
 import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
-import nl.jhvh.sudoku.grid.model.Grid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.random.Random
 
-internal class GridSegmentTest : GridTestBase() {
-
-    /** grid mock and cell mocks initialized in [GridTestBase.gridSetUp] */
-    override lateinit var gridMock: Grid
-    override val blockSize = 3
-    override val gridSize = 9
+/** grid mock and cell mocks initialized in [GridWithCellsTestBase.gridSetUp] */
+internal class GridSegmentTest : GridWithCellsTestBase(blockSize = 3) {
 
     private lateinit var subject: GridSegment
 
@@ -33,13 +28,13 @@ internal class GridSegmentTest : GridTestBase() {
             // Just grab some of the (mocked) cells to populate our mocked GridSegment
             override val cells = LinkedHashSet(gridMock.cellList.filter { it.colIndex == it.rowIndex })
             override fun format(formatter: SudokuFormatter): FormattableList = FormattableList(emptyList())
-            override fun toString() = "GridElement for testing"
+            override fun toString() = "GridSegment for testing"
         }
         subject.cells.forEach {cellMock ->
             every { cellMock.getValueCandidates() } returns HashSet(IntRange(1, gridSize).toList())
         }
         every { gridMock.handleCellRemoveCandidatesEvent(any(), any()) } returns Unit
-        every { gridMock.handleCellSetValueEvent(any(), any()) } returns Unit
+        every { gridMock.handleSetCellValueEvent(any(), any()) } returns Unit
     }
 
     @Test
@@ -53,7 +48,7 @@ internal class GridSegmentTest : GridTestBase() {
         // when
         spiedSubject.onEvent(setCellValueEvent)
         // then
-        verify (exactly = 1) {gridMock.handleCellSetValueEvent(setCellValueEvent, spiedSubject)}
+        verify (exactly = 1) {gridMock.handleSetCellValueEvent(setCellValueEvent, spiedSubject)}
     }
 
     @Test
