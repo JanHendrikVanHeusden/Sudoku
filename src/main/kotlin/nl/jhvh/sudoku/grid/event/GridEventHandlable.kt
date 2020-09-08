@@ -1,10 +1,10 @@
-package nl.jhvh.sudoku.grid.solve
+package nl.jhvh.sudoku.grid.event
 
 import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 
-interface GridSolvable {
+interface GridEventHandlable {
 
     fun handleSetCellValueEvent(gridEvent: SetCellValueEvent, segment: GridSegment)
 

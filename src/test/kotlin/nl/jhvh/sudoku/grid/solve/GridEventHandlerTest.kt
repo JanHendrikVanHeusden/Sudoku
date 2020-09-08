@@ -5,6 +5,7 @@ import io.mockk.verify
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.GridWithCellsTestBase
+import nl.jhvh.sudoku.grid.event.GridEventHandler
 import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
@@ -13,21 +14,13 @@ import org.junit.jupiter.api.Test
 import java.util.LinkedHashSet
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
-import kotlin.collections.Set
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.forEach
-import kotlin.collections.map
-import kotlin.collections.minus
-import kotlin.collections.random
-import kotlin.collections.toList
 import kotlin.random.Random
 import kotlin.test.assertFailsWith
 
 /** grid mock and cell mocks initialized in [GridWithCellsTestBase.gridSetUp] */
-internal class GridSolverTest: GridWithCellsTestBase(blockSize = 3) {
+internal class GridEventHandlerTest: GridWithCellsTestBase(blockSize = 3) {
 
-    private var subject = GridSolver()
+    private var subject = GridEventHandler()
     private lateinit var segment: GridSegment
     private val initialCandidateProvider: () -> Set<Int> = { HashSet(IntRange(1, gridSize).toList())}
 

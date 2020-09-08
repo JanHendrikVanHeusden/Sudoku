@@ -22,3 +22,5 @@ const val DEFAULT_BLOCK_SIZE: Int = 3
 /** Fixed minimum value to be entered in a cell  */
 const val CELL_MIN_VALUE: Int = 1
 
+val gridSize: (blockSize: Int) -> Int = { blockSize -> blockSize * blockSize }
+val maxValue: (blockSize: Int) -> Int = { blockSize -> blockSize * blockSize }

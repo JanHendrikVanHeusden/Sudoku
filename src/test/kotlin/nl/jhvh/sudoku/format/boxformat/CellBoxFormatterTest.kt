@@ -424,12 +424,12 @@ class CellBoxFormatterTest {
         }
         // println(grid4)
 
-        grid4.cellList.filter { it.cellValue.hasValue() }.forEach {
+        grid4.cellList.filter { it.cellValue.isSet }.forEach {
             assertThat(subject.nakedFormat(it).toString())
                     .`as`("Test fails for Cell x=${it.colIndex} y=${it.rowIndex}")
                     .isEqualTo(StringUtils.center("${if (it.cellValue.isFixed) "►" else " "}${it.cellValue.value!!}", 3))
         }
-        val cellListNoValue = grid4.cellList.filter { !it.cellValue.hasValue() }
+        val cellListNoValue = grid4.cellList.filter { !it.cellValue.isSet }
         cellListNoValue.forEach {
             assertThat(subject.nakedFormat(it).toString())
                     .`as`("Test fails for Cell x=${it.colIndex} y=${it.rowIndex}")
@@ -441,30 +441,35 @@ class CellBoxFormatterTest {
     fun `nakedFormat - grid 100*100`() {
         val blockSize = 10
         val gridSize = blockSize * blockSize
+        val maxValue = blockSize * blockSize
         val gridBuilder100 = GridBuilder(blockSize)
 
         val cellsToFix = 500 // of 10000
         val cellsToSet = 200 // of 10000
 
         with (gridBuilder100) {
+            val fixedCellRefs = mutableSetOf<CellRef>()
             // fix some values
-            for (count in 1..cellsToFix) {
-                val i = Random.nextInt(0, gridSize*gridSize-1) // last cell is never fixed!
+            while (fixedCellRefs.size < cellsToFix) {
+                val i = Random.nextInt(1, (gridSize*gridSize)-1) // first and last cell are excluded
                 val x = i % gridSize
                 val y = i / gridSize
-                this.fix(CellRef(x, y), Random.nextInt(1, gridSize))
+                val cellRef = CellRef(x, y)
+                if (fixedCellRefs.add(cellRef)) {
+                    this.fix(cellRef, Random.nextInt(1, maxValue))
+                }
             }
         }
-        // create a Grid with at least 1 fixed value 100, so 3 digits + fixed value indicator, to make sure that that is tested
-        val grid100 = gridBuilder100.fix("A1", gridSize).build()
-
-        // To make sure that a non-fixed number with 3 digits is tested (others are random, most will have 1 or 2 digits)
-        grid100.cellList.last().cellValue.setValue(gridSize)
+        // create a Grid with first cell having fixed value 100, so 3 digits + fixed value indicator, to make sure the maxValue is included
+        val grid100 = gridBuilder100.fix("A1", maxValue)
+                .build()
+        // Set last cell (non-fixed) to maxValue to have that tested too (others are random, most will have 1 or 2 digits)
+        grid100.cellList.last().cellValue.setValue(maxValue)
 
         with (grid100) {
             // set some other values
             for (count in 1..cellsToSet) {
-                val i = Random.nextInt(0, gridSize * gridSize) // last cell is never set!
+                val i = Random.nextInt(0, gridSize * gridSize)
                 val x = i % gridSize
                 val y = i / gridSize
                 val cellValue = this.findCell(x, y).cellValue
@@ -473,12 +478,12 @@ class CellBoxFormatterTest {
         }
         // println(grid100.format(defaultGridToStringFormatter))
 
-        grid100.cellList.filter { it.cellValue.hasValue() }.forEach {
+        grid100.cellList.filter { it.cellValue.isSet }.forEach {
             assertThat(subject.nakedFormat(it).toString())
                     .`as`("Test fails for Cell x=${it.colIndex} y=${it.rowIndex}")
                     .isEqualTo(StringUtils.center("${if (it.cellValue.isFixed) "►" else " "}${it.cellValue.value!!}", 4))
         }
-        val cellListNoValue = grid100.cellList.filter { !it.cellValue.hasValue() }
+        val cellListNoValue = grid100.cellList.filter { !it.cellValue.isSet }
         cellListNoValue.forEachIndexed { index, cell ->
             // Not necessary to test all almost 10000 cells
             if (index % 91 == 0) {

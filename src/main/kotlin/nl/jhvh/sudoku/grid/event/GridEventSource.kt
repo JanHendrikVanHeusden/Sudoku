@@ -20,8 +20,13 @@ interface GridEventSource {
      */
     fun subscribe(eventListener: GridEventListener, eventType: GridEventType) {
         eventListeners.putIfAbsent(eventType, ConcurrentHashSet())
-        eventListeners[eventType]?.add(eventListener)
-        log().trace { "$eventListener subscribed for eventType $eventType" }
+        val isAdded = eventListeners[eventType]!!.add(eventListener)
+        if (isAdded) {
+            log().trace { "$eventListener subscribed for eventType $eventType" }
+        } else {
+            // Not harmful, but should be avoided to repeatedly subscribe for the same vent
+            log().debug { "Duplicate subscription of $eventListener is duplicate: subscribed already for eventType $eventType" }
+        }
     }
 
     /**
@@ -30,8 +35,14 @@ interface GridEventSource {
      * @param eventType The [GridEventType] to unsubscribe from
      */
     fun unsubscribe(eventListener: GridEventListener, eventType: GridEventType) {
-        eventListeners[eventType]?.remove(eventListener)
-        log().trace { "$eventListener unsubscribed for eventType $eventType" }
+        val typedListeners = eventListeners[eventType]
+        if (typedListeners.isNullOrEmpty()) {
+            return
+        }
+        val isRemoved = typedListeners.remove(eventListener)
+        if (isRemoved) {
+            log().trace { "$eventListener unsubscribed for eventType $eventType" }
+        }
     }
 
     /**
@@ -40,7 +51,7 @@ interface GridEventSource {
      */
     fun publish(gridEvent: GridEvent) {
         eventListeners[gridEvent.type]?.forEach { l: GridEventListener -> l.onEvent(gridEvent) }
-        log().trace { "Publishing event: $gridEvent" }
+        log().trace { "Published event: $gridEvent" }
     }
 
     override fun toString(): String

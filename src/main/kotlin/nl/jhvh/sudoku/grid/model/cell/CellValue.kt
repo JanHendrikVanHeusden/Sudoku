@@ -7,6 +7,7 @@ import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
+import nl.jhvh.sudoku.grid.model.validateValueRange
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
 import nl.jhvh.sudoku.util.log
 import nl.jhvh.sudoku.util.requireAndLog
@@ -33,8 +34,8 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
     abstract var value: Int?
     protected set
 
-    val isSet: Boolean
-        get() = value != VALUE_UNKNOWN
+    /** @return Whether a known value (`!=` [VALUE_UNKNOWN]) is set, either fixed or mutable */
+    abstract val isSet: Boolean
 
     /**
      * Cell values are numbers from [CELL_MIN_VALUE] = 1 up to and including [Grid.maxValue]
@@ -43,8 +44,12 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
      */
     @Throws(IllegalArgumentException::class)
     protected fun validateRange(value: Int) {
-        requireAndLog(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher but is $value" }
-        requireAndLog(value <= this.cell.grid.maxValue) { "A cell value must be at most ${this.cell.grid.maxValue} but is $value (gridSize = ${grid.gridSize})" }
+        try {
+            validateValueRange(value, this.cell.grid.maxValue)
+        } catch (e: IllegalArgumentException) {
+            log().warn {e.message}
+            throw e
+        }
     }
 
     /** Value holder class to represent the fixed immutable numeric value of a [Cell]  */
@@ -61,6 +66,9 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
         override fun setValue(value: Int) {
             requireAndLog(value == this.value) { "Not allowed to change a fixed value! (fixed value = ${this.value}, new value = $value, cellRef = ${CellRef(cell.colIndex, cell.rowIndex)})" }
         }
+
+        override val isSet: Boolean = true
+
     }
 
     /** Simple value holder class to represent the non-fixed value of a [Cell]  */
@@ -91,13 +99,14 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
                 this.value = value
             }
         }
+
+        override val isSet: Boolean
+            get() = value != VALUE_UNKNOWN
+
     }
 
     /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
     abstract val isFixed: Boolean
-
-    /** @return Whether a known value (`!=` [VALUE_UNKNOWN]) is set, either fixed or mutable */
-    fun hasValue(): Boolean = this.value != VALUE_UNKNOWN
 
     abstract fun setValue(value: Int)
 

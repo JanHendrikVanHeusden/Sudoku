@@ -3,12 +3,14 @@ package nl.jhvh.sudoku.grid.model.cell
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.util.log
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import kotlin.test.assertFailsWith
 
 internal class FixedValueTest {
@@ -34,7 +36,7 @@ internal class FixedValueTest {
         }
         var newValue = gridSize+1
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
-            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue (gridSize = $gridSize)")
+            assertThat(message).isEqualTo("A cell value must be at most $gridSize but is $newValue")
         }
         newValue = 0
         with (assertFailsWith<IllegalArgumentException>{ FixedValue(cellMock, newValue) }) {
@@ -63,7 +65,7 @@ internal class FixedValueTest {
     }
 
     @Test
-    fun `setValue should publish an event when setting to a different value`() {
+    fun `setValue on a FixedValue should not publish an event when setting to same value`() {
         // given
         val newValue = 5
         subject = FixedValue(cellMock, newValue)
@@ -75,15 +77,28 @@ internal class FixedValueTest {
         subject.setValue(newValue)
         // then - verify that no event is published
         verify (exactly = 0) {cellMock.publish(any())}
+    }
 
-        // when - trying to set a different value
+    @Test
+    fun `setValue on a FixedValue should not publish an event when trying to set to a different value`() {
+        // given
+        val newValue = 5
+        subject = spyk(FixedValue(cellMock, newValue))
+        // clear recorded events
+        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+
+        every {cellMock.publish(any())} returns Unit
+
         try {
+            // when - trying to set a different value
             subject.setValue(newValue + 1)
-        } catch (e: Exception) {
+            fail("Should throw ${IllegalArgumentException::class.simpleName} !!")
+        } catch (e: IllegalArgumentException) {
             log().info { "${e.javaClass.simpleName} thrown (as expected when trying to set a ${FixedValue::class.simpleName} to another value)" }
         }
         // then - verify that unsuccessful setting does not fire an event
         verify (exactly = 0) {cellMock.publish(any())}
+        verify (exactly = 0) {subject.publish(any())}
     }
 
     @Test
@@ -93,9 +108,9 @@ internal class FixedValueTest {
     }
 
     @Test
-    fun hasValue() {
+    fun isSet() {
         subject = FixedValue(cellMock, 8)
-        assertThat(subject.hasValue()).isTrue()
+        assertThat(subject.isSet).isTrue()
     }
 
     @Test
