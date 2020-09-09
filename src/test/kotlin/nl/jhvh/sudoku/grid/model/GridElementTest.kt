@@ -17,7 +17,7 @@ internal class GridElementTest {
 
     @BeforeEach
     fun setUp() {
-        gridMock = mockk()
+        gridMock = mockk(relaxed = true)
     }
 
     @Test
@@ -37,18 +37,6 @@ internal class GridElementTest {
             verify (exactly = 1) {gridMock.maxValueLength}
             confirmVerified(gridMock)
         }
-    }
-
-    @Test
-    fun `assert that eventListeners is thread safe`() {
-        val gridElement = object: GridElement(gridMock) {
-            override fun format(formatter: SudokuFormatter): FormattableList {
-                return mockk()
-            }
-            override fun toString() = "GridElement for testing"
-        }
-        assertThat(gridElement.eventListeners.javaClass.name)
-                .isEqualTo("java.util.concurrent.ConcurrentHashMap")
     }
 
 }

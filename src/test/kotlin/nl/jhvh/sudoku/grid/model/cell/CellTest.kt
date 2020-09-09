@@ -25,12 +25,6 @@ internal class CellTest {
     }
 
     @Test
-    fun `assert that valueCandidates is thread safe`() {
-        assertThat(Cell(mockk(relaxed = true), 2, 5).getValueCandidates().javaClass.name)
-                .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
-    }
-
-    @Test
     fun `getCellValue - not fixed`() {
         val subject = Cell(grid9Mock, 2, 5)
         assertThat(subject.cellValue.value).isNull()
@@ -53,7 +47,7 @@ internal class CellTest {
             mockkConstructor(FixedValue::class)
             every {anyConstructed<FixedValue>().toString()} returns fixedValueToString
             val subject = Cell(grid9Mock, 2, 5, fixedValue = 7)
-            assertThat(subject.toString()).contains("Cell: ", "colIndex=2", "rowIndex=5", "cellValue=[$fixedValueToString]", "valueCandidates=[]")
+            assertThat(subject.toString()).contains("Cell: ", "colIndex=2", "rowIndex=5", "cellValue=[$fixedValueToString]")
             verify (exactly = 1) { anyConstructed<FixedValue>().toString() }
         } finally {
             unmockkConstructor(FixedValue::class)
@@ -67,7 +61,7 @@ internal class CellTest {
             mockkConstructor(NonFixedValue::class)
             every {anyConstructed<NonFixedValue>().toString()} returns nonFixedValueToString
             val subject = Cell(grid9Mock, 6, 3)
-            assertThat(subject.toString()).contains("Cell: ", "colIndex=6", "rowIndex=3", "cellValue=[$nonFixedValueToString]", "valueCandidates=[")
+            assertThat(subject.toString()).contains("Cell: ", "colIndex=6", "rowIndex=3", "cellValue=[$nonFixedValueToString]")
             verify (exactly = 1) { anyConstructed<NonFixedValue>().toString() }
         } finally {
             unmockkConstructor(NonFixedValue::class)

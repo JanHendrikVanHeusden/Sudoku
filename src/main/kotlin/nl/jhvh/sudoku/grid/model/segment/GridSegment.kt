@@ -1,13 +1,14 @@
 package nl.jhvh.sudoku.grid.model.segment
 
-import nl.jhvh.sudoku.grid.event.GridEvent
-import nl.jhvh.sudoku.grid.event.GridEventListener
-import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
-import nl.jhvh.sudoku.grid.event.candidate.CellRemoveCandidatesEvent
+import nl.jhvh.sudoku.grid.event.ValueEvent
+import nl.jhvh.sudoku.grid.event.ValueEventListener
+import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
+import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.Cell
+import nl.jhvh.sudoku.grid.model.cell.CellValue
 import nl.jhvh.sudoku.util.log
 
 /**
@@ -18,26 +19,36 @@ import nl.jhvh.sudoku.util.log
  *
  * A functional synonym for [GridSegment] is **Group**.
  */
-abstract class GridSegment constructor(grid: Grid) : GridElement(grid), GridEventListener {
+abstract class GridSegment constructor(grid: Grid) : GridElement(grid), ValueEventListener {
 
     abstract val cells: LinkedHashSet<Cell>
 
-    override fun onEvent(gridEvent: GridEvent) {
-        log().trace { "$this received event: $gridEvent" }
-        when (gridEvent) {
+    override fun onEvent(valueEvent: ValueEvent) {
+        log().trace { "$this received event: $valueEvent" }
+        if (!cells.contains(valueEvent.eventSource.cell)) {
+            // not expected to be called, so warning:
+            // it would mean we subscribed to events outside the segment
+            log().warn { "Only events from ${CellValue::class.simpleName}s within the ${GridSegment::class.simpleName}" +
+                    " should be handled by $this; event=$valueEvent" }
+            return
+        }
+        when (valueEvent) {
             is SetCellValueEvent -> {
-                grid.handleSetCellValueEvent(gridEvent, this)
+                grid.handleSetCellValueEvent(valueEvent, this)
             }
             is CellRemoveCandidatesEvent -> {
-                grid.handleCellRemoveCandidatesEvent(gridEvent, this)
+                grid.handleRemoveCandidatesEvent(valueEvent, this)
             }
-            else -> {log().warn { "Unhandled event type: ${gridEvent.javaClass.simpleName}; event=$gridEvent" }}
-            // not expected to be called, so warning:
-            // it would mean we subscribed to an event type that we are not willing to handle
+            else -> {
+                // not expected to be called, so warning:
+                // it would mean we subscribed to an event type that we are not willing to handle
+                log().warn { "Unhandled event type: ${valueEvent.javaClass.simpleName}; event=$valueEvent; " +
+                        "${GridSegment::class.simpleName}=$this" }
+            }
         }
     }
 
-    protected fun subscribeToSetValueEvents() {
+    protected fun subscribeToSegmentSetValueEvents() {
         cells.forEach { it.cellValue.subscribe(this, SET_CELL_VALUE) }
     }
 

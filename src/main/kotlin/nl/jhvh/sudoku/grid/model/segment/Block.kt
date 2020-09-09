@@ -38,7 +38,7 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 
     init {
-        subscribeToSetValueEvents()
+        subscribeToSegmentSetValueEvents()
     }
 
 }

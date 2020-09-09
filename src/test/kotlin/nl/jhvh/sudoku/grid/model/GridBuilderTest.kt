@@ -45,36 +45,13 @@ internal class GridBuilderTest {
         assertThat(builder.blockSize).isEqualTo(blockSize)
         assertThat(builder.isBuilt).isFalse()
 
-        // Size not checked by GridBuilder (check is done later, in build()
-        blockSize = MAX_BLOCK_SIZE+1
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
-
-        blockSize = MAX_BLOCK_SIZE+100
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
-
-        blockSize = 0
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
-
-        blockSize = -1
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
-
-        blockSize = Int.MAX_VALUE
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
-
-        blockSize = Int.MIN_VALUE
-        builder = GridBuilder(blockSize)
-        assertThat(builder.blockSize).isEqualTo(blockSize)
-        assertThat(builder.isBuilt).isFalse()
+        // Invalid block sizes
+        assertFailsWith<IllegalArgumentException> {GridBuilder(MAX_BLOCK_SIZE+1) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(MAX_BLOCK_SIZE+100) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(0) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(-1) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(Int.MAX_VALUE) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(Int.MIN_VALUE) }
     }
 
     @Test

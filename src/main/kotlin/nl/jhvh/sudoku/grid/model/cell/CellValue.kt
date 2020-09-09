@@ -4,20 +4,28 @@ import nl.jhvh.sudoku.base.CELL_MIN_VALUE
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.event.ValueEventListener
+import nl.jhvh.sudoku.grid.event.ValueEventSource
+import nl.jhvh.sudoku.grid.event.ValueEventType
+import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.validateValueRange
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
+import nl.jhvh.sudoku.util.intRangeSet
 import nl.jhvh.sudoku.util.log
 import nl.jhvh.sudoku.util.requireAndLog
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
 val VALUE_UNKNOWN: Int? = null
 
 /** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
-sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
+sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), ValueEventSource {
+
+    final override val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>> = ConcurrentHashMap()
 
     /**
      * The mutable, numeric or unknown value of this [Cell], observed in case of for non-fixed value.
@@ -54,13 +62,14 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
     /** Value holder class to represent the fixed immutable numeric value of a [Cell]  */
     class FixedValue(cell: Cell, value: Int) : CellValue(cell) {
+
         override val isFixed: Boolean = true
 
-        override var value: Int? = VALUE_UNKNOWN
+        // Although it will never change and not be null, due to override it must be var (not val) and nullable
+        override var value: Int? = value
 
         init {
             validateRange(value)
-            this.value = value
         }
 
         override fun setValue(value: Int) {
@@ -69,10 +78,14 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
 
         override val isSet: Boolean = true
 
+        /** Technical [toString] method; for a functional representation, see [format]  */
+        override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]}"
+
     }
 
     /** Simple value holder class to represent the non-fixed value of a [Cell]  */
     class NonFixedValue(cell: Cell) : CellValue(cell) {
+
         override val isFixed: Boolean = false
 
         @Suppress("UNUSED_ANONYMOUS_PARAMETER")
@@ -86,7 +99,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
                 }
 
         private fun validateCandidate(value: Int) {
-            if (!cell.getValueCandidates().contains(value)) {
+            if (!getValueCandidates().contains(value)) {
                 throw GridNotSolvableException("Grid is not solvable: trying to set cell to value '$value'" +
                         " but this value is not present anymore in value candidates of ${cell}")
             }
@@ -103,15 +116,51 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid) {
         override val isSet: Boolean
             get() = value != VALUE_UNKNOWN
 
+        // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
+        // synchronizedSet gives better read consistency, but slightly worse write performance,
+        // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
+        private val valueCandidates: MutableSet<Int> = ConcurrentHashMap.newKeySet(if (isFixed) 0 else grid.gridSize)
+
+        init {
+            valueCandidates.addAll(intRangeSet(CELL_MIN_VALUE, grid.maxValue))
+        }
+
+        // Read only view on valueCandidates
+        // NB: not really immutable, with explicit cast (to MutableSet etc.) one could still mutate it's contents, theoretically.
+        //     Returning it as a Set (so formal type is read only) should be enough to discourage external mutation:
+        //     it would be too much hassle ( & too much performance penalty) to create a new immutableSet on every get.
+        fun getValueCandidates(): Set<Int> = valueCandidates
+
+        fun removeValueCandidate(value: Int): Boolean {
+            // using getValueCandidates() instead of valueCandidates for testability
+            if (getValueCandidates().contains(value)) {
+                val oldValues = HashSet(getValueCandidates())
+                if (valueCandidates.remove(value)) {
+                    publish(CellRemoveCandidatesEvent(this, oldValues, getValueCandidates()))
+                    return true
+                }
+            }
+            return false
+        }
+
+        fun clearValueCandidates() {
+            // using getValueCandidates() instead of valueCandidates for testability
+            if (getValueCandidates().isEmpty()) {
+                return
+            }
+            val oldValues = HashSet(getValueCandidates())
+            valueCandidates.clear()
+            publish(CellRemoveCandidatesEvent(this, oldValues, valueCandidates))
+        }
+
+        /** Technical [toString] method; for a functional representation, see [format]  */
+        override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed], valueCandidates=${valueCandidates}"
     }
 
     /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
     abstract val isFixed: Boolean
 
     abstract fun setValue(value: Int)
-
-    /** Technical [toString] method; for a functional representation, see [format]  */
-    override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 

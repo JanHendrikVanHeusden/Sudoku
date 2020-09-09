@@ -3,22 +3,22 @@ package nl.jhvh.sudoku.grid.event
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import nl.jhvh.sudoku.grid.event.GridEventType.CELL_REMOVE_CANDIDATES
-import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
+import nl.jhvh.sudoku.grid.event.ValueEventType.CELL_REMOVE_CANDIDATES
+import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ConcurrentHashMap
 
-class GridEventSourceTest {
+class ValueEventSourceTest {
 
-    lateinit var subject: GridEventSource
+    lateinit var subject: ValueEventSource
 
     @BeforeEach
     fun setUp() {
-        subject = object : GridEventSource {
-            override val eventListeners: ConcurrentHashMap<GridEventType, MutableSet<GridEventListener>> = ConcurrentHashMap()
+        subject = object : ValueEventSource {
+            override val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>> = ConcurrentHashMap()
             override fun toString(): String = "GridEventSource for unit test"
         }
     }
@@ -96,27 +96,27 @@ class GridEventSourceTest {
         // given
         val gridSegmentMock1: GridSegment = mockk()
         every {gridSegmentMock1.onEvent(any())} returns Unit
-        val gridEvent1: GridEvent = mockk(relaxed = true)
-        every {gridEvent1.type} returns SET_CELL_VALUE
+        val valueEvent1: ValueEvent = mockk(relaxed = true)
+        every {valueEvent1.type} returns SET_CELL_VALUE
 
         val gridSegmentMock2: GridSegment = mockk()
         every {gridSegmentMock2.onEvent(any())} returns Unit
-        val gridEvent2: GridEvent = mockk(relaxed = true)
-        every {gridEvent2.type} returns CELL_REMOVE_CANDIDATES
+        val valueEvent2: ValueEvent = mockk(relaxed = true)
+        every {valueEvent2.type} returns CELL_REMOVE_CANDIDATES
 
         // when - no relevant subscriptions yet, nothing should be published
-        subject.subscribe(gridSegmentMock2, gridEvent2.type)
-        subject.publish(gridEvent1)
+        subject.subscribe(gridSegmentMock2, valueEvent2.type)
+        subject.publish(valueEvent1)
         // then
         verify (exactly = 0, timeout = 100) { gridSegmentMock1.onEvent(any()) }
         verify (exactly = 0, timeout = 100) { gridSegmentMock2.onEvent(any()) }
 
         // when - subscribed event
-        subject.publish(gridEvent2)
+        subject.publish(valueEvent2)
         // then
-        verify (exactly = 0, timeout = 100) { gridSegmentMock2.onEvent(gridEvent1) }
-        verify (exactly = 0, timeout = 100) { gridSegmentMock1.onEvent(gridEvent1) }
-        verify (exactly = 1) { gridSegmentMock2.onEvent(gridEvent2) }
+        verify (exactly = 0, timeout = 100) { gridSegmentMock2.onEvent(valueEvent1) }
+        verify (exactly = 0, timeout = 100) { gridSegmentMock1.onEvent(valueEvent1) }
+        verify (exactly = 1) { gridSegmentMock2.onEvent(valueEvent2) }
 
     }
 

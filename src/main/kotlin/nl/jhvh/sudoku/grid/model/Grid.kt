@@ -2,15 +2,13 @@ package nl.jhvh.sudoku.grid.model
 
 import nl.jhvh.sudoku.base.CELL_MIN_VALUE
 import nl.jhvh.sudoku.base.DEFAULT_BLOCK_SIZE
-import nl.jhvh.sudoku.base.MAX_BLOCK_SIZE
 import nl.jhvh.sudoku.base.gridSize
 import nl.jhvh.sudoku.base.maxValue
+import nl.jhvh.sudoku.base.validateBlockSize
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
-import nl.jhvh.sudoku.grid.event.GridEventHandlable
-import nl.jhvh.sudoku.grid.event.GridEventHandler
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
@@ -19,9 +17,10 @@ import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolver
+import nl.jhvh.sudoku.grid.solve.SegmentValueEventHandlable
+import nl.jhvh.sudoku.grid.solve.SegmentValueEventHandler
 import nl.jhvh.sudoku.util.incrementFromZero
 import nl.jhvh.sudoku.util.log
-import nl.jhvh.sudoku.util.requireAndLog
 import java.util.Collections.unmodifiableMap
 
 /**
@@ -29,12 +28,18 @@ import java.util.Collections.unmodifiableMap
  *  * Grids of different sizes can be represented, indicated by their [blockSize]
  *  * Square ones only ([Grid]s of `4*4` ([blockSize] = 2), `9*9` ([blockSize] = 3), `16*16` ([blockSize] = 4), etc.,
  *    but not `4*6`, `9*16` etc.)
+ *  @constructor Throws [IllegalArgumentException] on invalid [blockSize], e.g. negative or too high
  */
-class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) :
-        Formattable, GridEventHandlable by GridEventHandler() {
+class Grid @Throws(IllegalArgumentException::class) private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) :
+        Formattable, SegmentValueEventHandlable by SegmentValueEventHandler() {
 
     init {
-        validateBlockSize()
+        try {
+            validateBlockSize(blockSize)
+        } catch (e: IllegalArgumentException) {
+            log().warn {e.message}
+            throw e
+        }
     }
 
     /** The length of each side = [blockSize] * [blockSize]  */
@@ -58,12 +63,6 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
     init {
         // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
         this.cellList.filter { it.isFixed }.map { it.cellValue }.forEach { it.publish(SetCellValueEvent(it, it.value!!)) }
-    }
-
-    @Throws(IllegalArgumentException::class)
-    private fun validateBlockSize() {
-        requireAndLog(blockSize > 0) { "Given blocksize is $blockSize but must be positive ( > 0 )" }
-        requireAndLog(blockSize <= MAX_BLOCK_SIZE) { "Given blocksize is $blockSize but must be at most $MAX_BLOCK_SIZE" }
     }
 
     @Throws(IllegalArgumentException::class)
@@ -105,6 +104,10 @@ class Grid private constructor (val blockSize: Int = 3, val fixedValues: Map<Cel
      *  * Not thread safe (should not be used across threads anyway)
      */
     class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE) {
+
+        init {
+            validateBlockSize(blockSize)
+        }
 
         private val fixedValueMap: MutableMap<CellRef, Int> = mutableMapOf()
 

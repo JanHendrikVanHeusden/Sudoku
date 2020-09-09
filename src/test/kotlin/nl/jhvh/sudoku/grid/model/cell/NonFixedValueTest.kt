@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import nl.jhvh.sudoku.grid.event.GridEventType.SET_CELL_VALUE
+import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
@@ -34,16 +34,12 @@ internal class NonFixedValueTest {
     private val gridSize = blockSize * blockSize
     private val maxValue = gridSize
 
-    private val valueCandidates = intRangeSet(1, maxValue)
-
     @BeforeEach
     fun setUp() {
         cellMock = mockk(relaxed = true)
         every {cellMock.grid.blockSize} returns blockSize
         every {cellMock.grid.gridSize} returns gridSize
         every {cellMock.grid.maxValue} returns gridSize
-        every { cellMock.getValueCandidates() } returns valueCandidates
-        every { cellMock.clearValueCandidates() } returns Unit
 
         subject = NonFixedValue(cellMock)
     }
@@ -70,17 +66,18 @@ internal class NonFixedValueTest {
         val valueRange = intRangeSet(1, maxValue)
         val removedCandidate = 4
         val valuesWithoutRemovedCandidate = valueRange.stream().filter { it != removedCandidate }.toList().toSet()
-        every { cellMock.getValueCandidates() } returns valuesWithoutRemovedCandidate
+        val spiedSubject = spyk(NonFixedValue(cellMock))
+        every { spiedSubject.getValueCandidates() } returns valuesWithoutRemovedCandidate
 
         // assert that values within candidate set can be assigned
         for (value in valuesWithoutRemovedCandidate) {
             // when
-            subject.setValue(value)
+            spiedSubject.setValue(value)
             // then
-            assertThat(subject.value).isEqualTo(value)
+            assertThat(spiedSubject.value).isEqualTo(value)
         }
         // when, then: assert that it throws the exception when assigning value that is not in candidate set
-        assertFailsWith<GridNotSolvableException> { subject.setValue(removedCandidate)}
+        assertFailsWith<GridNotSolvableException> { spiedSubject.setValue(removedCandidate)}
     }
 
     @Disabled("Does not work; see replacement test in this class")
@@ -88,7 +85,7 @@ internal class NonFixedValueTest {
     fun `setValue should publish an event on change of value - not working`() {
         // Verification of subject.publish(...) does not work anymore
         // Maybe because the publish is not called by the subject itself, but delegated to a Delegate.observable
-        // (but it has worked, until eventType was added to GridEventSource methods).
+        // (but it has worked, until eventType was added to ValueEventSource methods).
         // Unclear why this happens ???
         //
         // Note that the event IS published, and before the change it actually could be verified
@@ -195,6 +192,12 @@ internal class NonFixedValueTest {
         subject.setValue(newValue)
         assertThat(subject.value).isEqualTo(newValue)
         assertThat(subject.isSet)
+    }
+
+    @Test
+    fun `valueCandidates should be thread safe`() {
+        assertThat(NonFixedValue(cellMock).getValueCandidates().javaClass.name)
+                .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
     }
 
     @Test

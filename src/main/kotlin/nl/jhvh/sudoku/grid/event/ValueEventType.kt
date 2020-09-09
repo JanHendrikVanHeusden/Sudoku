@@ -1,6 +1,6 @@
 package nl.jhvh.sudoku.grid.event
 
-enum class GridEventType {
+enum class ValueEventType {
     SET_CELL_VALUE,
     CELL_REMOVE_CANDIDATES
 }

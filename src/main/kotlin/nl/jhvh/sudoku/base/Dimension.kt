@@ -22,5 +22,17 @@ const val DEFAULT_BLOCK_SIZE: Int = 3
 /** Fixed minimum value to be entered in a cell  */
 const val CELL_MIN_VALUE: Int = 1
 
-val gridSize: (blockSize: Int) -> Int = { blockSize -> blockSize * blockSize }
-val maxValue: (blockSize: Int) -> Int = { blockSize -> blockSize * blockSize }
+fun gridSize(blockSize: Int): Int {
+    validateBlockSize(blockSize)
+    return blockSize * blockSize
+}
+
+fun maxValue(blockSize: Int): Int {
+    validateBlockSize(blockSize)
+    return blockSize * blockSize
+}
+
+fun validateBlockSize(blockSize: Int) {
+    require(blockSize > 0) { "Given blocksize is $blockSize but must be positive ( > 0 )" }
+    require(blockSize <= MAX_BLOCK_SIZE) { "Given blocksize is $blockSize but must be at most $MAX_BLOCK_SIZE" }
+}

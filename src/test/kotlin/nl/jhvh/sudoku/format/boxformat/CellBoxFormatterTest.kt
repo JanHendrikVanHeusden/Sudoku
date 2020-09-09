@@ -5,6 +5,7 @@ import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.cell.CellValue
+import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -46,9 +47,9 @@ class CellBoxFormatterTest {
 
     private fun randomCellValueSetter(cellValue: CellValue): Int? {
         try {
-            if (!cellValue.isFixed && !cellValue.cell.getValueCandidates().isEmpty()) {
-                val index = Random.nextInt(0, cellValue.cell.getValueCandidates().size)
-                let { cellValue.cell.getValueCandidates().toList()[index] }
+            if (cellValue is NonFixedValue && !cellValue.getValueCandidates().isEmpty()) {
+                val index = Random.nextInt(0, cellValue.getValueCandidates().size)
+                let { cellValue.getValueCandidates().toList()[index] }
                         .also { cellValue.setValue(it) }
             }
         } catch (e: Exception) {

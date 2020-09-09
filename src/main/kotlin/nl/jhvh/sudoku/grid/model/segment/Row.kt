@@ -25,7 +25,7 @@ class Row(grid: Grid, val rowIndex: Int) : GridSegment(grid), Formattable {
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 
     init {
-        subscribeToSetValueEvents()
+        subscribeToSegmentSetValueEvents()
     }
 
 }

@@ -1,6 +1,5 @@
 package nl.jhvh.sudoku.grid.model.cell
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -68,37 +67,29 @@ internal class FixedValueTest {
     fun `setValue on a FixedValue should not publish an event when setting to same value`() {
         // given
         val newValue = 5
-        subject = FixedValue(cellMock, newValue)
-        // clear recorded events
-        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
+        val spiedSubject = spyk(FixedValue(cellMock, newValue))
 
-        every {cellMock.publish(any())} returns Unit
         // when - setting to same value
-        subject.setValue(newValue)
+        spiedSubject.setValue(newValue)
         // then - verify that no event is published
-        verify (exactly = 0) {cellMock.publish(any())}
+        verify (exactly = 0) {spiedSubject.publish(any())}
     }
 
     @Test
     fun `setValue on a FixedValue should not publish an event when trying to set to a different value`() {
         // given
         val newValue = 5
-        subject = spyk(FixedValue(cellMock, newValue))
-        // clear recorded events
-        clearMocks(cellMock, answers = false, recordedCalls = true, verificationMarks = true)
-
-        every {cellMock.publish(any())} returns Unit
+        val spiedSubject = spyk(FixedValue(cellMock, newValue))
 
         try {
             // when - trying to set a different value
-            subject.setValue(newValue + 1)
+            spiedSubject.setValue(newValue + 1)
             fail("Should throw ${IllegalArgumentException::class.simpleName} !!")
         } catch (e: IllegalArgumentException) {
             log().info { "${e.javaClass.simpleName} thrown (as expected when trying to set a ${FixedValue::class.simpleName} to another value)" }
         }
         // then - verify that unsuccessful setting does not fire an event
-        verify (exactly = 0) {cellMock.publish(any())}
-        verify (exactly = 0) {subject.publish(any())}
+        verify (exactly = 0) {spiedSubject.publish(any())}
     }
 
     @Test
