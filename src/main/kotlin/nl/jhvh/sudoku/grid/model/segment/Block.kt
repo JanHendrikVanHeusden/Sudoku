@@ -28,7 +28,7 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
     /** The bottom (y-axis) coordinate of the [Block] within the [Grid]  */
     val bottomRowIndex: Int = topRowIndex + grid.blockSize - 1
 
-    override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize)
+    override val cells: Set<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize)
             .map { grid.findCell(colIndex = it % grid.blockSize + leftColIndex, rowIndex = it/grid.blockSize + topRowIndex) }
     )
 
@@ -36,9 +36,5 @@ class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegme
     override fun toString(): String = "${this.javaClass.simpleName}: [leftColIndex=$leftColIndex], [rightColIndex=$rightColIndex], [upperRowIndex=$topRowIndex], [bottomRowIndex=$bottomRowIndex]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
-
-    init {
-        subscribeToSegmentSetValueEvents()
-    }
 
 }

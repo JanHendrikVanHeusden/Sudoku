@@ -17,15 +17,12 @@ class Row(grid: Grid, val rowIndex: Int) : GridSegment(grid), Formattable {
 
     val rowRef: String = indexToRowRef(rowIndex)
 
-    override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize).map { grid.findCell(colIndex = it, rowIndex = rowIndex) })
+    override val cells: Set<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize)
+            .map { grid.findCell(colIndex = it, rowIndex = rowIndex) })
 
     /** Technical [toString] value; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: [rowIndex=$rowIndex] [rowRef=$rowRef]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
-
-    init {
-        subscribeToSegmentSetValueEvents()
-    }
 
 }

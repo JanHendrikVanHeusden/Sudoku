@@ -2,7 +2,6 @@ package nl.jhvh.sudoku.grid.event
 
 import nl.jhvh.sudoku.util.log
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
 /** Base interface for sources that may emit [ValueEvent]s */
 interface ValueEventSource {
@@ -13,19 +12,21 @@ interface ValueEventSource {
      */
     val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>>
 
+    /** Initialize the [eventListeners] with thread safe [MutableSet]s */
+    fun initEventListeners()
+
     /**
      * Subscribe on [ValueEvent]s emitted by this [ValueEventSource]
      * @param eventListener The interested [ValueEventListener]
      * @param eventType The [ValueEventType] to subscribe for
      */
     fun subscribe(eventListener: ValueEventListener, eventType: ValueEventType) {
-        eventListeners.putIfAbsent(eventType, ConcurrentHashSet())
+        // Should be initialized with event types, so eventListeners[eventType] will always return a non-null Set
         val isAdded = eventListeners[eventType]!!.add(eventListener)
         if (isAdded) {
             log().trace { "$eventListener subscribed for eventType $eventType" }
         } else {
-            // Not harmful, but should be avoided to repeatedly subscribe for the same event
-            log().debug { "Duplicate subscription of $eventListener is duplicate: subscribed already for eventType $eventType" }
+            log().trace { "Duplicate subscription of $eventListener is duplicate: subscribed already for eventType $eventType" }
         }
     }
 
@@ -51,7 +52,7 @@ interface ValueEventSource {
      */
     fun publish(valueEvent: ValueEvent) {
         eventListeners[valueEvent.type]?.forEach { l: ValueEventListener -> l.onEvent(valueEvent) }
-        log().trace { "Published event: $valueEvent" }
+        log().trace { "Published event: $valueEvent to ${eventListeners.size} listeners" }
     }
 
     override fun toString(): String

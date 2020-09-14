@@ -9,16 +9,17 @@ import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
-import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.Row
+import nl.jhvh.sudoku.grid.solve.GridSolvable
 import nl.jhvh.sudoku.grid.solve.GridSolver
 import nl.jhvh.sudoku.grid.solve.SegmentValueEventHandlable
 import nl.jhvh.sudoku.grid.solve.SegmentValueEventHandler
+import nl.jhvh.sudoku.grid.solve.ValueEventHandlable
 import nl.jhvh.sudoku.util.incrementFromZero
 import nl.jhvh.sudoku.util.log
 import java.util.Collections.unmodifiableMap
@@ -30,9 +31,13 @@ import java.util.Collections.unmodifiableMap
  *    but not `4*6`, `9*16` etc.)
  *  @constructor Throws [IllegalArgumentException] on invalid [blockSize], e.g. negative or too high
  */
-class Grid @Throws(IllegalArgumentException::class) private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>) :
-        Formattable, SegmentValueEventHandlable by SegmentValueEventHandler() {
+class Grid
 
+@Throws(IllegalArgumentException::class)
+private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver) :
+        Formattable, SegmentValueEventHandlable by SegmentValueEventHandler(), ValueEventHandlable by gridSolver, GridSolvable by gridSolver {
+
+    // early validation
     init {
         try {
             validateBlockSize(blockSize)
@@ -60,9 +65,9 @@ class Grid @Throws(IllegalArgumentException::class) private constructor (val blo
     val blockList: List<Block> = incrementFromZero(gridSize)
             .map { Block(this, leftColIndex = ((it * blockSize) % gridSize), topRowIndex = (it / blockSize) * blockSize) }
 
+    // late initialization: after all properties have been set
     init {
-        // For all fixed values, publish the set value event to remove the candidates that can be eliminated already
-        this.cellList.filter { it.isFixed }.map { it.cellValue }.forEach { it.publish(SetCellValueEvent(it, it.value!!)) }
+        gridSolver.gridToSolve = this
     }
 
     @Throws(IllegalArgumentException::class)
@@ -88,11 +93,18 @@ class Grid @Throws(IllegalArgumentException::class) private constructor (val blo
 
     override val maxValueLength: Int = this.maxValue.toString().length
 
+    fun toStringFull(): String {
+        return toStringCompact() + "\ngrid = \n" + format(defaultGridToStringFormatter)
+    }
+
+    fun toStringCompact(): String {
+        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize). ${this.javaClass.simpleName}" +
+                " id = ${System.identityHashCode(this)}"
+    }
+
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String {
-        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize)" +
-                // if not too big, we also add the formatted grid
-                if (gridSize <= 16) ", grid = \n" + format(defaultGridToStringFormatter) else ""
+        return if (gridSize <= 16) toStringFull() else toStringCompact()
     }
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
@@ -103,7 +115,7 @@ class Grid @Throws(IllegalArgumentException::class) private constructor (val blo
      *  * No reuse. Trying to use the same [GridBuilder] instance twice results in [IllegalStateException]
      *  * Not thread safe (should not be used across threads anyway)
      */
-    class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE) {
+    class GridBuilder(val blockSize: Int = DEFAULT_BLOCK_SIZE, val gridSolver: GridSolver = GridSolver()) {
 
         init {
             validateBlockSize(blockSize)
@@ -126,7 +138,7 @@ class Grid @Throws(IllegalArgumentException::class) private constructor (val blo
         fun build(): Grid {
             check(!isBuilt) { "${this.javaClass.simpleName} can be used only once - " +
                     "create a new ${this.javaClass.simpleName} instance to build a new ${Grid::class.simpleName}!" }
-            val grid = Grid(blockSize, unmodifiableMap(fixedValueMap))
+            val grid = Grid(blockSize, unmodifiableMap(fixedValueMap), gridSolver)
             isBuilt = true
             return grid
         }
@@ -251,7 +263,7 @@ fun main() {
 
     // print the formatted grid
     println(grid)
+    grid.solveGrid()
+    println(grid)
 
-    val gridSolver = GridSolver(grid)
-    gridSolver.solveGrid()
 }

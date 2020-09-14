@@ -439,20 +439,20 @@ class CellBoxFormatterTest {
     }
 
     @Test
-    fun `nakedFormat - grid 100*100`() {
-        val blockSize = 10
+    fun `nakedFormat - grid 25*25`() {
+        val blockSize = 5
         val gridSize = blockSize * blockSize
         val maxValue = blockSize * blockSize
-        val gridBuilder100 = GridBuilder(blockSize)
+        val gridBuilder25 = GridBuilder(blockSize)
 
-        val cellsToFix = 500 // of 10000
-        val cellsToSet = 200 // of 10000
+        val cellsToFix = 50 // of 625
+        val cellsToSet = 20 // of 625
 
-        with (gridBuilder100) {
+        with (gridBuilder25) {
             val fixedCellRefs = mutableSetOf<CellRef>()
             // fix some values
             while (fixedCellRefs.size < cellsToFix) {
-                val i = Random.nextInt(1, (gridSize*gridSize)-1) // first and last cell are excluded
+                val i = Random.nextInt(0, gridSize*gridSize)
                 val x = i % gridSize
                 val y = i / gridSize
                 val cellRef = CellRef(x, y)
@@ -462,12 +462,9 @@ class CellBoxFormatterTest {
             }
         }
         // create a Grid with first cell having fixed value 100, so 3 digits + fixed value indicator, to make sure the maxValue is included
-        val grid100 = gridBuilder100.fix("A1", maxValue)
-                .build()
-        // Set last cell (non-fixed) to maxValue to have that tested too (others are random, most will have 1 or 2 digits)
-        grid100.cellList.last().cellValue.setValue(maxValue)
+        val grid25 = gridBuilder25.build()
 
-        with (grid100) {
+        with (grid25) {
             // set some other values
             for (count in 1..cellsToSet) {
                 val i = Random.nextInt(0, gridSize * gridSize)
@@ -479,18 +476,18 @@ class CellBoxFormatterTest {
         }
         // println(grid100.format(defaultGridToStringFormatter))
 
-        grid100.cellList.filter { it.cellValue.isSet }.forEach {
+        grid25.cellList.filter { it.cellValue.isSet }.forEach {
             assertThat(subject.nakedFormat(it).toString())
                     .`as`("Test fails for Cell x=${it.colIndex} y=${it.rowIndex}")
-                    .isEqualTo(StringUtils.center("${if (it.cellValue.isFixed) "►" else " "}${it.cellValue.value!!}", 4))
+                    .isEqualTo(StringUtils.center("${if (it.cellValue.isFixed) "►" else " "}${it.cellValue.value!!}", 3))
         }
-        val cellListNoValue = grid100.cellList.filter { !it.cellValue.isSet }
+        val cellListNoValue = grid25.cellList.filter { !it.cellValue.isSet }
         cellListNoValue.forEachIndexed { index, cell ->
-            // Not necessary to test all almost 10000 cells
-            if (index % 91 == 0) {
+            // Not necessary to test all 625 cells
+            if (index % 4 == 0) {
                 assertThat(subject.nakedFormat(cell).toString())
                         .`as`("Test fails for Cell x=${cell.colIndex} y=${cell.rowIndex}")
-                        .isEqualTo("    ")
+                        .isEqualTo("   ")
             }
         }
     }

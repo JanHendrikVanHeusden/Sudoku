@@ -7,6 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.grid.event.ValueEventType
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import org.assertj.core.api.Assertions.assertThat
@@ -27,11 +28,24 @@ class CellValueTest {
     @Test
     fun `eventListeners should be thread safe`() {
         var cellValue: CellValue = FixedValue(cellMock, 3)
+        // assert type of the map (Map<ValueEventType, Set<ValueEventListener>)
         assertThat(cellValue.eventListeners.javaClass.name)
                 .isEqualTo("java.util.concurrent.ConcurrentHashMap")
+        ValueEventType.values().forEach {
+            // for each entry: assert type of the map value (Set<ValueEventListener>)
+            assertThat(cellValue.eventListeners[it]!!.javaClass.name)
+                    .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
+        }
+
         cellValue = NonFixedValue(cellMock)
+        // assert type of the map (Map<ValueEventType, Set<ValueEventListener>)
         assertThat(cellValue.eventListeners.javaClass.name)
                 .isEqualTo("java.util.concurrent.ConcurrentHashMap")
+        ValueEventType.values().forEach {
+            // for each entry: assert type of the map value (Set<ValueEventListener>)
+            assertThat(cellValue.eventListeners[it]!!.javaClass.name)
+                    .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
+        }
     }
 
     private fun testCellValueFormat(spiedSubject: CellValue, formatterMock: SudokuFormatter): FormattableList {

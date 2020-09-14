@@ -18,22 +18,35 @@ class ValueEventSourceTest {
     @BeforeEach
     fun setUp() {
         subject = object : ValueEventSource {
+            // For this test, eventListeners and its contents need not be thread safe actually,
+            // but just copied the real implementation here (which as a bonus is thread safe)
             override val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>> = ConcurrentHashMap()
+            override fun initEventListeners() {
+                ValueEventType.values().forEach {
+                    eventListeners.putIfAbsent(it, ConcurrentHashMap.newKeySet())
+                }
+            }
             override fun toString(): String = "GridEventSource for unit test"
+            init {
+                initEventListeners()
+            }
         }
     }
 
     @Test
     fun subscribe() {
         // given
-        assertThat(subject.eventListeners).isEmpty()
+        ValueEventType.values().forEach {
+            assertThat(subject.eventListeners[it]).isEmpty()
+        }
+        assertThat(subject.eventListeners).hasSize(2) // 1 for each event type
         val gridSegmentMock1: GridSegment = mockk()
         val gridSegmentMock2: GridSegment = mockk()
 
         // when
         subject.subscribe(gridSegmentMock1, CELL_REMOVE_CANDIDATES)
+
         // then
-        assertThat(subject.eventListeners).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]?.first() === gridSegmentMock1).isTrue()
         // assert that no alien value was added :-)
@@ -41,7 +54,6 @@ class ValueEventSourceTest {
 
         // when
         subject.subscribe(gridSegmentMock1, SET_CELL_VALUE)
-        assertThat(subject.eventListeners).hasSize(2)
         // then - previous subscription should still be there
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]?.first() === gridSegmentMock1).isTrue()
@@ -57,7 +69,6 @@ class ValueEventSourceTest {
         // when - adding another listener
         subject.subscribe(gridSegmentMock2, SET_CELL_VALUE)
         // then
-        assertThat(subject.eventListeners).hasSize(2)
         assertThat(subject.eventListeners[SET_CELL_VALUE]).hasSize(2)
         assertThat(subject.eventListeners[SET_CELL_VALUE]).hasSameElementsAs(listOf(gridSegmentMock1, gridSegmentMock2))
     }
@@ -65,9 +76,13 @@ class ValueEventSourceTest {
     @Test
     fun unSubscribe() {
         // given
-        assertThat(subject.eventListeners).isEmpty()
+        ValueEventType.values().forEach {
+            assertThat(subject.eventListeners[it]).isEmpty()
+        }
         val gridSegmentMock1: GridSegment = mockk()
         val gridSegmentMock2: GridSegment = mockk()
+        assertThat(subject.eventListeners).hasSize(2) // 1 for each event type
+
         subject.subscribe(gridSegmentMock1, CELL_REMOVE_CANDIDATES)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]?.first() === gridSegmentMock1).isTrue()
@@ -75,13 +90,11 @@ class ValueEventSourceTest {
         // when - unsubscribe something that did not subscribe at all, no problem
         subject.unsubscribe(gridSegmentMock2, CELL_REMOVE_CANDIDATES)
         // then
-        assertThat(subject.eventListeners).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]?.first() === gridSegmentMock1).isTrue()
         // when
         subject.unsubscribe(gridSegmentMock1, SET_CELL_VALUE)
         // then
-        assertThat(subject.eventListeners).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).hasSize(1)
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]?.first() === gridSegmentMock1).isTrue()
 
@@ -89,6 +102,8 @@ class ValueEventSourceTest {
         subject.unsubscribe(gridSegmentMock1, CELL_REMOVE_CANDIDATES)
         // then
         assertThat(subject.eventListeners[CELL_REMOVE_CANDIDATES]).isNullOrEmpty()
+        // event types should still be there
+        assertThat(subject.eventListeners).hasSize(2) // 1 for each event type
     }
 
     @Test
@@ -118,14 +133,6 @@ class ValueEventSourceTest {
         verify (exactly = 0, timeout = 100) { gridSegmentMock1.onEvent(valueEvent1) }
         verify (exactly = 1) { gridSegmentMock2.onEvent(valueEvent2) }
 
-    }
-
-    @Test
-    fun `subscription List should be thread safe`() {
-        val gridSegmentMock: GridSegment = mockk()
-        subject.subscribe(gridSegmentMock, SET_CELL_VALUE)
-        assertThat(subject.eventListeners[SET_CELL_VALUE]!!.javaClass.name)
-                .isEqualTo("java.util.concurrent.ConcurrentHashMap\$KeySetView")
     }
 
 }

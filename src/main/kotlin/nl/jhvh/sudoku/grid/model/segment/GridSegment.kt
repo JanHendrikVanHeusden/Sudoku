@@ -2,7 +2,6 @@ package nl.jhvh.sudoku.grid.model.segment
 
 import nl.jhvh.sudoku.grid.event.ValueEvent
 import nl.jhvh.sudoku.grid.event.ValueEventListener
-import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
@@ -21,7 +20,7 @@ import nl.jhvh.sudoku.util.log
  */
 abstract class GridSegment constructor(grid: Grid) : GridElement(grid), ValueEventListener {
 
-    abstract val cells: LinkedHashSet<Cell>
+    abstract val cells: Set<Cell>
 
     override fun onEvent(valueEvent: ValueEvent) {
         log().trace { "$this received event: $valueEvent" }
@@ -46,10 +45,6 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), ValueEve
                         "${GridSegment::class.simpleName}=$this" }
             }
         }
-    }
-
-    protected fun subscribeToSegmentSetValueEvents() {
-        cells.forEach { it.cellValue.subscribe(this, SET_CELL_VALUE) }
     }
 
 }

@@ -1,5 +1,7 @@
 package nl.jhvh.sudoku.grid.solve
 
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.verify
 import nl.jhvh.sudoku.format.Formattable
@@ -9,6 +11,7 @@ import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.LinkedHashSet
 import kotlin.collections.ArrayList
@@ -17,6 +20,7 @@ import kotlin.random.Random
 import kotlin.test.assertFailsWith
 
 /** grid mock and cell mocks initialized in [GridWithCellsTestBase.gridSetUp] */
+@Disabled("Event handling will be done by GridSolver - work in progress!")
 internal class SegmentValueEventHandlerTest: GridWithCellsTestBase(blockSize = 3) {
 
     private var subject = SegmentValueEventHandler()
@@ -47,13 +51,26 @@ internal class SegmentValueEventHandlerTest: GridWithCellsTestBase(blockSize = 3
         val eventSource = segmentCellValueList.random() as NonFixedValue
         val newValue = Random.nextInt(1, gridSize+1)
         val valueEvent = SetCellValueEvent(eventSource, newValue)
+        clearAllMocks(answers = false, recordedCalls = true)
+
         // when
         subject.handleSetCellValueEvent(valueEvent, segment)
+
         // then
+        // verify event source calls
+        val valueEventType = valueEvent.type
         verify (exactly = 1) { eventSource.clearValueCandidates() }
-        segment.cells.map { it.cellValue as NonFixedValue }.filter { it !== eventSource }.forEach {
-            verify (exactly = 1) { it.removeValueCandidate(newValue) }
-        }
+        verify (exactly = 1) { eventSource.unsubscribe(segment, valueEventType) }
+        verify { eventSource.cell }
+        confirmVerified(eventSource)
+
+        // verify other cellValues in the segment
+        segment.cells.map { cell -> cell.cellValue as NonFixedValue }
+                .filter { it !== eventSource }
+                .forEach { cellValue ->
+                    verify (exactly = 1) { cellValue.removeValueCandidate(newValue) }
+                    confirmVerified(cellValue)
+                }
     }
 
     @Test
@@ -62,8 +79,7 @@ internal class SegmentValueEventHandlerTest: GridWithCellsTestBase(blockSize = 3
         val nonSegementCellValueList = gridMock.cellList.minus(segment.cells)
         // just grab a few random cells not in the segment; not necessary to test all 72 cells
         for (x in 1..5) {
-            val eventSourceCell = nonSegementCellValueList.random()
-            val eventSource = eventSourceCell.cellValue
+            val eventSource = nonSegementCellValueList.random().cellValue
             val newValue = Random.nextInt(1, gridSize+1)
             val valueEvent = SetCellValueEvent(eventSource, newValue)
             // when, then

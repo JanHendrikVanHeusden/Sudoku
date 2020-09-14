@@ -19,6 +19,7 @@ import nl.jhvh.sudoku.util.requireAndLog
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
+import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
 val VALUE_UNKNOWN: Int? = null
 
@@ -26,6 +27,16 @@ val VALUE_UNKNOWN: Int? = null
 sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), ValueEventSource {
 
     final override val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>> = ConcurrentHashMap()
+
+    final override fun initEventListeners() {
+        ValueEventType.values().forEach {
+            eventListeners.putIfAbsent(it, ConcurrentHashSet())
+        }
+    }
+
+    init {
+        initEventListeners()
+    }
 
     /**
      * The mutable, numeric or unknown value of this [Cell], observed in case of for non-fixed value.
@@ -119,7 +130,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
         // synchronizedSet gives better read consistency, but slightly worse write performance,
         // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
-        private val valueCandidates: MutableSet<Int> = ConcurrentHashMap.newKeySet(if (isFixed) 0 else grid.gridSize)
+        private val valueCandidates: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
 
         init {
             valueCandidates.addAll(intRangeSet(CELL_MIN_VALUE, grid.maxValue))

@@ -17,15 +17,12 @@ class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
 
     val colRef: String = indexToColRef(colIndex)
 
-    override val cells: LinkedHashSet<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize).map { grid.findCell(colIndex = colIndex, rowIndex = it) })
+    override val cells: Set<Cell> = LinkedHashSet(incrementFromZero(grid.gridSize)
+            .map { grid.findCell(colIndex = colIndex, rowIndex = it) })
 
     /** Technical [toString] value; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: [colIndex=$colIndex] [colRef=$colRef]"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
-
-    init {
-        subscribeToSegmentSetValueEvents()
-    }
 
 }
