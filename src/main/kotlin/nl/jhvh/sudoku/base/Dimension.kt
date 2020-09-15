@@ -1,12 +1,6 @@
 package nl.jhvh.sudoku.base
 
 /**
- * Minimal allowed base dimension of a [Block] = [MIN_BLOCK_SIZE].
- *  * 1 dimension only: we only support square Sudoku's (blocks of 2x2, 3x3, 4x4 etc.); so no support for, say, 2x3 block.
- */
-const val MIN_BLOCK_SIZE: Int = 2
-
-/**
  * Arbitrary maximal allowed base dimension of a [Block] = 100.
  *  * This is used only to avoid too large Sudokus being constructed that would do nothing but clog memory and CPU.
  *  * The value may be too high yet, depending on JVM settings etc.

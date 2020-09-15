@@ -169,7 +169,8 @@ internal class CellRefTest {
                     "Too high value [100] for row index! Block size asked for is higher than 100")
         }
         // println(indexToRowRef(maxBlockSize-1))
-        val maxRowRef = "CV" // corresponds with max block size = 100, should be ok        assertThat(CellRef(maxRowRef, "1")).isNotNull
+        val maxRowRef = "CV" // corresponds with max block size = 100, should be ok
+        assertThat(CellRef(maxRowRef, "1")).isNotNull
         val tooHighRowRef = "CW" // rowRefMaxBlockSize + 1; should fail
         with(assertFailsWith(IllegalArgumentException::class) {CellRef(tooHighRowRef, "67")}) {
             assertThat(this.message).isEqualTo(
