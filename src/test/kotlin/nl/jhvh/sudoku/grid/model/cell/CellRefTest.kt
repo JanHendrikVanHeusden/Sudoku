@@ -93,16 +93,16 @@ internal class CellRefTest {
         assertThat(CellRef(0, 25).rowRef).isEqualTo("Z")
         assertThat(CellRef(0, 26).rowRef).isEqualTo("AA")
         // given, when
-        with (CellRef(1500, 789)) {
+        with (CellRef(80, 49)) {
             // then:  790 = ADJ (1 based), so 789 zero based -> ADJ
-            assertThat(this.rowRef).isEqualTo("ADJ")
-            assertThat(this.colRef).isEqualTo("1501")
-            assertThat(this.cellRef).isEqualTo("ADJ1501")
+            assertThat(this.rowRef).isEqualTo("AX")
+            assertThat(this.colRef).isEqualTo("81")
+            assertThat(this.cellRef).isEqualTo("AX81")
         }
         // given, when, then
-        assertThat(CellRef(1500, 789).rowRef).isEqualTo("ADJ")
+        assertThat(CellRef(80, 49).rowRef).isEqualTo("AX")
         // given
-        for (y in 25..800) {
+        for (y in 25..99) {
             // when
             val rowRef = CellRef(0, y).rowRef
             val yFromRef1 = CellRef(rowRef = rowRef, colRef = "1").y
@@ -156,37 +156,36 @@ internal class CellRefTest {
             assertThat(this.message).isEqualTo("Negative row index [${Int.MIN_VALUE}] is not allowed")
         }
 
-        val maxBlockSize = 46340
+        val maxBlockSize = 100
         assertThat(CellRef(maxBlockSize-1,maxBlockSize-1)).isNotNull
 
         // Too large indices
         with(assertFailsWith(IllegalArgumentException::class) {CellRef(maxBlockSize, 10)}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [46340] for column index! Block size asked for is higher than 46340")
+                    "Too high value [100] for column index! Block size asked for is higher than 100")
         }
         with(assertFailsWith(IllegalArgumentException::class) {CellRef(10, maxBlockSize)}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [46340] for row index! Block size asked for is higher than 46340")
+                    "Too high value [100] for row index! Block size asked for is higher than 100")
         }
         // println(indexToRowRef(maxBlockSize-1))
-        val BPNH = "BPNH" // causes the max block size, should be ok
-        assertThat(CellRef(BPNH, "1")).isNotNull
-        val BPNI = "BPNI" // rowRefMaxBlockSize + 1; should fail
-        with(assertFailsWith(IllegalArgumentException::class) {CellRef(BPNI, "67")}) {
+        val maxRowRef = "CV" // corresponds with max block size = 100, should be ok        assertThat(CellRef(maxRowRef, "1")).isNotNull
+        val tooHighRowRef = "CW" // rowRefMaxBlockSize + 1; should fail
+        with(assertFailsWith(IllegalArgumentException::class) {CellRef(tooHighRowRef, "67")}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [$BPNI] for row reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+                    "Too high value [$tooHighRowRef] for row reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
-        with(assertFailsWith(IllegalArgumentException::class) {CellRef("${BPNI}88")}) {
+        with(assertFailsWith(IllegalArgumentException::class) {CellRef("${tooHighRowRef}88")}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [$BPNI] for row reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+                    "Too high value [$tooHighRowRef] for row reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class) {CellRef("skjhahakjajkajhuihsajnshynmklsjfgtio88")}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [SKJHAHAKJAJKAJHUIHSAJNSHYNMKLSJFGTIO] for row reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+                    "Too high value [SKJHAHAKJAJKAJHUIHSAJNSHYNMKLSJFGTIO] for row reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class) {CellRef("x", "${maxBlockSize+1}")}) {
             assertThat(this.message).isEqualTo(
-                    "Too high value [${maxBlockSize+1}] for column reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+                    "Too high value [${maxBlockSize+1}] for column reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
 
         // empty or blank references
@@ -218,21 +217,26 @@ internal class CellRefTest {
     }
 
         @Test
-    fun `test testHashCode`() {
-        with (CellRef(8, 11)) {
-            assertThat(this.hashCode())
-                    // stays the same when calculated again
-                    .isEqualTo(hashCode())
-                    .isEqualTo(CellRef(8, 11).hashCode())
+        fun `test testHashCode`() {
+            with (CellRef(8, 11)) {
+                assertThat(this.hashCode())
+                        // stays the same when calculated again
+                        .isEqualTo(hashCode())
+                        .isEqualTo(CellRef(8, 11).hashCode())
+            }
+            val expected = CellRef("CU23")
+            with (CellRef(22, 98)) {
+                assertThat(this.hashCode())
+                        .`as`("hashCode() should be equal! actual = $this, expected = $expected")
+                        .isEqualTo(expected.hashCode())
+                        .`as`("hashCode() should be equal! actual = $this, expected = $expected")
+                        .isEqualTo(CellRef("cu23").hashCode())
+                        .`as`("hashCode() should be equal! actual = $this, expected = $expected")
+                        .isEqualTo(CellRef("CU", "23").hashCode())
+                        .`as`("hashCode() should be equal! actual = $this, expected = $expected")
+                        .isEqualTo(CellRef("cU", "23").hashCode())
+            }
         }
-        with (CellRef(120, 815)) {
-            assertThat(this.hashCode())
-                    .isEqualTo(CellRef("AEJ121").hashCode())
-                    .isEqualTo(CellRef("aej121").hashCode())
-                    .isEqualTo(CellRef("AEJ", "121").hashCode())
-                    .isEqualTo(CellRef("aEj", "121").hashCode())
-        }
-    }
 
     @Test
     fun `test testEquals`() {
@@ -242,21 +246,21 @@ internal class CellRefTest {
                     .isEqualTo(this)
                     .isEqualTo(CellRef(3, 14))
         }
-        with (CellRef(15, 789)) {
+        with (CellRef(98, 78)) {
             assertThat(this)
-                    .isEqualTo(CellRef("ADJ16"))
-                    .isEqualTo(CellRef("Adj16"))
-                    .isEqualTo(CellRef("ADJ", "16"))
-                    .isEqualTo(CellRef("adj", "16"))
+                    .isEqualTo(CellRef("CA99"))
+                    .isEqualTo(CellRef("Ca99"))
+                    .isEqualTo(CellRef("CA", "99"))
+                    .isEqualTo(CellRef("cA", "99"))
         }
     }
 
     @Test
     fun `test testToString`() {
-        with (CellRef(15, 789).toString()) {
+        with (CellRef(15, 89).toString()) {
             assertThat(this)
                     .startsWith("CellRef ")
-                    .contains("x=15", "y=789", "rowRef='ADJ'", "colRef='16'", "cellRef='ADJ16'")
+                    .contains("x=15", "y=89", "rowRef='CL'", "colRef='16'", "cellRef='CL16'")
         }
     }
 
@@ -313,16 +317,16 @@ internal class CellRefTest {
         assertThat(rowRefToIndex("AA")).isEqualTo(26)
         assertThat(rowRefToIndex("AB")).isEqualTo(27)
 
-        val maxBlockSize = 46340
+        val maxBlockSize = 100
         // println(indexToRowRef(maxBlockSize-1))
-        val BPNH = "BPNH" // causes the max block size, should be ok
-        val BPNI = "BPNI" // rowRefMaxBlockSize + 1; should fail
-        assertThat(rowRefToIndex(BPNH)).isEqualTo(maxBlockSize-1) // rowIndex is zero based
-        with(assertFailsWith(IllegalArgumentException::class, { rowRefToIndex(BPNI) })) {
-            assertThat(this.message).isEqualTo("Too high value [BPNI] for row reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+        val maxRowRef = "CV" // causes the max block size = 100, should be ok
+        val tooHighRowRef = "CW" // rowRefMaxBlockSize + 1; should fail
+        assertThat(rowRefToIndex(maxRowRef)).isEqualTo(maxBlockSize-1) // rowIndex is zero based
+        with(assertFailsWith(IllegalArgumentException::class, { rowRefToIndex(tooHighRowRef) })) {
+            assertThat(this.message).isEqualTo("Too high value [CW] for row reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { rowRefToIndex("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ") })) {
-            assertThat(this.message).isEqualTo("Too high value [ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ] for row reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+            assertThat(this.message).isEqualTo("Too high value [ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ] for row reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { rowRefToIndex("A A") })) {
             assertThat(this.message).startsWith("Invalid format, can not parse row reference [A A].")
@@ -337,15 +341,15 @@ internal class CellRefTest {
         assertThat(indexToRowRef(0)).isEqualTo("A")
         assertThat(indexToRowRef(25)).isEqualTo("Z")
         assertThat(indexToRowRef(26)).isEqualTo("AA")
-        val maxBlockSize = 46340
-        val BPNH = "BPNH" // correspondes with max block size, should be ok
-        assertThat(indexToRowRef(maxBlockSize-1)).isEqualTo(BPNH)
+        val maxBlockSize = 100
+        val maxRowRef = "CV" // corresponds with max block size = 100, should be ok
+        assertThat(indexToRowRef(maxBlockSize-1)).isEqualTo(maxRowRef)
 
         with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(maxBlockSize) })) {
-            assertThat(this.message).isEqualTo("Too high value [46340] for row index! Block size asked for is higher than 46340")
+            assertThat(this.message).isEqualTo("Too high value [100] for row index! Block size asked for is higher than 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(Int.MAX_VALUE) })) {
-            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for row index! Block size asked for is higher than 46340")
+            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for row index! Block size asked for is higher than 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { indexToRowRef(-1) })) {
             assertThat(this.message).isEqualTo("Negative row index [-1] is not allowed")
@@ -360,16 +364,16 @@ internal class CellRefTest {
         assertThat(colRefToIndex("1")).isEqualTo(0)
         assertThat(colRefToIndex("24")).isEqualTo(23)
         assertThat(colRefToIndex(" \t2\n")).isEqualTo(1)
-        assertThat(colRefToIndex("14528")).isEqualTo(14527)
+        assertThat(colRefToIndex("99")).isEqualTo(98)
 
-        val maxBlockSize = 46340
+        val maxBlockSize = 100
         assertThat(colRefToIndex("$maxBlockSize")).isEqualTo(maxBlockSize-1)
 
         with(assertFailsWith(IllegalArgumentException::class, { colRefToIndex("${maxBlockSize+1}") })) {
-            assertThat(this.message).isEqualTo("Too high value [46341] for column reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+            assertThat(this.message).isEqualTo("Too high value [101] for column reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { colRefToIndex("1345865952315245454454544234545445412789798464662126") })) {
-            assertThat(this.message).isEqualTo("Too high value [1345865952315245454454544234545445412789798464662126] for column reference! Block size asked for is [46341] or higher but must be between 1 and 46340")
+            assertThat(this.message).isEqualTo("Too high value [1345865952315245454454544234545445412789798464662126] for column reference! Block size asked for is [101] or higher but must be between 1 and 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { colRefToIndex("A A") })) {
             assertThat(this.message).startsWith("Invalid format, can not parse column reference [A A].")
@@ -378,17 +382,17 @@ internal class CellRefTest {
 
     @Test
     fun`test CellRefCalculation - indexToColRef`() {
-        for (colIndex in 0..100) {
+        for (colIndex in 0..99) {
             assertThat(indexToColRef(colIndex)).isEqualTo((colIndex+1).toString())
         }
-        val maxBlockSize = 46340
+        val maxBlockSize = 100
         assertThat(indexToColRef(maxBlockSize-1)).isEqualTo(maxBlockSize.toString())
 
         with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(maxBlockSize) })) {
-            assertThat(this.message).isEqualTo("Too high value [46340] for column index! Block size asked for is higher than 46340")
+            assertThat(this.message).isEqualTo("Too high value [100] for column index! Block size asked for is higher than 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(Int.MAX_VALUE) })) {
-            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for column index! Block size asked for is higher than 46340")
+            assertThat(this.message).isEqualTo("Too high value [${Int.MAX_VALUE}] for column index! Block size asked for is higher than 100")
         }
         with(assertFailsWith(IllegalArgumentException::class, { indexToColRef(-1) })) {
             assertThat(this.message).isEqualTo("Negative column index [-1] is not allowed")

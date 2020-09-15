@@ -7,11 +7,13 @@ package nl.jhvh.sudoku.base
 const val MIN_BLOCK_SIZE: Int = 2
 
 /**
- * Hypothetical maximal allowed base dimension of a [Block] = [MAX_BLOCK_SIZE].
- *  * This is the maximum number that, when squared, does not cause overflow of [Integer.MAX_VALUE] (2_147_483_647).
- *    Does not have much practical meaning, though...
+ * Arbitrary maximal allowed base dimension of a [Block] = 100.
+ *  * This is used only to avoid too large Sudokus being constructed that would do nothing but clog memory and CPU.
+ *  * The value may be too high yet, depending on JVM settings etc.
+ *  * The theoretical maximum would be 46340: this is the maximum number that, when squared, does not cause overflow
+ *    of [Integer.MAX_VALUE] (2_147_483_647). Does not have much practical meaning, though...
  */
-const val MAX_BLOCK_SIZE: Int = 46340
+const val MAX_BLOCK_SIZE: Int = 100
 
 /**
  * Default base dimension of a [Block] = [DEFAULT_BLOCK_SIZE].
