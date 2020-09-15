@@ -68,7 +68,7 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
     protected val segmentsByCellValue: Map<CellValue, Set<GridSegment>> by lazy {
         val segsByCellValue: MutableMap<CellValue, MutableSet<GridSegment>> = HashMap(grid.cellList.size)
         segments.forEach { segment ->
-            segment.cells.forEach {cell ->
+            segment.cells.forEach { cell ->
                 // initialCapacity = 3: one for each row, column and block a cell is part of
                 segsByCellValue.putIfAbsent(cell.cellValue, HashSet(3))
                 segsByCellValue[cell.cellValue]!!.add(segment)
@@ -89,20 +89,25 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
     override fun handleSetCellValueEvent(valueEvent: SetCellValueEvent) {
         val eventSource = valueEvent.eventSource
         val eventSourceSegments: Set<GridSegment> = segmentsByCellValue[eventSource]!!
+        if (eventSource is NonFixedValue) {
+            eventSource.clearValueCandidates()
+        }
         eventSourceSegments.forEach { gridSegment ->
                     gridSegment.cells.forEach { cell ->
-                        if (cell.cellValue is NonFixedValue) {
-                            if (cell.cellValue === eventSource) {
-                                cell.cellValue.clearValueCandidates()
-                            } else {
+                        if (cell.cellValue !== eventSource) {
+                            if (cell.cellValue is NonFixedValue) {
+                                // For cells that are in the same Block AND in either the same Row or same Col
+                                // as the eventSource, method removeValueCandidate will be called more than once.
+                                // Making cells unique beforehand would probably be more costly (in terms of memory
+                                // and/or performance) than just calling this method more than once.
+                                // Method removeValueCandidate should be lenient for this, and ignore redundant calls.
                                 cell.cellValue.removeValueCandidate(valueEvent.newValue)
                             }
                         }
-                        if (cell.cellValue === eventSource) {
-                            cell.cellValue.unsubscribe(this, valueEvent.type)
-                        }
                     }
                 }
+        // Once set, the cellValue should not produce any events anymore, so we are not interested anymore: unsubscribe
+        eventSource.unsubscribe(this, valueEvent.type)
     }
 
     override fun handleRemoveCandidatesEvent(valueEvent: CellRemoveCandidatesEvent) {
@@ -156,6 +161,7 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
                 // not expected to be called, so warning:
                 // it would mean we subscribed to an event type that we are not willing to handle
                 log().warn { "Unhandled event type: ${valueEvent.javaClass.simpleName}; event=$valueEvent" }
+                return
             }
         }
         solveGrid()

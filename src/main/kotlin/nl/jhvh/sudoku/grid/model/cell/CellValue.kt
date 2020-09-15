@@ -130,6 +130,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
         // synchronizedSet gives better read consistency, but slightly worse write performance,
         // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
+        /** The [MutableSet] of remaining possible values if the [NonFixedValue] is not solved yet; empty if it was solved. */
         private val valueCandidates: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
 
         init {
@@ -142,6 +143,13 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         //     it would be too much hassle ( & too much performance penalty) to create a new immutableSet on every get.
         fun getValueCandidates(): Set<Int> = valueCandidates
 
+        /**
+         * Removes the given [value] from the [valueCandidates], if present.
+         * If so, a [CellRemoveCandidatesEvent] is published.
+         *  * Method [removeValueCandidate] is lenient for being called multiple times, and does not publish an event
+         *    when nothing is removed.
+         * @return true if the [value] was actually removed from [valueCandidates]; false otherwise.
+         */
         fun removeValueCandidate(value: Int): Boolean {
             // using getValueCandidates() instead of valueCandidates for testability
             if (getValueCandidates().contains(value)) {
@@ -154,6 +162,15 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
             return false
         }
 
+        /**
+         * Remove the content of [valueCandidates], if not empty.
+         * If [valueCandidates] was not empty, a [CellRemoveCandidatesEvent] is published.
+         *  * Method [removeValueCandidate] is lenient for being called multiple times, and normally it does not publish
+         *    an event when nothing is removed.
+         *  * However, the method is not synchronized or otherwise guarded (deliberately),
+         *    so in race conditions a [CellRemoveCandidatesEvent] might be published even if [valueCandidates] was already
+         *    emptied concurrently.
+         */
         fun clearValueCandidates() {
             // using getValueCandidates() instead of valueCandidates for testability
             if (getValueCandidates().isEmpty()) {
