@@ -1,9 +1,10 @@
 package nl.jhvh.sudoku.grid.solve
 
 import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
@@ -25,6 +26,8 @@ import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import nl.jhvh.sudoku.grid.model.segment.Row
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.PREPARED_FOR_SOLVING
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,20 +46,25 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
         setUpValueCandidates()
     }
 
+    /** Used by [clearAllGridMocks] */
+    override val allGridMocks: Array<Any> by lazy {
+        val mockkList = mutableListOf<Any>()
+        mockkList.addAll(super.allGridMocks)
+        mockkList.addAll(gridMock.cellList.map { it.cellValue }.filter { it is FixedValue })
+        mockkList.toTypedArray()
+    }
+
     @Test
     fun `GridSolver initialization when Grid is set`() {
-        // given - subclassed to make protected values reachable
-        val subject = object : GridSolver() {
-            fun subscribedToEvents() = subscribedToEvents
-            fun preparedForSolving() = preparedForSolving
-        }
-        assertThat(subject.subscribedToEvents()).isFalse()
-        assertThat(subject.preparedForSolving()).isFalse()
+        // given
+        val subject = GridSolver()
+        assertThat(subject.solvingPhase).isEqualTo(NOT_STARTED)
+        assertThat(subject.isSolving).isFalse()
         // when
         subject.gridToSolve = gridMock
         // then
-        assertThat(subject.subscribedToEvents()).isFalse()
-        assertThat(subject.preparedForSolving()).isTrue()
+        assertThat(subject.isSolving).isFalse()
+        assertThat(subject.solvingPhase).isEqualTo(PREPARED_FOR_SOLVING)
         val expectedUnSolved = gridMock.cellList
                 .filter { it.cellValue is NonFixedValue }
                 .map { it.cellValue as NonFixedValue }
@@ -112,11 +120,8 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                 .forEach { cellValue ->
 
                     verify (exactly = 1) { cellValue.subscribe(spiedSubject, SET_CELL_VALUE) }
-                    verify (atLeast = 1) { cellValue.isFixed }
 
                     if (cellValue is NonFixedValue) {
-                        verify { cellValue.value }
-                        verify { cellValue.cell }
                         confirmVerified(cellValue)
                     }
                 }
@@ -128,7 +133,6 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                 .filter { it.isFixed }
                 .forEach { fixedValue ->
 
-                    verify (atLeast = 1) { fixedValue.isFixed }
                     verify (exactly = 1) { fixedValue.subscribe(spiedSubject, SET_CELL_VALUE) }
 
                     val eventCapturer: CapturingSlot<SetCellValueEvent> = slot()
@@ -137,8 +141,6 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                     assertThat(event.eventSource).isEqualTo(fixedValue)
                     assertThat(event.newValue).isEqualTo(fixedValue.value)
 
-                    verify { fixedValue.value }
-                    verify { fixedValue.cell }
                     confirmVerified(fixedValue)
                 }
     }
@@ -201,7 +203,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - all params explicitly specified, 1st param non-default
         subject.subscribeForTest(excludeFixed = false, allValueEventTypes)
         // then
@@ -215,7 +217,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - all params default
         subject.subscribeForTest()
         // then
@@ -226,13 +228,12 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                             verify(exactly = 1) { cellValue.subscribe(subject, eventType) }
                         }
                     }
-                    verify { cellValue.isFixed }
                     confirmVerified(cellValue)
                 }
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - all params explicitly specified, both params default values
         subject.subscribeForTest(excludeFixed = true, allValueEventTypes)
         // then
@@ -243,13 +244,12 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                             verify(exactly = 1) { cellValue.subscribe(subject, eventType) }
                         }
                     }
-                    verify { cellValue.isFixed }
                     confirmVerified(cellValue)
                 }
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - excludeFixed specified: non default, so not excluding fixed ones
         subject.subscribeForTest(excludeFixed = false)
         // then
@@ -263,7 +263,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - both params specified, both non-default
         val eventTypeSetCellValue = arrayOf(SET_CELL_VALUE)
         subject.subscribeForTest(excludeFixed = false, eventTypeSetCellValue)
@@ -276,7 +276,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
 
         // given
         subject = constructSubject()
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
         // when - event type specified, non-default
         val eventTypeRemoveCandidatesEvent = arrayOf(CELL_REMOVE_CANDIDATES)
         subject.subscribeForTest(eventTypeRemoveCandidatesEvent)
@@ -286,7 +286,6 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                     if (!cellValue.isFixed) {
                         verify(exactly = 1) { cellValue.subscribe(subject, CELL_REMOVE_CANDIDATES) }
                     }
-                    verify { cellValue.isFixed }
                     confirmVerified(cellValue)
                 }
     }
@@ -300,9 +299,11 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
         val spiedSubject = spyk(gridSolver)
         gridSolver.gridToSolve = gridMock
         every { spiedSubject.gridToSolve } returns gridSolver.gridToSolve
+
         val eventSourceCell = spiedSubject.gridToSolve!!.cellList.filter { !it.isFixed }.random()
         val eventSource = eventSourceCell.cellValue
         val newValue = Random.nextInt(1, gridMock.maxValue+1)
+        every { eventSource.value } returns newValue
         val valueEventSpyk = spyk(SetCellValueEvent(eventSource, newValue))
         val allGridSegments = gridMock.rowList + gridMock.colList + gridMock.blockList
         val touchedSegments =
@@ -320,7 +321,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                 segment.cells.map { it.cellValue }.forEach { cellValue ->
                     if (cellValue is NonFixedValue) {
                         if (cellValue === valueEventSpyk.eventSource) {
-                            verify(exactly = 1) { cellValue.clearValueCandidates() }
+                            verify(exactly = 1) { cellValue.clearValueCandidatesOnValueSet() }
                         } else {
                             // May happen twice for cells that are in same Block AND
                             // either in same Row or same Col as the eventSource
@@ -332,23 +333,19 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                     }
                     confirmVerified(cellValue)
                 }
-                verify { segment.cells }
                 confirmVerified(segment)
             }
         }
 
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
 
         // when - 1st time, includes lazy initialization: it touches all cells and segments
         spiedSubject.handleEvent(valueEventSpyk)
 
-        // then - including calls by lazy initialization
-        allGridSegments.forEach { verify { it.cells } }
-        gridMock.cellList.forEach { verify { it.cellValue } }
         // verify "real" calls (not related to lazy initialization
         verifyHandleEventCalls()
         allGridSegments.forEach { confirmVerified(it) }
-        clearAllMocks(answers = false, recordedCalls = true)
+        clearAllGridMocks()
 
         // now a few more times, without lazy initialization
         for (x in 1..3) {
@@ -359,7 +356,7 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
             // verify that nothing is done with unrelated segments & cells
             nonTouchedSegments.forEach { confirmVerified(it) }
             nonTouchedCells.forEach { confirmVerified(it) }
-            clearAllMocks(answers = false, recordedCalls = true)
+            clearAllGridMocks()
         }
     }
 
@@ -383,15 +380,21 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
     fun onEvent() {
         // given
         val gridSolver = GridSolver()
-        val spiedSubject = spyk(gridSolver)
+        val spiedSubject = spyk(gridSolver, recordPrivateCalls = true )
         gridSolver.gridToSolve = gridMock
         every { spiedSubject.gridToSolve } answers { gridSolver.gridToSolve }
+        // we only want to test the onEvent itself, so execution of solveGrid is mocked
+        // to avoid side effects outside the scope of onEvent()
         every { spiedSubject.solveGrid() } returns Unit
+        every { spiedSubject.isSolving } returns false
+        every { spiedSubject.handleSetCellValueEvent(any()) } returns Unit
+        every { spiedSubject.handleRemoveCandidatesEvent(any()) } returns Unit
 
         val eventSource = gridMock.cellList.random().cellValue
 
-        // given
-        clearAllMocks(answers = false, recordedCalls = true)
+        // given - unknown event type
+        clearAllGridMocks()
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
         val unknownValueEvent: ValueEvent = mockk(relaxed = true)
         every { unknownValueEvent.eventSource } returns eventSource
         // when
@@ -399,11 +402,13 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
         // then
         verify { spiedSubject.onEvent(unknownValueEvent) }
         verify { unknownValueEvent.toString() } // warning logged
+        verify (exactly = 0) { spiedSubject["solveGridPhase"]() } // should not be called: isSolving returns false
         confirmVerified(unknownValueEvent)
-        confirmVerified(spiedSubject) // ignored, so no further calls
+        confirmVerified(spiedSubject)
 
-        // given
-        clearAllMocks(answers = false, recordedCalls = true)
+        // given - SetCellValueEvent
+        clearAllGridMocks()
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
         val setCellValueEvent: SetCellValueEvent = mockk(relaxed = true)
         every { setCellValueEvent.eventSource } returns eventSource
         // when
@@ -411,22 +416,40 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
         // then
         verify { spiedSubject.onEvent(setCellValueEvent) }
         verify (exactly = 1) { spiedSubject.handleSetCellValueEvent(setCellValueEvent) }
-        verify (exactly = 1) { spiedSubject.solveGrid() }
+        verify { spiedSubject.isSolving }
+        verify (exactly = 0) { spiedSubject["solveGridPhase"]() } // should not be called: isSolving returns false
         confirmVerified(spiedSubject)
 
-        // given
+        // given - CellRemoveCandidatesEvent
         val nonFixedValueEventSource = gridMock.cellList.filter { !it.isFixed } .random().cellValue as NonFixedValue
         val removeCandidatesEvent: CellRemoveCandidatesEvent = mockk(relaxed = true)
         every { removeCandidatesEvent.eventSource } returns nonFixedValueEventSource
-        clearAllMocks(answers = false, recordedCalls = true)
+
+        // now pretend that we are solving; in that case, the onEvent(...) must call gridSolve()
+        every {spiedSubject.isSolving} returns true
+        clearAllGridMocks()
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
         // when
         spiedSubject.onEvent(removeCandidatesEvent)
         // then
         verify { spiedSubject.onEvent(removeCandidatesEvent) }
         verify (exactly = 1) { spiedSubject.handleRemoveCandidatesEvent(removeCandidatesEvent) }
-        verify (exactly = 1) { spiedSubject.solveGrid() }
-        confirmVerified(spiedSubject)
+        // Once solving is started, every onEvent calls solveGridPhase(), so let's verify this
+        verify { spiedSubject.isSolving }
+        val dummyArray: Array<ValueEvent> = emptyArray()
+        verify (exactly = 1) { spiedSubject["solveGridPhase"]() }
 
+        // solveGridPhase also called with SetCellValueEvent
+        clearAllGridMocks()
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
+        spiedSubject.onEvent(setCellValueEvent)
+        verify { spiedSubject["solveGridPhase"]() }
+
+        // solveGrid not called with unknown event
+        clearAllGridMocks()
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
+        spiedSubject.onEvent(unknownValueEvent)
+        verify (exactly = 0) { spiedSubject["solveGridPhase"]() }
     }
 
     private fun setUpFixedValues() {
@@ -448,6 +471,10 @@ internal class GridSolverTest: GridWithCellsAndSegmentsTestBase(blockSize = 3) {
                     every { fixedValueMock.value } returns cellMock.rowIndex
                     every { fixedValueMock.toString() } returns "FixedValue mock;" +
                             " rowIndex=${fixedValueMock.cell.rowIndex}, colIndex=${fixedValueMock.cell.colIndex}, value=${fixedValueMock.value}"
+
+                    excludeRecords { fixedValueMock.isFixed }
+                    excludeRecords { fixedValueMock.value }
+                    excludeRecords { fixedValueMock.cell }
                 }
     }
 

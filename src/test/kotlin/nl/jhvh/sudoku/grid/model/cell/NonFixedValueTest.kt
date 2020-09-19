@@ -1,17 +1,20 @@
 package nl.jhvh.sudoku.grid.model.cell
 
 import io.mockk.CapturingSlot
+import io.mockk.clearMocks
+import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
+import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
-import nl.jhvh.sudoku.util.intRangeSet
 import nl.jhvh.sudoku.util.log
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
@@ -63,7 +66,7 @@ internal class NonFixedValueTest {
     @Test
     fun `setValue should fail with 'not solvable' when trying to set a value while no such value candidate is present`() {
         // given
-        val valueRange = intRangeSet(1, maxValue)
+        val valueRange = (1..maxValue).toList()
         val removedCandidate = 4
         val valuesWithoutRemovedCandidate = valueRange.stream().filter { it != removedCandidate }.toList().toSet()
         val spiedSubject = spyk(NonFixedValue(cellMock))
@@ -94,14 +97,15 @@ internal class NonFixedValueTest {
         // (also based on experience with other projects)...
         //
         // given
-        val subject = spyk(NonFixedValue(cellMock))
-        assertThat(subject.value).isNull()
+        val subject = NonFixedValue(cellMock)
+        val spiedSubject = spyk(subject)
+        assertThat(spiedSubject.value).isNull()
         val newValue = 5
         // when
-        subject.setValue(newValue)
+        spiedSubject.setValue(newValue)
         // then
         // Fails here ! AssertionError: Verification failed: call 1 of 1: NonFixedValue(#4).publish(any())) was not called
-        verify (timeout = 1000) {subject.publish(any())}
+        verify (timeout = 1000) {spiedSubject.publish(any())}
         // ...
     }
 
@@ -180,9 +184,144 @@ internal class NonFixedValueTest {
     }
 
     @Test
+    fun removeValueCandidate() {
+        // given
+        val spiedSubject = spyk(subject)
+        every { spiedSubject.publish(any()) } returns Unit
+
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs(1..gridSize)
+        var toRemove = setOf(2, 3)
+
+        // when
+        var removedIntArray = toRemove.toIntArray()
+        spiedSubject.removeValueCandidate(*removedIntArray)
+
+        // then
+        var eventCapturer: CapturingSlot<CellRemoveCandidatesEvent> = slot()
+        verify { spiedSubject.removeValueCandidate(*removedIntArray) }
+        verify (exactly = 1) { spiedSubject.publish(capture(eventCapturer)) }
+        var publishedEvent = eventCapturer.captured
+        assertThat(publishedEvent.eventSource).isEqualTo(spiedSubject)
+        assertThat(publishedEvent.removedValues).isEqualTo(toRemove)
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs((1..gridSize)-toRemove)
+
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, verificationMarks = true)
+
+        // given - should also accept values that are removed already or out of range
+        toRemove = setOf(7, gridSize+2, 2)
+
+        // when
+        removedIntArray = toRemove.toIntArray()
+        spiedSubject.removeValueCandidate(*removedIntArray)
+
+        // then
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs((1..gridSize)- setOf(2, 3, 7))
+
+        eventCapturer = slot()
+        verify { spiedSubject.removeValueCandidate(*removedIntArray) }
+        verify (exactly = 1) { spiedSubject.publish(capture(eventCapturer)) }
+        publishedEvent = eventCapturer.captured
+        assertThat(publishedEvent.eventSource).isEqualTo(spiedSubject)
+        assertThat(publishedEvent.removedValues).isEqualTo(setOf(7))
+
+        verify { spiedSubject.getValueCandidates() }
+        confirmVerified(spiedSubject)
+
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, verificationMarks = true)
+
+        // given - ignore empty input
+        toRemove = setOf()
+
+        // when
+        removedIntArray = toRemove.toIntArray()
+        spiedSubject.removeValueCandidate(*removedIntArray)
+
+        // then
+        verify { spiedSubject.removeValueCandidate(*removedIntArray) }
+        confirmVerified(spiedSubject) // nothing else called
+        // unchanged
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs((1..gridSize)- setOf(2, 3, 7))
+
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, verificationMarks = true)
+
+        // given - everything out of range
+        toRemove = setOf(gridSize+1, gridSize+10, -3)
+
+        // when
+        removedIntArray = toRemove.toIntArray()
+        spiedSubject.removeValueCandidate(*removedIntArray)
+
+        // then
+        verify { spiedSubject.removeValueCandidate(*removedIntArray) }
+        verify { spiedSubject.getValueCandidates() }
+        verify (exactly = 0) { spiedSubject.publish(any()) }
+        confirmVerified(spiedSubject)
+        // unchanged
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs((1..gridSize)- setOf(2, 3, 7))
+    }
+
+    @Test
+    fun getValueCandidates() {
+        assertThat(subject.getValueCandidates()).hasSameElementsAs(1..gridSize)
+    }
+
+    @Test
+    fun `clearValueCandidatesOnValueSet - value was set`() {
+        // given
+        val spiedSubject = spyk(subject)
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs(1..gridSize)
+        every { spiedSubject.publish(any()) } returns Unit
+        excludeRecords { spiedSubject.value }
+        excludeRecords { spiedSubject.getValueCandidates() }
+
+        val value = 3
+        every { spiedSubject.value } returns value
+
+        // when
+        spiedSubject.clearValueCandidatesOnValueSet()
+
+        // then
+        val eventCapturer: CapturingSlot<CellRemoveCandidatesEvent> = slot()
+        verify { spiedSubject.clearValueCandidatesOnValueSet() }
+        verify (exactly = 1) { spiedSubject.publish(capture(eventCapturer)) }
+        confirmVerified(spiedSubject)
+
+        val publishedEvent = eventCapturer.captured
+        assertThat(publishedEvent.eventSource).isEqualTo(spiedSubject)
+        assertThat(publishedEvent.removedValues).isEqualTo(((1..gridSize)-value).toSet())
+        assertThat(spiedSubject.getValueCandidates()).isEqualTo(setOf(value))
+
+    }
+
+    @Test
+    fun `clearValueCandidatesOnValueSet - no value was set`() {
+        // given
+        val spiedSubject = spyk(subject)
+        every { spiedSubject.publish(any()) } returns Unit
+        excludeRecords { spiedSubject.value }
+        excludeRecords { spiedSubject.getValueCandidates() }
+
+        assertThat(spiedSubject.getValueCandidates()).hasSameElementsAs(1..gridSize)
+
+        // when
+        spiedSubject.clearValueCandidatesOnValueSet() // no value set
+
+        // then
+        val eventCapturer: CapturingSlot<CellRemoveCandidatesEvent> = slot()
+        verify { spiedSubject.clearValueCandidatesOnValueSet() }
+        verify (exactly = 1) { spiedSubject.publish(capture(eventCapturer)) }
+        confirmVerified(spiedSubject)
+
+        val publishedEvent = eventCapturer.captured
+        assertThat(publishedEvent.eventSource).isEqualTo(spiedSubject)
+        assertThat(publishedEvent.removedValues).isEqualTo((1..gridSize).toSet())
+        assertThat(spiedSubject.getValueCandidates()).isEmpty()
+
+    }
+
+    @Test
     fun isSet() {
         // given
-        subject = NonFixedValue(cellMock)
         assertThat(subject.value).isNull()
         assertThat(subject.value === VALUE_UNKNOWN).isTrue()
         // when, then

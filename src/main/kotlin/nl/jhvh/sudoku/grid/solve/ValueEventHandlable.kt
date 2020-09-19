@@ -5,7 +5,7 @@ import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 
 interface ValueEventHandlable {
 
-    fun handleSetCellValueEvent(valueEvent: SetCellValueEvent)
+    fun handleSetCellValueEvent(event: SetCellValueEvent)
 
-    fun handleRemoveCandidatesEvent(valueEvent: CellRemoveCandidatesEvent)
+    fun handleRemoveCandidatesEvent(event: CellRemoveCandidatesEvent)
 }

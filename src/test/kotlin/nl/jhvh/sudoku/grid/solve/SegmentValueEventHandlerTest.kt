@@ -59,7 +59,7 @@ internal class SegmentValueEventHandlerTest: GridWithCellsTestBase(blockSize = 3
         // then
         // verify event source calls
         val valueEventType = valueEvent.type
-        verify (exactly = 1) { eventSource.clearValueCandidates() }
+        verify (exactly = 1) { eventSource.clearValueCandidatesOnValueSet() }
         verify (exactly = 1) { eventSource.unsubscribe(segment, valueEventType) }
         verify { eventSource.cell }
         confirmVerified(eventSource)

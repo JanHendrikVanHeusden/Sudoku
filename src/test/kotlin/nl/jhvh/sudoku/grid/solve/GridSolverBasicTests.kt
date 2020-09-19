@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.Grid
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGULAR_VALUES
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,6 +40,27 @@ internal class GridSolverBasicTests {
     }
 
     @Test
+    fun isSolved() {
+        // given
+        val subject = object : GridSolver() {
+            fun setPhase(phase: GridSolvingPhase) {
+                this.solvingPhase = phase
+            }
+        }
+        assertThat(subject.solvingPhase).isEqualTo(NOT_STARTED)
+        assertThat(subject.solvingPhase.isSolving).isFalse()
+        // when, then
+        assertThat(subject.isSolving).isFalse()
+
+        // given
+        subject.setPhase(SOLVE_SINGULAR_VALUES)
+        assertThat(subject.solvingPhase).isEqualTo(SOLVE_SINGULAR_VALUES)
+        assertThat(subject.solvingPhase.isSolving).isTrue()
+        // when, then
+        assertThat(subject.isSolving).isTrue()
+    }
+
+    @Test
     fun `set Grid to null should fail`() {
         val spiedSubject = spyk(subject)
         // given, when, then
@@ -56,7 +79,7 @@ internal class GridSolverBasicTests {
 
         spiedSubject.gridToSolve = grid1
         assertThat(spiedSubject.gridToSolve === grid1).isTrue()
-        clearMocks(spiedSubject, answers = false, recordedCalls = true)
+        clearMocks(spiedSubject, answers = false, recordedCalls = true, exclusionRules = false)
 
         // when, then
         assertFailsWith<IllegalStateException> { spiedSubject.gridToSolve = grid2 }

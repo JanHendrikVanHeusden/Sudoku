@@ -1,6 +1,7 @@
 package nl.jhvh.sudoku.grid
 
 import io.mockk.every
+import io.mockk.excludeRecords
 import io.mockk.mockk
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.cell.Cell
@@ -37,6 +38,8 @@ internal abstract class GridWithCellsAndSegmentsTestBase(blockSize: Int): GridWi
             every { row.toString() } returns "Row mock; rowIndex=${row.rowIndex}"
             rowCells.addAll(gridMock.cellList.filter { it.rowIndex == rowIndex })
             every {row.cells} returns rowCells
+            excludeRecords { row.rowIndex }
+            excludeRecords { row.cells }
             rowList.add(row)
         }
         gridMockRowList = rowList
@@ -52,6 +55,8 @@ internal abstract class GridWithCellsAndSegmentsTestBase(blockSize: Int): GridWi
             every { col.toString() } returns "Col mock; rowIndex=${col.colIndex}"
             colCells.addAll(gridMock.cellList.filter { it.colIndex == colIndex })
             every {col.cells} returns colCells
+            excludeRecords { col.colIndex }
+            excludeRecords { col.cells }
             colList.add(col)
         }
         gridMockColList = colList
@@ -76,10 +81,25 @@ internal abstract class GridWithCellsAndSegmentsTestBase(blockSize: Int): GridWi
             }
             blockCells.addAll(cells)
             every {block.cells} returns blockCells
+            excludeRecords { block.topRowIndex }
+            excludeRecords { block.bottomRowIndex }
+            excludeRecords { block.leftColIndex }
+            excludeRecords { block.rightColIndex }
+            excludeRecords { block.cells }
             blockList.add(block)
         }
         gridMockBlockList = blockList
         every { gridMock.blockList } returns gridMockBlockList
+    }
+
+    /** Used by [clearAllGridMocks] */
+    override val allGridMocks: Array<Any> by lazy {
+        val mockkList = mutableListOf<Any>()
+        mockkList.addAll(super.allGridMocks)
+        mockkList.addAll(gridMock.rowList)
+        mockkList.addAll(gridMock.colList)
+        mockkList.addAll(gridMock.blockList)
+        mockkList.toTypedArray()
     }
 
 }

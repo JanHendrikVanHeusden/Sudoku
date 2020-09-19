@@ -9,7 +9,6 @@ import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
 import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
-import nl.jhvh.sudoku.grid.model.Grid.GridBuilder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -199,71 +198,4 @@ private fun validateCellCoordinates(colIndex: Int, rowIndex: Int, gridSize: Int)
 fun validateValueRange(value: Int, maxValue: Int) {
     require(value >= CELL_MIN_VALUE) { "A cell value must be $CELL_MIN_VALUE or higher but is $value" }
     require(value <= maxValue) { "A cell value must be at most $maxValue but is $value" }
-}
-
-
-fun main() {
-    val gridBuilder = GridBuilder()
-    // build an easy to solve grid
-    val grid = gridBuilder
-            .fix("A1", 5)
-            .fix("A2", 8)
-            .fix("A3", 4)
-            .fix("A4", 7)
-            .fix("A5", 2)
-            .fix("A6", 1)
-            .fix("A7", 3)
-            .fix("A8", 6)
-            .fix("A9", 9)
-            .fix("B1", 2)
-            .fix("B2", 3)
-            .fix("B5", 6)
-            .fix("B6", 4)
-            .fix("C3", 9)
-            .fix("C5", 3)
-            .fix("C6", 8)
-            .fix("C7", 4)
-            .fix("C8", 1)
-            .fix("D1", 8)
-            .fix("D2", 9)
-            .fix("D3", 6)
-            .fix("D5", 1)
-            .fix("D6", 7)
-            .fix("D8", 4)
-            .fix("E3", 5)
-            .fix("E5", 4)
-            .fix("E6", 9)
-            .fix("E8", 8)
-            .fix("E9", 7)
-            .fix("F1", 7)
-            .fix("F2", 4)
-            .fix("F3", 3)
-            .fix("F5", 5)
-            .fix("F6", 6)
-            .fix("F8", 9)
-            .fix("G3", 8)
-            .fix("G5", 7)
-            .fix("G6", 3)
-            .fix("G7", 1)
-            .fix("G8", 2)
-            .fix("H1", 4)
-            .fix("H2", 6)
-            .fix("H5", 9)
-            .fix("H6", 2)
-            .fix("I1", 3)
-            .fix("I2", 1)
-            .fix("I3", 2)
-            .fix("I4", 6)
-            .fix("I5", 8)
-            .fix("I6", 5)
-            .fix("I7", 9)
-            .fix("I8", 7)
-            .fix("I9", 4)
-            .build()
-
-    // print the formatted grid
-    println(grid)
-    grid.solveGrid()
-    println(grid)
-
 }

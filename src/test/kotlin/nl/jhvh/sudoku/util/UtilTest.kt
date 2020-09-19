@@ -25,22 +25,4 @@ class UtilTest {
         assertFailsWith<UnsupportedOperationException> { wouldBeMutableList.add(14) }
     }
 
-    @Test
-    fun intRangeSet() {
-        assertThat(intRangeSet(0, 4)).isEqualTo(sortedSetOf(0, 1, 2, 3, 4))
-        assertThat(intRangeSet(2, 5)).isEqualTo(sortedSetOf(2, 3, 4, 5))
-        assertThat(intRangeSet(0, 0)).isEqualTo(setOf(0))
-        assertThat(intRangeSet(1, 1)).isEqualTo(setOf(1))
-        assertThat(intRangeSet(5, 1)).isEmpty()
-        assertThat(intRangeSet(0, 500))
-                .startsWith(0)
-                .endsWith(500)
-                .hasSize(501)
-
-        val intRangeSet2_5 = intRangeSet(2, 5)
-        assertThat(intRangeSet2_5 is MutableSet).isTrue()
-        val wouldBeMutableSet = intRangeSet2_5 as MutableSet
-        // although it's type says it's mutable, you can not really modify it:
-        assertFailsWith<UnsupportedOperationException> { wouldBeMutableSet.add(-1) }
-    }
 }

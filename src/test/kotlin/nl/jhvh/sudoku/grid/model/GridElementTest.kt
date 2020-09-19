@@ -31,7 +31,7 @@ internal class GridElementTest {
                 }
                 override fun toString() = "GridElement for testing"
             }
-            clearMocks(gridMock, answers = false, recordedCalls = true, verificationMarks = true)
+            clearMocks(gridMock, answers = false, recordedCalls = true, verificationMarks = true, exclusionRules = false)
             // when, then
             assertThat(gridElement.maxValueLength).isEqualTo(valueLength)
             verify (exactly = 1) {gridMock.maxValueLength}

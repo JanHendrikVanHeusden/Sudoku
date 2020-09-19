@@ -19,6 +19,8 @@ class Cell(grid: Grid, val colIndex: Int, val rowIndex: Int, val fixedValue: Int
 
     val cellValue: CellValue = if (isFixed) FixedValue(this, fixedValue!!) else NonFixedValue(this)
 
+    val isSet: Boolean = cellValue.isSet
+
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName}: colIndex=$colIndex, rowIndex=$rowIndex, cellValue=[$cellValue]"
 

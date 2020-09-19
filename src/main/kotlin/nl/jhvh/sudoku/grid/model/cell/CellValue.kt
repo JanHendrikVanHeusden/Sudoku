@@ -13,9 +13,9 @@ import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.validateValueRange
 import nl.jhvh.sudoku.grid.solve.GridNotSolvableException
-import nl.jhvh.sudoku.util.intRangeSet
 import nl.jhvh.sudoku.util.log
 import nl.jhvh.sudoku.util.requireAndLog
+import java.util.Collections.unmodifiableSet
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
@@ -89,9 +89,6 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
 
         override val isSet: Boolean = true
 
-        /** Technical [toString] method; for a functional representation, see [format]  */
-        override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]}"
-
     }
 
     /** Simple value holder class to represent the non-fixed value of a [Cell]  */
@@ -134,7 +131,7 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         private val valueCandidates: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
 
         init {
-            valueCandidates.addAll(intRangeSet(CELL_MIN_VALUE, grid.maxValue))
+            valueCandidates.addAll(CELL_MIN_VALUE..grid.maxValue)
         }
 
         // Read only view on valueCandidates
@@ -144,26 +141,26 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         fun getValueCandidates(): Set<Int> = valueCandidates
 
         /**
-         * Removes the given [value] from the [valueCandidates], if present.
+         * Removes the given [values] from the [valueCandidates], if present.
          * If so, a [CellRemoveCandidatesEvent] is published.
-         *  * Method [removeValueCandidate] is lenient for being called multiple times, and does not publish an event
-         *    when nothing is removed.
-         * @return true if the [value] was actually removed from [valueCandidates]; false otherwise.
+         *  * Method [removeValueCandidate] is lenient for being called multiple times, and does not normally publish
+         *    an event when nothing is removed. In race conditions, this may happen incidentally.
+         *    No synchronization or guarding mechanism is provided to prevent this, listeners should be lenient for such conditions.
          */
-        fun removeValueCandidate(value: Int): Boolean {
-            // using getValueCandidates() instead of valueCandidates for testability
-            if (getValueCandidates().contains(value)) {
-                val oldValues = HashSet(getValueCandidates())
-                if (valueCandidates.remove(value)) {
-                    publish(CellRemoveCandidatesEvent(this, oldValues, getValueCandidates()))
-                    return true
-                }
+        fun removeValueCandidate(vararg values: Int) {
+            if (values.isEmpty()) {
+                return
             }
-            return false
+            // only publish those actually present in the candidates
+            val removeFromCandidates = values.filter { getValueCandidates().contains(it) }.toSet()
+            if (removeFromCandidates.isNotEmpty()) {
+                valueCandidates.removeAll(removeFromCandidates)
+                publish(CellRemoveCandidatesEvent(this, removeFromCandidates))
+            }
         }
 
         /**
-         * Remove the content of [valueCandidates], if not empty.
+         * If not empty, all content of [valueCandidates] are removed, except the [value] if it was set (solved) already.
          * If [valueCandidates] was not empty, a [CellRemoveCandidatesEvent] is published.
          *  * Method [removeValueCandidate] is lenient for being called multiple times, and normally it does not publish
          *    an event when nothing is removed.
@@ -171,24 +168,31 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
          *    so in race conditions a [CellRemoveCandidatesEvent] might be published even if [valueCandidates] was already
          *    emptied concurrently.
          */
-        fun clearValueCandidates() {
+        fun clearValueCandidatesOnValueSet() {
             // using getValueCandidates() instead of valueCandidates for testability
             if (getValueCandidates().isEmpty()) {
                 return
             }
-            val oldValues = HashSet(getValueCandidates())
-            valueCandidates.clear()
-            publish(CellRemoveCandidatesEvent(this, oldValues, valueCandidates))
+            // When solved, the valueCandidates list still holds the solved value.
+            // NB: when the cell value can not be solved (means: unsolvable grid, invalid Sudoku ! ),
+            //     the valueCandidates list will be empty.
+            @Suppress("UNCHECKED_CAST") // value is nullable. But still safe: left side is Set of not nullable
+            val removedValues = (getValueCandidates() - value) as Set<Int>
+            valueCandidates.removeAll(removedValues)
+            publish(CellRemoveCandidatesEvent(this, unmodifiableSet(removedValues)))
         }
 
         /** Technical [toString] method; for a functional representation, see [format]  */
-        override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed], valueCandidates=${valueCandidates}"
+        override fun toString(): String = super.toString() + ", valueCandidates=${valueCandidates}"
     }
 
     /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
     abstract val isFixed: Boolean
 
     abstract fun setValue(value: Int)
+
+    /** Technical [toString] method; for a functional representation, see [format]  */
+    override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]}, colIndex=${cell.colIndex}, rowIndex=${cell.rowIndex}"
 
     override fun format(formatter: SudokuFormatter): FormattableList = formatter.format(this)
 

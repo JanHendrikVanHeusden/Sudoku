@@ -36,7 +36,7 @@ internal class SudokuBoxFormatterTest {
     private lateinit var gridFormatterDelegate: GridBoxFormatter
 
     @AfterEach
-    fun tearDownAfterAll() {
+    fun tearDown() {
         clearAllMocks()
     }
 

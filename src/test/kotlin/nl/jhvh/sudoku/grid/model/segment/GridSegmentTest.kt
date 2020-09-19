@@ -61,7 +61,7 @@ internal class GridSegmentTest : GridWithCellsTestBase(blockSize = 3) {
         every {eventCellMock.cellValue} returns nonFixedValueMock
         every {nonFixedValueMock.cell} returns eventCellMock
 
-        val cellRemoveCandidatesEvent = CellRemoveCandidatesEvent(nonFixedValueMock, setOf(1, 4, 6), setOf(1, 6))
+        val cellRemoveCandidatesEvent = CellRemoveCandidatesEvent(nonFixedValueMock, setOf(1, 6))
         // when
         spiedSubject.onEvent(cellRemoveCandidatesEvent)
         // then - event cell is part of the GridSegment (spiedSubject), so should handle it
@@ -133,7 +133,7 @@ internal class GridSegmentTest : GridWithCellsTestBase(blockSize = 3) {
 
     @Test
     fun `onEvent should ignore CellRemoveCandidatesEvent where eventSource is not part of the segment`() {
-        val valueEvent = CellRemoveCandidatesEvent(mockk(), setOf(1, 4, 6), setOf(1, 6))
+        val valueEvent = CellRemoveCandidatesEvent(mockk(), setOf(1, 6))
         `onEvent should ignore eventSource that is not part of the Segment`(valueEvent)
     }
 

@@ -4,7 +4,6 @@ import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.cell.CellValue
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
-import nl.jhvh.sudoku.util.log
 
 class SegmentValueEventHandler: SegmentValueEventHandlable {
 
@@ -32,27 +31,27 @@ class SegmentValueEventHandler: SegmentValueEventHandlable {
     }
 
     override fun handleRemoveCandidatesEvent(valueEvent: CellRemoveCandidatesEvent, segment: GridSegment) {
-        log().trace { "$valueEvent handled by $segment" }
-        val eventSource = valueEvent.eventSource
-        val updatedValueCandidates = eventSource.getValueCandidates()
-        when (updatedValueCandidates.size) {
-            0 -> {
-                valueEvent.eventSource.unsubscribe(segment, valueEvent.type)
-                if (!eventSource.isSet) {
-                    throw GridNotSolvableException("Grid is not solvable: no candidate values anymore in $eventSource. valueEvent=$valueEvent")
-                }
-            }
-            1 -> {
-                // allow null because the valueCandidates might be cleared by a concurrent thread / coroutine
-                val intValue = updatedValueCandidates.firstOrNull()
-                if (intValue != null) {
-                    eventSource.setValue(intValue)
-                }
-            }
-            else -> {
-                // TODO("Not implemented yet")
-            }
-        }
+//        log().trace { "$valueEvent handled by $segment" }
+//        val eventSource = valueEvent.eventSource
+//        val updatedValueCandidates = eventSource.getValueCandidates()
+//        when (updatedValueCandidates.size) {
+//            0 -> {
+//                valueEvent.eventSource.unsubscribe(segment, valueEvent.type)
+//                if (!eventSource.isSet) {
+//                    throw GridNotSolvableException("Grid is not solvable: no candidate values anymore in $eventSource. valueEvent=$valueEvent")
+//                }
+//            }
+//            1 -> {
+//                // allow null because the valueCandidates might be cleared by a concurrent thread / coroutine
+//                val intValue = updatedValueCandidates.firstOrNull()
+//                if (intValue != null) {
+//                    eventSource.setValue(intValue)
+//                }
+//            }
+//            else -> {
+//                // TODO("Not implemented yet")
+//            }
+//        }
     }
 
 }

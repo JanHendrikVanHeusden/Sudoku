@@ -1,7 +1,10 @@
 package nl.jhvh.sudoku.grid
 
 import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.slot
 import nl.jhvh.sudoku.grid.model.Grid
@@ -55,6 +58,13 @@ internal abstract class GridWithCellsTestBase(protected val blockSize: Int) {
             every { nonFixedValueMock.isSet } returns false
             every { nonFixedValueMock.toString() } returns "NonFixedValue mock;" +
                     " rowIndex=${nonFixedValueMock.cell.rowIndex}, colIndex=${nonFixedValueMock.cell.colIndex}, value=${nonFixedValueMock.value}"
+
+            excludeRecords { nonFixedValueMock.cell }
+            excludeRecords { nonFixedValueMock.value }
+            excludeRecords { nonFixedValueMock.isFixed }
+            excludeRecords { cellMock.isFixed }
+            excludeRecords { cellMock.cellValue.isFixed }
+
             cellMock
         }
 
@@ -67,6 +77,38 @@ internal abstract class GridWithCellsTestBase(protected val blockSize: Int) {
             }
         }
         every {gridMock.cellList} returns gridCells
+    }
+
+    /** Used by [clearAllGridMocks] */
+    protected open val allGridMocks: Array<Any> by lazy {
+        val mockkList = mutableListOf<Any>()
+        mockkList.add(gridMock)
+        mockkList.addAll(gridMock.cellList)
+        mockkList.addAll(gridMock.cellList.map { it.cellValue })
+        mockkList.toTypedArray()
+    }
+
+    /**
+     * Clears [gridMock] and all mocks it consists of (cells, cellValues, rows, cols, blocks, etc., insofar specified).
+     * This is used for cases where [clearAllMocks] can not be used (you can't specify `exclusionRules` there)
+     *  * To specify different mocks from your subclass, override [allGridMocks] to specify your test class's mocks.
+     *  * Cleared are:
+     *     * All recorded calls, including those of childMocks
+     *     * All verification marks, including those of childMocks
+     *  * NOT cleared are:
+     *     * answers / returns
+     *     * exclusion rules
+     */
+    protected fun clearAllGridMocks() {
+        clearMocks(
+                firstMock = gridMock,
+                mocks = allGridMocks,
+                answers = false,
+                recordedCalls = true,
+                childMocks = true,
+                verificationMarks = true,
+                exclusionRules = false
+        )
     }
 
 }
