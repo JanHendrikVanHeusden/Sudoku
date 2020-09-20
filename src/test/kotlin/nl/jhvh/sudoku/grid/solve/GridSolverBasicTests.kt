@@ -7,7 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
-import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGULAR_VALUES
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGLE_CANDIDATE_VALUES
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ internal class GridSolverBasicTests {
 
     @Test
     fun isSolved() {
-        // given
+        // given - subclassed to make protected properties reachable
         val subject = object : GridSolver() {
             fun setPhase(phase: GridSolvingPhase) {
                 this.solvingPhase = phase
@@ -53,8 +53,8 @@ internal class GridSolverBasicTests {
         assertThat(subject.isSolving).isFalse()
 
         // given
-        subject.setPhase(SOLVE_SINGULAR_VALUES)
-        assertThat(subject.solvingPhase).isEqualTo(SOLVE_SINGULAR_VALUES)
+        subject.setPhase(SOLVE_SINGLE_CANDIDATE_VALUES)
+        assertThat(subject.solvingPhase).isEqualTo(SOLVE_SINGLE_CANDIDATE_VALUES)
         assertThat(subject.solvingPhase.isSolving).isTrue()
         // when, then
         assertThat(subject.isSolving).isTrue()

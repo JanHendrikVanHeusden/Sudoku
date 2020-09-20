@@ -1,6 +1,9 @@
 package nl.jhvh.sudoku.grid.solve
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
+import nl.jhvh.sudoku.format.SudokuFormatter
+import nl.jhvh.sudoku.format.concatEach
+import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
 import nl.jhvh.sudoku.grid.event.ValueEvent
 import nl.jhvh.sudoku.grid.event.ValueEventListener
 import nl.jhvh.sudoku.grid.event.ValueEventType
@@ -8,16 +11,22 @@ import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
 import nl.jhvh.sudoku.grid.model.Grid
+import nl.jhvh.sudoku.grid.model.GridElement
+import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.FixedValue
 import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
+import nl.jhvh.sudoku.grid.model.segment.Block
+import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
+import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.Companion.firstSolvingPhase
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.GRID_SOLVED
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.PREPARED_FOR_SOLVING
-import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_COMBINATIONS
-import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGULAR_VALUES
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_EXCLUDING_COMBINATIONS
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_POLYMORPHIC_COMBINATIONS
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGLE_CANDIDATE_VALUES
 import nl.jhvh.sudoku.util.checkAndLog
 import nl.jhvh.sudoku.util.log
 import nl.jhvh.sudoku.util.requireAndLog
@@ -223,10 +232,10 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
                 .forEach { nonFixedValue -> solveSingularCandidates(nonFixedValue) }
     }
 
-    private fun solveUniqueInSegments() {
+    private fun solveSingleValueInSegments() {
         var segmentCellValuesWithCandidate: List<CellValue> = emptyList()
         segments.forEach {segment ->
-            unSolvedNumbersBySegment[segment]!!.forEach unsolvedNumbersLoop@ { value ->
+            unSolvedNumbersBySegment[segment]!!.forEach { value ->
                 val segmentCellValues = cellValuesBySegment[segment]!!
                 segmentCellValuesWithCandidate = segmentCellValues
                         .filter {it is NonFixedValue && it.getValueCandidates().contains(value) }
@@ -235,6 +244,10 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
                 }
             }
         }
+    }
+
+    fun solveExcludingSubsetValues() {
+        // TODO
     }
 
     private fun solveIdenticalCandidateSets() {
@@ -260,7 +273,11 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
         }
     }
 
-    private fun solveCombinations() {
+    private fun solvePolymorphicCombinations() {
+        // TODO
+    }
+
+    private fun solveExcludingSubsetCombinations() {
         // TODO
     }
 
@@ -269,12 +286,17 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
             return
         }
         when (solvingPhase) {
-            SOLVE_SINGULAR_VALUES -> {
-                solveIdenticalCandidateSets()
-                solveUniqueInSegments()
+            SOLVE_SINGLE_CANDIDATE_VALUES -> {
+                solveSingularCandidates()
             }
-            SOLVE_COMBINATIONS -> {
-                solveCombinations()
+            SOLVE_EXCLUDING_COMBINATIONS -> {
+                solveIdenticalCandidateSets()
+                solveSingleValueInSegments()
+                solveExcludingSubsetValues()
+            }
+            SOLVE_POLYMORPHIC_COMBINATIONS -> {
+                solvePolymorphicCombinations()
+                solveExcludingSubsetCombinations()
             }
             else -> {
                 if (isSolving) {
@@ -363,20 +385,110 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
     }
 
     /**
-     * Enumerates phases in the [Grid] solving process. The order of the enum values is strictly relevant;
-     * see methods [nextPhase] and [nextSolvingPhase].
+     * [SubSegment]s are artifacts that are used for solving only.
+     * They have quite some similarities with [Row]s and [Col]s, and also with [Block]s, but they are a superficial thing
+     * constructed for solving purposes, not so much an integral part of the Sudoku's [Grid] model.
+     * [SubSegment]s may have references to [Row]s, [Col]s and [Block]s, but not the other way around: [Row]s, [Col]s and
+     * [Block]s are not aware of [SubSegment]s.
+     */
+    protected sealed class SubSegment(grid: Grid): GridElement(grid) {
+
+        abstract val cells: Set<Cell>
+
+        class HorizontalSubSegment(grid: Grid, val rowIndex: Int, val leftColIndex: Int): SubSegment(grid) {
+            val rightColIndex: Int = leftColIndex + grid.blockSize - 1
+            val enclosingRow: Row = grid.rowList.filter { it.rowIndex == rowIndex }.first() // filter returns 1 row only
+            val enclosingBlock: Block = grid.blockList.filter { rowIndex in it.topRowIndex..it.bottomRowIndex && leftColIndex == it.leftColIndex }.first() // filter returns 1 row only
+            override val cells: Set<Cell> = LinkedHashSet(enclosingRow.cells.filter { it.colIndex in leftColIndex..rightColIndex })
+
+            override fun toString(): String = "${this.javaClass.simpleName}: [rowIndex=$rowIndex] [leftColIndex=$leftColIndex] [rightColIndex=$rightColIndex]" +
+                    if (grid.blockSize <= 4) ("\n" + format(defaultGridToStringFormatter)) else ""
+
+            /** Concatenates the formatted [Cell]s */
+            override fun format(formatter: SudokuFormatter): FormattableList {
+                val formattedCells = cells.map { formatter.format(it) }.toTypedArray()
+                return FormattableList(concatEach(*formattedCells))
+            }
+        }
+
+        class VerticalSubSegment(grid: Grid, val colIndex: Int, val topRowIndex: Int): SubSegment(grid) {
+            val botttomRowIndex: Int = topRowIndex + grid.blockSize - 1
+            val enclosingCol: Col = grid.colList.filter { it.colIndex == colIndex }.first() // filter returns 1 col only
+            val enclosingBlock: Block = grid.blockList.filter { colIndex in it.leftColIndex..it.rightColIndex && topRowIndex == it.topRowIndex }.first() // filter returns 1 row only
+            override val cells: Set<Cell> = LinkedHashSet(enclosingCol.cells.filter { it.rowIndex in topRowIndex..botttomRowIndex })
+
+            override fun toString(): String = "${this.javaClass.simpleName}: [colIndex=$colIndex] [topRowIndex=$topRowIndex] [botttomRowIndex=$botttomRowIndex]" +
+                    if (grid.blockSize <= 4) ("\n" + format(defaultGridToStringFormatter)) else ""
+
+            /** Returns the formatted [Cell]s below each other */
+            override fun format(formatter: SudokuFormatter): FormattableList {
+                val formattedCells = cells.map { formatter.format(it).toString() }
+                return FormattableList(formattedCells.fold(listOf(), {current, next -> current + next}))
+            }
+        }
+    }
+
+    /**
+     * Enumerates phases in the [Grid] solving process. The order of the enum values is strictly relevant, with ascending complexity.
+     * See also methods [nextPhase] and [nextSolvingPhase].
      * @param isSolving indication whether the [Grid] is actually solved in this phase
      */
     enum class GridSolvingPhase(val isSolving: Boolean) {
-        /** Indicates that processing was not started yet ([Grid] was not assigned yet). [isSolving] = `false` */
+        /** Indicates that processing was not started yet ([Grid] not assigned yet). [isSolving] = `false` */
         NOT_STARTED(false),
-        /** Indicates that the [GridSolver] is ready to start processing ([Grid] was assigned) */
+        /** Indicates that the [GridSolver] is ready to start processing ([Grid] has been assigned). [isSolving] = `false` */
         PREPARED_FOR_SOLVING(false),
 
-        /** Indicates that the [GridSolver] is processing, and using less computational heavy solution algorithms. [isSolving] = `true` */
-        SOLVE_SINGULAR_VALUES(true),
-        /** Indicates that the [GridSolver] is processing, and using all possible algorithms. [isSolving] = `true` */
-        SOLVE_COMBINATIONS(true),
+        /**
+         * Phase [SOLVE_SINGLE_CANDIDATE_VALUES] indicates that the [GridSolver] is processing, searching for single candidate values within [GridSegment]s. [isSolving] = `true`.
+         *  * E.g. if a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
+         *    can have that value, so `[5]` can be eliminated from the other cells.
+         *     * See [solveSingularCandidates]
+         */
+        SOLVE_SINGLE_CANDIDATE_VALUES(true),
+        
+        /**
+         * Phase [SOLVE_EXCLUDING_COMBINATIONS] indicates that the [GridSolver] is processing, searching for combinations of candidate values
+         * that exclude these values from other cells in the [GridSegment]. [isSolving] = `true`.
+         * E.g.,
+         *  * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
+         *    candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
+         *     * See [solveIdenticalCandidateSets]
+         *  * if cells in a [GridSegment] have different combinations of values, e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
+         *    and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
+         *     * See [solveSingleValueInSegments]
+         *  * if in a [Block] a value, say, `[2]`, only exists in a single row part ([SubSegment]) of the [Block], (so these all have, say,
+         *    [Block.rowIndex] = 7, and the cells with [Block.rowIndex] 7 have candidates `[1, 4, 7]`, `[2, 7]` and `[2, 3]`,
+         *    and no other cells in that block have candidate `[2]`), than that value 2 can be removed from all other cells
+         *    in the [Row] with [Row.rowIndex] = 7.
+         *     * See: [solveExcludingSubsetValues]
+         */
+        SOLVE_EXCLUDING_COMBINATIONS(true),
+        
+        /**
+         * Phase [SOLVE_POLYMORPHIC_COMBINATIONS] indicates that the [GridSolver] is processing, and searching for polymorphic combinations of candidate values. [isSolving] = `true`.
+         * E.g.
+         *  * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`, and none of the values
+         *    in `[4, 7, 8]` is a candidate value of the other cells in the same [GridSegment], the other values can be removed
+         *    from these cells.
+         *    So in these 3 cells, the candidate values are reduced like this: `[4, 7]` -> `[4, 7]`;  `[1, 4, 7, 8]` -> `[4, 7, 8]`; `[2, 4, 7, 8, 9]` -> `[4, 7, 8]`
+         *  * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
+         *    [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
+         *    So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
+         *  * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block], (so these all have, say,
+         *    [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]` and `[3, 6]`,
+         *    and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from all other cells
+         *    in the [Row] with [Row.rowIndex] = 4.
+         *     * See: [solveExcludingSubsetCombinations]
+         *
+         * Re the 'polymorphic' in [SOLVE_POLYMORPHIC_COMBINATIONS], this is because none of the cells may have the exact combination of values searched for,
+         * some candidate values of the combination searched for may not be present in the touched cells, and cells may have candidate values
+         * that are not part of the combination searched for.
+         * This is computationally relatively costly, so this method should be the last one if unsolved candidates remain after all other methods
+         * have been applied.
+         *  * See: [solvePolymorphicCombinations]
+         */
+        SOLVE_POLYMORPHIC_COMBINATIONS(true),
 
         /** Indicates that the [Grid] was solved successfully; [isSolving] = `false` */
         GRID_SOLVED(false);

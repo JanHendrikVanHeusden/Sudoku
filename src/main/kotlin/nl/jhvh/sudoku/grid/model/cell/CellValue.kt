@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
 val VALUE_UNKNOWN: Int? = null
 
-/** Simple value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
+/** Value holder [Class] to represent the numeric or unknown value of a [Cell] and some related properties  */
 sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), ValueEventSource {
 
     final override val eventListeners: ConcurrentHashMap<ValueEventType, MutableSet<ValueEventListener>> = ConcurrentHashMap()
