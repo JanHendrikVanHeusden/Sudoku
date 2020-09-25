@@ -51,10 +51,15 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
      *  so atomic operations only, so concurrent setting is not really a problem
      */
     abstract var value: Int?
-    protected set
+        protected set
 
     /** @return Whether a known value (`!=` [VALUE_UNKNOWN]) is set, either fixed or mutable */
     abstract val isSet: Boolean
+
+    /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
+    abstract val isFixed: Boolean
+
+    abstract fun setValue(value: Int)
 
     /**
      * Cell values are numbers from [CELL_MIN_VALUE] = 1 up to and including [Grid.maxValue]
@@ -99,11 +104,13 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         @Suppress("UNUSED_ANONYMOUS_PARAMETER")
         override var value: Int?
                 by Delegates.observable(VALUE_UNKNOWN) { _: KProperty<*>, oldValue: Int?, newValue: Int? ->
-                    if (newValue != oldValue) {
-                        let { SetCellValueEvent(this, newValue!!) }
-                                .also { log().trace { "'$this' - about to publish event: $it" } }
-                                .also { publish(it) }
-                    }
+//                    synchronized(grid) {
+                        if (newValue != oldValue) {
+                            let { SetCellValueEvent(this, newValue!!) }
+                                    .also { log().trace { "'$this' - about to publish event: $it" } }
+                                    .also { publish(it) }
+                        }
+//                    }
                 }
 
         private fun validateCandidate(value: Int) {
@@ -116,52 +123,64 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
         override fun setValue(value: Int) {
             if (value != this.value) {
                 validateRange(value)
-                validateCandidate(value)
-                this.value = value
+//                synchronized(grid) {
+                    validateCandidate(value)
+                    this.value = value
+//                }
             }
         }
 
         override val isSet: Boolean
-            get() = value != VALUE_UNKNOWN
+            get() = //synchronized(grid) {
+                value != VALUE_UNKNOWN
+//            }
 
         // preferring ConcurrentHashMap.newKeySet over synchronizedSet(mutableSetOf())
         // synchronizedSet gives better read consistency, but slightly worse write performance,
         // and more important: synchronizedSet may throw ConcurrentModificationException when iterating over it while updated concurrently
         /** The [MutableSet] of remaining possible values if the [NonFixedValue] is not solved yet; empty if it was solved. */
-        private val valueCandidates: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
+        private val valueCandidateSet: MutableSet<Int> = ConcurrentHashSet(if (isFixed) 0 else grid.gridSize)
 
         init {
-            valueCandidates.addAll(CELL_MIN_VALUE..grid.maxValue)
+            valueCandidateSet.addAll(CELL_MIN_VALUE..grid.maxValue)
         }
 
         // Read only view on valueCandidates
         // NB: not really immutable, with explicit cast (to MutableSet etc.) one could still mutate it's contents, theoretically.
         //     Returning it as a Set (so formal type is read only) should be enough to discourage external mutation:
         //     it would be too much hassle ( & too much performance penalty) to create a new immutableSet on every get.
-        fun getValueCandidates(): Set<Int> = valueCandidates
+        fun getValueCandidates(): Set<Int> {
+//            synchronized(grid) {
+                return valueCandidateSet
+//            }
+        }
 
         /**
-         * Removes the given [values] from the [valueCandidates], if present.
+         * Removes the given [values] from the [valueCandidateSet], if present.
          * If so, a [CellRemoveCandidatesEvent] is published.
          *  * Method [removeValueCandidate] is lenient for being called multiple times, and does not normally publish
          *    an event when nothing is removed. In race conditions, this may happen incidentally.
          *    No synchronization or guarding mechanism is provided to prevent this, listeners should be lenient for such conditions.
          */
-        fun removeValueCandidate(vararg values: Int) {
+        fun removeValueCandidate(vararg values: Int): Boolean {
             if (values.isEmpty()) {
-                return
+                return false
             }
             // only publish those actually present in the candidates
-            val removeFromCandidates = values.filter { getValueCandidates().contains(it) }.toSet()
-            if (removeFromCandidates.isNotEmpty()) {
-                valueCandidates.removeAll(removeFromCandidates)
-                publish(CellRemoveCandidatesEvent(this, removeFromCandidates))
-            }
+//            synchronized(grid) {
+                val removeFromCandidates = values.filter { getValueCandidates().contains(it) }.toSet()
+                if (removeFromCandidates.isNotEmpty()) {
+                    valueCandidateSet.removeAll(removeFromCandidates)
+                    publish(CellRemoveCandidatesEvent(this, removeFromCandidates))
+                    return true
+                }
+//            }
+            return false
         }
 
         /**
-         * If not empty, all content of [valueCandidates] are removed, except the [value] if it was set (solved) already.
-         * If [valueCandidates] was not empty, a [CellRemoveCandidatesEvent] is published.
+         * If not empty, all content of [valueCandidateSet] are removed, except the [value] if it was set (solved) already.
+         * If [valueCandidateSet] was not empty, a [CellRemoveCandidatesEvent] is published.
          *  * Method [removeValueCandidate] is lenient for being called multiple times, and normally it does not publish
          *    an event when nothing is removed.
          *  * However, the method is not synchronized or otherwise guarded (deliberately),
@@ -169,27 +188,24 @@ sealed class CellValue(val cell: Cell) : Formattable, GridElement(cell.grid), Va
          *    emptied concurrently.
          */
         fun clearValueCandidatesOnValueSet() {
-            // using getValueCandidates() instead of valueCandidates for testability
-            if (getValueCandidates().isEmpty()) {
-                return
-            }
-            // When solved, the valueCandidates list still holds the solved value.
-            // NB: when the cell value can not be solved (means: unsolvable grid, invalid Sudoku ! ),
-            //     the valueCandidates list will be empty.
-            @Suppress("UNCHECKED_CAST") // value is nullable. But still safe: left side is Set of not nullable
-            val removedValues = (getValueCandidates() - value) as Set<Int>
-            valueCandidates.removeAll(removedValues)
-            publish(CellRemoveCandidatesEvent(this, unmodifiableSet(removedValues)))
+//            synchronized(grid) {
+                // using getValueCandidates() instead of valueCandidates for testability
+                if (getValueCandidates().isEmpty()) {
+                    return
+                }
+                // When solved, the valueCandidates list still holds the solved value.
+                // NB: when the cell value can not be solved (means: unsolvable grid, invalid Sudoku ! ),
+                //     the valueCandidates list will be empty.
+                @Suppress("UNCHECKED_CAST") // value is nullable. But still safe: left side is Set of not nullable
+                val removedValues = (getValueCandidates() - value) as Set<Int>
+                valueCandidateSet.removeAll(removedValues)
+                publish(CellRemoveCandidatesEvent(this, unmodifiableSet(removedValues)))
+//            }
         }
 
         /** Technical [toString] method; for a functional representation, see [format]  */
-        override fun toString(): String = super.toString() + ", valueCandidates=${valueCandidates}"
+        override fun toString(): String = super.toString() + ", valueCandidates=${valueCandidateSet}"
     }
-
-    /** @return Whether the value of this [Cell] is fixed (`true`) or mutable (`false`) */
-    abstract val isFixed: Boolean
-
-    abstract fun setValue(value: Int)
 
     /** Technical [toString] method; for a functional representation, see [format]  */
     override fun toString(): String = "${this.javaClass.simpleName} [value=$value], isFixed()=$isFixed]}, colIndex=${cell.colIndex}, rowIndex=${cell.rowIndex}"

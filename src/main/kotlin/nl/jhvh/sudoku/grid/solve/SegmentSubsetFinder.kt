@@ -4,7 +4,8 @@ import nl.jhvh.sudoku.grid.model.segment.GridSegment
 
 /**
  * Sudoku structure, base rules
- * * A [Grid] is a square of `n * n` [Cell]s
+ * * A [Block] is a square of `b * b` [Cell]s
+ * * A [Grid] is a square of `n * n` [Cell]s, where `n = b * b`
  * * A [Grid] consists of [GridSegment]s:
  *    * [Row]s, [Col]s (aka columns) and [Block]s.
  * * Each [GridSegment] can contain numbers 1..n, each number at most one time
@@ -22,9 +23,13 @@ import nl.jhvh.sudoku.grid.model.segment.GridSegment
  * 4. If any combination of `q` candidates (`1 < q < n`) is present only in `q` [Cell]s of a [GridSegment],
  *    these restrict the solution of these [Cell]s to these values; so all other candidates can be removed from
  *    these [Cell]s within the [GridSegment] that contain all of these `q` [Cell]s.
+ * 5. If any combination of `q` candidates (`1 < q < b`) is present only in those [Cell]s of a [Block] that are in
+ *    a single [LinearSegment] ([Row] or [Col], these restrict the solution of the [Cell]s in the same [LinearSegment]
+ *    that are not part of that [Block]: these candidates can not be present in any of those other [Cell]s, so these
+ *    values can be removed from the candidates of the other [Cell]s in the linear segment.
  *
  * It seems to me that with these basic rules, any Sudoku should be solvable, because basically there are no more rules
- * in Sudoku than the structure rules (*) and the derived rules (1-4).
+ * in Sudoku than the structure rules (*) and the derived rules (1-5).
  *
  * Several less or more smart additional strategies exist, e.g.
  *  * Trial and error: try some possible solution, and if it proves wrong, go back to the situation that you know to be correct.

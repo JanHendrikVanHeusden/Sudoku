@@ -13,7 +13,7 @@ import nl.jhvh.sudoku.util.incrementFromZero
  *
  * When solved, the [Cell]s within the [Col] must contain all defined values of the Sudoku.
  */
-class Col(grid: Grid, val colIndex: Int) : GridSegment(grid), Formattable {
+class Col(grid: Grid, val colIndex: Int) : LinearSegment(grid), Formattable {
 
     val colRef: String = indexToColRef(colIndex)
 

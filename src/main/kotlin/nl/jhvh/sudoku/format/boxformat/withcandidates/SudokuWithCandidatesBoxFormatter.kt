@@ -1,4 +1,4 @@
-package nl.jhvh.sudoku.format.boxformat
+package nl.jhvh.sudoku.format.boxformat.withcandidates
 
 import nl.jhvh.sudoku.format.GridFormatterFactory
 import nl.jhvh.sudoku.format.SudokuFormatter
@@ -16,7 +16,7 @@ import nl.jhvh.sudoku.format.element.RowFormatter
  * Typically for console output, to inspect results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-class SudokuBoxFormatter(val formatterFactory: GridFormatterFactory = BoxFormatterFactory.factoryInstance) :
+class SudokuWithCandidatesBoxFormatter(val formatterFactory: GridFormatterFactory = BoxFormatterWithCandidatesFactory.factoryInstance) :
         SudokuFormatter,
         CellValueFormatter by formatterFactory.cellValueFormatterInstance,
         CellFormatter by formatterFactory.cellBoxFormatterInstance,

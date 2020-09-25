@@ -2,14 +2,14 @@ package nl.jhvh.sudoku.grid.solve
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.format.concatEach
-import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
+import nl.jhvh.sudoku.grid.defaultGridFormatter
 import nl.jhvh.sudoku.grid.event.ValueEvent
 import nl.jhvh.sudoku.grid.event.ValueEventListener
 import nl.jhvh.sudoku.grid.event.ValueEventType
 import nl.jhvh.sudoku.grid.event.ValueEventType.SET_CELL_VALUE
 import nl.jhvh.sudoku.grid.event.cellvalue.CellRemoveCandidatesEvent
 import nl.jhvh.sudoku.grid.event.cellvalue.SetCellValueEvent
+import nl.jhvh.sudoku.grid.gridWithCandidatesBoxFormatter
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.grid.model.GridElement
 import nl.jhvh.sudoku.grid.model.cell.Cell
@@ -19,6 +19,7 @@ import nl.jhvh.sudoku.grid.model.cell.CellValue.NonFixedValue
 import nl.jhvh.sudoku.grid.model.segment.Block
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
+import nl.jhvh.sudoku.grid.model.segment.LinearSegment
 import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.Companion.firstSolvingPhase
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.GRID_SOLVED
@@ -27,11 +28,21 @@ import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.PREPARED_FOR_SOLVIN
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_EXCLUDING_COMBINATIONS
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_POLYMORPHIC_COMBINATIONS
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGLE_CANDIDATE_VALUES
+import nl.jhvh.sudoku.grid.solve.GridSolver.SubSegment.HorizontalSubSegment
+import nl.jhvh.sudoku.grid.solve.GridSolver.SubSegment.VerticalSubSegment
+import nl.jhvh.sudoku.util.allCombinations
 import nl.jhvh.sudoku.util.checkAndLog
+import nl.jhvh.sudoku.util.concatEach
 import nl.jhvh.sudoku.util.log
 import nl.jhvh.sudoku.util.requireAndLog
+import java.util.*
 import java.util.Collections.unmodifiableMap
 import java.util.Collections.unmodifiableSet
+import java.util.concurrent.LinkedBlockingQueue
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashSet
 import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
 /**
@@ -68,10 +79,85 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
     var solvingPhase: GridSolvingPhase = NOT_STARTED
         protected set
 
-    val isSolving
+    override val isSolving
         get() = solvingPhase.isSolving
 
+    private var isSolvable = true
+
+    override val unSolvable
+        get() = if (!isSolvable) !isSolvable else null
+
+    protected val eventQueue = LinkedBlockingQueue<ValueEvent>()
+
     protected val segments: Set<GridSegment> by lazy { with(grid) { (this.rowList + this.colList + this.blockList).toSet() } }
+
+    protected val horizontalSubSegments: Set<HorizontalSubSegment> by lazy {
+        val subSegmentSet: MutableSet<HorizontalSubSegment> = HashSet(grid.gridSize)
+                (0 until grid.gridSize).forEach { rowIndex ->
+                    (0 until grid.gridSize step grid.blockSize).forEach {leftColIndex ->
+                        subSegmentSet.add(HorizontalSubSegment(grid, rowIndex, leftColIndex))
+                    }
+                }
+        unmodifiableSet(subSegmentSet)
+    }
+
+    protected val verticalSubSegments: Set<VerticalSubSegment> by lazy {
+        val subSegmentSet: MutableSet<VerticalSubSegment> = HashSet(grid.gridSize)
+        (0 until grid.gridSize).forEach { colIndex ->
+            (0 until grid.gridSize step grid.blockSize).forEach {topRowIndex ->
+                subSegmentSet.add(VerticalSubSegment(grid, colIndex, topRowIndex))
+            }
+        }
+        unmodifiableSet(subSegmentSet)
+    }
+
+    protected val horizontalSubSegmentsByRow: Map<Row, Set<HorizontalSubSegment>> by lazy {
+        val subSegmentsByRowMap =
+                horizontalSubSegments
+                        .groupBy{ it.enclosingLinearSegment }
+                        .mapValues { it -> it.value.toSet() }
+        unmodifiableMap(subSegmentsByRowMap)
+    }
+
+    protected val verticalSubSegmentsByCol: Map<Col, Set<VerticalSubSegment>> by lazy {
+        val subSegmentsByColMap =
+                verticalSubSegments
+                        .groupBy{ it.enclosingLinearSegment }
+                        .mapValues { it -> it.value.toSet() }
+        unmodifiableMap(subSegmentsByColMap)
+    }
+
+    protected val subSegmentsByLinearSegment: Map<LinearSegment, Set<SubSegment<LinearSegment>>> by lazy {
+        val subSegmentsByLinearSegment: MutableMap<LinearSegment, Set<SubSegment<LinearSegment>>>
+                = HashMap(horizontalSubSegmentsByRow.size + verticalSubSegmentsByCol.size)
+        subSegmentsByLinearSegment.putAll(horizontalSubSegmentsByRow)
+        subSegmentsByLinearSegment.putAll(verticalSubSegmentsByCol)
+        subSegmentsByLinearSegment
+    }
+
+    protected val horizontalSubSegmentsByBlock: Map<Block, Set<HorizontalSubSegment>> by lazy {
+        val subSegmentsByBlockMap =
+                horizontalSubSegments
+                        .groupBy{ it.enclosingBlock }
+                        .mapValues { it -> it.value.toSet() }
+        unmodifiableMap(subSegmentsByBlockMap)
+    }
+
+    protected val verticalSubSegmentsByBlock: Map<Block, Set<VerticalSubSegment>> by lazy {
+        val subSegmentsByBlockMap =
+                verticalSubSegments
+                        .groupBy{ it.enclosingBlock }
+                        .mapValues { it -> it.value.toSet() }
+        unmodifiableMap(subSegmentsByBlockMap)
+    }
+
+    protected val linearSubSegmentsByBlock: Map<Block, Set<SubSegment<LinearSegment>>> by lazy {
+        val subSegmentsByBlockMap: MutableMap<Block, Set<SubSegment<LinearSegment>>>
+                = HashMap(horizontalSubSegmentsByBlock.size + verticalSubSegmentsByBlock.size)
+        subSegmentsByBlockMap.putAll(horizontalSubSegmentsByBlock)
+        subSegmentsByBlockMap.putAll(verticalSubSegmentsByBlock)
+        unmodifiableMap(subSegmentsByBlockMap)
+    }
 
     protected val segmentsByCellValue: Map<CellValue, Set<GridSegment>> by lazy {
         val segsByCellValue: MutableMap<CellValue, MutableSet<GridSegment>> = HashMap(grid.cellList.size)
@@ -208,95 +294,325 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
         }
     }
 
-    private fun solveSingularCandidates(nonFixedValue: NonFixedValue) {
-        val valueCandidates = nonFixedValue.getValueCandidates()
-        when (valueCandidates.size) {
-            0 -> {
-                if (!nonFixedValue.isSet) {
-                    throw GridNotSolvableException("Grid is not solvable: value not set, and no candidate values anymore in $nonFixedValue! cellValue=$nonFixedValue")
-                }
-            }
-            1 -> {
-                // allow null because the valueCandidates might be cleared by a concurrent thread / coroutine
-                val intValue = valueCandidates.firstOrNull()
-                if (intValue != null && !nonFixedValue.isSet) {
-                    nonFixedValue.setValue(intValue)
-                }
+    private fun assertCorrectGrid() {
+        segments.forEach { segment ->
+            val valueList = segment.cells.filter { cell -> cell.isSet }.map { cell -> cell.cellValue.value!! }
+            val valueSet = valueList.toSet()
+            if (valueList.size > valueSet.size) {
+                val formattedSegment = segment.format(defaultGridFormatter).toString()
+                throw AssertionError("Duplicate value in $grid\n\n in $segment:\n$formattedSegment\n")
             }
         }
     }
 
-    private fun solveSingularCandidates() {
+    /**
+     * If a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
+     * can have that value, so `[5]` can be eliminated from the other cells.
+     */
+    protected fun solveSingularCandidates(nonFixedValue: NonFixedValue) {
+//        synchronized(grid) {
+            val valueCandidates = nonFixedValue.getValueCandidates()
+            when (valueCandidates.size) {
+                0 -> {
+                    if (!nonFixedValue.isSet) {
+                        throw GridNotSolvableException("Grid is not solvable: value not set, and no candidate values anymore in $nonFixedValue! cellValue=$nonFixedValue")
+                    }
+                }
+                1 -> {
+                    // allow null because the valueCandidates might be cleared by a concurrent thread / coroutine
+                    val intValue = valueCandidates.firstOrNull()
+                    if (intValue != null && !nonFixedValue.isSet) {
+                        nonFixedValue.setValue(intValue)
+                    }
+                }
+            }
+//        }
+//        handleEvents()
+assertCorrectGrid()
+    }
+
+    /**
+     * If a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
+     * can have that value, so `[5]` can be eliminated from the other cells.
+     */
+    fun solveSingularCandidates() {
         unSolvedNonFixedValues
                 .filter { it.getValueCandidates().size <= 1}
                 .forEach { nonFixedValue -> solveSingularCandidates(nonFixedValue) }
     }
 
-    private fun solveSingleValueInSegments() {
-        var segmentCellValuesWithCandidate: List<CellValue> = emptyList()
-        segments.forEach {segment ->
-            unSolvedNumbersBySegment[segment]!!.forEach { value ->
-                val segmentCellValues = cellValuesBySegment[segment]!!
-                segmentCellValuesWithCandidate = segmentCellValues
-                        .filter {it is NonFixedValue && it.getValueCandidates().contains(value) }
-                if (segmentCellValuesWithCandidate.size == 1) {
-                    segmentCellValuesWithCandidate[0].setValue(value)
-                }
-            }
-        }
-    }
-
-    fun solveExcludingSubsetValues() {
-        // TODO
-    }
-
-    private fun solveIdenticalCandidateSets() {
-        nonFixedBySegment.forEach { segment, segmentCellValues ->
-            val nonFixedByCandidates: Map<Set<Int>, List<NonFixedValue>> =
-                    segmentCellValues
-                            .groupBy { it.getValueCandidates() }
-                            // Only those where more than 1 cellValue with identical candidates
-                            .filter { it.value.size > 1 }
-            nonFixedByCandidates.forEach { candidates, cellValuesWithSameCandidates ->
-                // if 2 identical candidates (say, [3, 8]) occur in 2 cells,
-                // or 3 identical candidates (say, [2, 5, 7]) occur in 3 cells, etc.,
-                // these values can not appear in the other cells in the same segment,
-                // so these can be eliminated from the candidates of the other cells in the segment
-                if (candidates.size == cellValuesWithSameCandidates.size) {
-                    val targetCells = segmentCellValues - cellValuesWithSameCandidates
-                    targetCells.forEach { nonFixedValue ->
-                        nonFixedValue.removeValueCandidate(*candidates.toIntArray())
+    /**
+     * If cells in a [GridSegment] have different combinations of values,
+     * e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
+     * and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
+     */
+    fun solveSingleValueInSegments() {
+//        synchronized(grid) {
+            var segmentCellValuesWithCandidate: List<CellValue>
+            segments.forEach { segment ->
+                unSolvedNumbersBySegment[segment]!!.forEach { value ->
+                    val segmentCellValues = cellValuesBySegment[segment]!!
+                    segmentCellValuesWithCandidate = segmentCellValues
+                            .filter { it is NonFixedValue && it.getValueCandidates().contains(value) }
+                    if (segmentCellValuesWithCandidate.size == 1) {
+                        segmentCellValuesWithCandidate[0].setValue(value)
                     }
                 }
             }
+//        }
+//        handleEvents()
+assertCorrectGrid()
+    }
 
+    /**
+     * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block],
+     * (so these all have, say, [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
+     * and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
+     * all other cells in the [Row] with [Row.rowIndex] = 4.
+     */
+    protected fun solveExcludingSubsetCandidates(subSegment: SubSegment<LinearSegment>, otherBlockCandidates: Set<Int>) {
+//        synchronized(grid) {
+            val subSegmentCellValuesByCandidates = subSegment.cells
+                    .filter { !it.isFixed && !it.isSet }
+                    .map { cell -> cell.cellValue as NonFixedValue }
+                    .groupBy { nonFixedValue -> nonFixedValue.getValueCandidates() }
+            val subSegmentCandidateValues = subSegmentCellValuesByCandidates.keys.flatten().toSet()
+            val remainingCandidateValues = (subSegmentCandidateValues - otherBlockCandidates).toIntArray()
+            if (remainingCandidateValues.isNotEmpty()) {
+                // we now have candidate values that exist in the current subSegment, but not anywhere else in the Block
+                // so these can be removed from the candidate values in the same linear segment (Row or Col)
+                // that are not part of this subSegment
+                val otherCellsOfLinearSegment = subSegment.enclosingLinearSegment.cells.filter { !it.isFixed } - subSegment.cells
+                otherCellsOfLinearSegment.map { cell -> cell.cellValue as NonFixedValue }.forEach { nonFixedValue ->
+                    nonFixedValue.removeValueCandidate(*remainingCandidateValues)
+                }
+            }
+//        }
+assertCorrectGrid()
+    }
+
+    /**
+     * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block],
+     * (so these all have, say, [Row.rowIndex] = 4, and the [Block] cells with [Row.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
+     * and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
+     * all other [SubSegment]s of the [Row] with [Row.rowIndex] = 4.
+     */
+    private fun solveExcludingSubsetCandidates(linearSegmentsByBlock: Map<Block, Set<SubSegment<LinearSegment>>>, currentBlock: Block) {
+        linearSegmentsByBlock[currentBlock]!!.forEach { subSegmentOfBlock ->
+            val otherSubSegmentsOfBlock = linearSegmentsByBlock[currentBlock]!!.minus(subSegmentOfBlock)
+            val otherBlockCandidates = otherSubSegmentsOfBlock
+                    .map { subSegment -> subSegment.cells }
+                    .flatten()
+                    .filter { cell -> !cell.isFixed }
+                    .map { cell -> (cell.cellValue as NonFixedValue).getValueCandidates() }
+                    .flatten()
+                    .toSet()
+                    .union(otherSubSegmentsOfBlock
+                            .map { horizontalSubSegment -> horizontalSubSegment.cells }
+                            .flatten()
+                            .filter { cell -> cell.isSet }
+                            .map { cell -> cell.cellValue.value!! }
+                    )
+            solveExcludingSubsetCandidates(subSegmentOfBlock, otherBlockCandidates)
         }
     }
 
-    private fun solvePolymorphicCombinations() {
-        // TODO
+    /**
+     * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block],
+     * (so these all have, say, [Row.rowIndex] = 4, and the [Block] cells with [Row.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
+     * and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
+     * all other [SubSegment]s of the [Row] with [Row.rowIndex] = 4.
+     */
+    fun solveExcludingSubsetCandidates() {
+//        synchronized(grid) {
+
+            grid.blockList.forEach { block ->
+                solveExcludingSubsetCandidates(horizontalSubSegmentsByBlock, block)
+                solveExcludingSubsetCandidates(verticalSubSegmentsByBlock, block)
+            }
+//        }
+//        handleEvents()
     }
 
-    private fun solveExcludingSubsetCombinations() {
-        // TODO
+    /**
+     *  * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
+     *    candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
+     */
+    private fun solveIdenticalCandidateSets() {
+//        synchronized(grid) {
+            nonFixedBySegment.forEach { segment, segmentCellValues ->
+                val nonFixedByCandidates: Map<Set<Int>, List<NonFixedValue>> =
+                        segmentCellValues
+                                .groupBy { it.getValueCandidates() }
+                                // Only those where more than 1 cellValue with identical candidates
+                                .filter { it.value.size > 1 }
+                nonFixedByCandidates.forEach { candidates, cellValuesWithSameCandidates ->
+                    // if 2 identical candidates (say, [3, 8]) occur in 2 cells,
+                    // or 3 identical candidates (say, [2, 5, 7]) occur in 3 cells, etc.,
+                    // these values can not appear in the other cells in the same segment,
+                    // so these can be eliminated from the candidates of the other cells in the segment
+                    if (candidates.size == cellValuesWithSameCandidates.size) {
+                        val targetCells = segmentCellValues - cellValuesWithSameCandidates
+                        targetCells.forEach { nonFixedValue ->
+                            nonFixedValue.removeValueCandidate(*candidates.toIntArray())
+                        }
+                    }
+                }
+            }
+//        }
+//        handleEvents()
+//assertCorrectGrid()
+    }
+
+    /**
+     *  * if 3 cells in a [GridSegment] have candidates, say, `[2, 8]`, `[3, 8]`, `[2, 8]`, then the values `[2, 3, 8]` can be removed
+     *    from the candidates of all other cells in the same [GridSegment].
+     *  * if 4 cells have candidates `[1, 2]`, `[1, 2, 3]`, `[2, 3]`, `[1, 4]`, then the values `[1, 2, 3, 4]` can be removed
+     *    from the candidates of all other cells in the same [GridSegment].
+     */
+    fun solvePolymorphicExclusions() {
+        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 2..8.
+        // But if you have a combination of, say [1, 4, 5, 6, 7, 9], then there must also be a smaller combination,
+        // in this case [1, 3, 8]. So it makes no sense to look for combinations of gridSize / 2 or larger, finding
+        // larger combinations is much more costly in terms of computing power & memory
+        var goNextCombinationSize = true
+        (2..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
+            if (!goNextCombinationSize) {
+                // If we have found combinations of, say, 3, we do not proceed with combinations of 4,
+                // we better handle events first (with less complicated solution methods)
+                return
+            }
+            segments.forEach segmentLoop@ { segment ->
+                // find all candidate values of unsolved cells of the segment that have at most `combinationLength` candidates
+                val targetCandidates: SortedSet<Int> = cellValuesBySegment[segment]!!
+                        .filter { cellValue -> !cellValue.isFixed && !cellValue.isSet }
+                        .map { cellValue -> (cellValue as NonFixedValue).getValueCandidates()}
+                        .filter { valueCandidates -> valueCandidates.size <= combinationLength }
+                        .flatten()
+                        .toSortedSet()
+                if (targetCandidates.isEmpty()) {
+                    return@segmentLoop
+                }
+                // find the cells in the segment whose candidates are equal to or a subset of the targetCandidates
+                val targetUnsolved: List<NonFixedValue> = cellValuesBySegment[segment]!!
+                        .filter { cellValue -> !cellValue.isFixed &&!cellValue.isSet }
+                        .map { cellValue -> (cellValue as NonFixedValue)}
+                        .filter { nonFixedValue ->
+                            nonFixedValue.getValueCandidates().size <= combinationLength
+                                    && targetCandidates.containsAll(nonFixedValue.getValueCandidates()) }
+                if (targetUnsolved.isEmpty()) {
+                    return@segmentLoop
+                }
+                // create all possible combinations of n targetUnsolved cellValues, where n = combinationLength
+                val unsolvedCellValueCombinations = allCombinations(targetUnsolved, combinationLength)
+                unsolvedCellValueCombinations.forEach { nonFixedValueCombination ->
+                    // for each combination found, remove value candidates in the combination from other segment cells in the segment
+                    val combinationCandidates: Set<Int> = nonFixedValueCombination.map { it.getValueCandidates() }.flatten().toSet()
+                    if (combinationCandidates.size == combinationLength) {
+                        val cellValuesToRemoveCandidates
+                                = (segment.cells.filter { cell -> !cell.isFixed && !cell.isSet }
+                                .map { cell -> cell.cellValue as NonFixedValue }) - nonFixedValueCombination
+                        if (cellValuesToRemoveCandidates.isNotEmpty()) {
+                            val candidatesIntArray = combinationCandidates.toIntArray()
+                            cellValuesToRemoveCandidates.forEach { nonFixedValue ->
+                                if (nonFixedValue.removeValueCandidate(*candidatesIntArray)) {
+                                    goNextCombinationSize = false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+//        synchronized(grid) {
+//        }
+//        //        handleEvents()
+//assertCorrectGrid()
+    }
+
+    /**
+     * * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`,
+     *   and none of the values `[4, 7, 8]` is a candidate value of the other cells in the same [GridSegment],
+     *   the other values can be removed from these cells.
+     *   So in these 3 cells, the candidate values are reduced like this: `[4, 7]` -> `[4, 7]`;  `[1, 4, 7, 8]` -> `[4, 7, 8]`; `[2, 4, 7, 8, 9]` -> `[4, 7, 8]`
+     * * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
+     *   [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
+     *   So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
+     */
+    fun solvePolymorphicCombinations() {
+//        synchronized(grid) {
+        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 2..8.
+        // But if you have a combination of, say [1, 4, 5, 6, 7, 9], then there must also be a smaller combination,
+        // in this case [1, 3, 8]. So it makes no sense to look for combinations of gridSize / 2 or larger, finding
+        // larger combinations is much more costly in terms of computing power & memory
+        var goNextCombinationSize = true
+        (2..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
+            if (!goNextCombinationSize) {
+                // If we have found combinations of, say, 3, we do not proceed with combinations of 4,
+                // we better handle events first (with less complicated solution methods)
+                return
+            }
+            segments.forEach segmentLoop@{ segment ->
+                // find all candidate values of unsolved cells of the segment that have at most `combinationLength` candidates
+                val targetCandidates: SortedSet<Int> = cellValuesBySegment[segment]!!
+                        .filter { cellValue -> !cellValue.isFixed && !cellValue.isSet }
+                        .map { cellValue -> (cellValue as NonFixedValue).getValueCandidates() }
+                        .filter { valueCandidates -> valueCandidates.size <= combinationLength }
+                        .flatten()
+                        .toSortedSet()
+                if (targetCandidates.isEmpty()) {
+                    return@segmentLoop
+                }
+                val candidateCombinationStream = allCombinations(targetCandidates, combinationLength)
+                // Find all cellValues that have one or more candidates of the given combination
+                candidateCombinationStream.forEach { candicateCombination ->
+                    val cellValuesWithCandidateFromCombi = cellValuesBySegment[segment]!!
+                            .filter { !it.isFixed && !it.isSet }
+                            .map { it as NonFixedValue }
+                            .filter { it.getValueCandidates().intersect(candicateCombination).isNotEmpty() }
+                    if (cellValuesWithCandidateFromCombi.size == combinationLength) {
+                        // if only n cellValues have candidates within a given combination of n values,
+                        // all other candidate values can be removed from these cells
+                        cellValuesWithCandidateFromCombi.forEach { nonFixedValue ->
+                            val valuesToRemove = nonFixedValue.getValueCandidates() - candicateCombination
+                            if (valuesToRemove.isNotEmpty()) {
+                                if (nonFixedValue.removeValueCandidate(*valuesToRemove.toIntArray())) {
+                                    goNextCombinationSize = false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+//        synchronized(grid) {
+//        }
+//        //        handleEvents()
+//assertCorrectGrid()
+//        }
+//        //        handleEvents()
+//assertCorrectGrid()
     }
 
     private fun solveGridPhase() {
-        if (!isSolving) {
+        if (!isSolving || isSolved) {
             return
         }
         when (solvingPhase) {
             SOLVE_SINGLE_CANDIDATE_VALUES -> {
                 solveSingularCandidates()
+                handleEvents()
             }
             SOLVE_EXCLUDING_COMBINATIONS -> {
                 solveIdenticalCandidateSets()
                 solveSingleValueInSegments()
-                solveExcludingSubsetValues()
+                handleEvents()
             }
             SOLVE_POLYMORPHIC_COMBINATIONS -> {
+                solveExcludingSubsetCandidates()
+                solvePolymorphicExclusions()
                 solvePolymorphicCombinations()
-                solveExcludingSubsetCombinations()
+                handleEvents()
             }
             else -> {
                 if (isSolving) {
@@ -306,11 +622,17 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
         }
     }
 
-    fun gridSolved(): Boolean {
-        if (unSolvedNonFixedValues.isEmpty()) {
+    override val isSolved: Boolean
+        get() = solvingPhase == GRID_SOLVED
+
+    fun checkGridSolved(): Boolean {
+        if (isSolved) {
+            return true
+        } else if (unSolvedNonFixedValues.isEmpty()) {
             solvingPhase = GRID_SOLVED
+            return true
         }
-        return solvingPhase == GRID_SOLVED
+        return false
     }
 
     override fun solveGrid() {
@@ -340,11 +662,16 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
                 solveGridPhase()
                 unSolvedCount =  unSolvedNonFixedValues.size
                 solvedCount = cellCount - fixedCount - unSolvedCount
-                solvingPhase = solvingPhase.nextSolvingPhase()?: throw GridNotSolvableException("Grid is not solved!")
-            } while (!gridSolved())
+                if (eventQueue.isEmpty()) {
+                    solvingPhase = solvingPhase.nextSolvingPhase()
+                            ?: throw GridNotSolvableException("Grid is not solved!")
+                }
+            } while (!checkGridSolved())
             log().info { "Grid solved! Solved grid = $grid" }
+            assertCorrectGrid()
 
         } catch (gnse: GridNotSolvableException) {
+            isSolvable = false
             log().info { "${gnse.message}. $this" +
                     "\nTotal cells = $cellCount; Fixed cells = $fixedCount; Solved cells = $solvedCount; Unsolved cells = $unSolvedCount" }
             if (log().isDebugEnabled) {
@@ -358,51 +685,85 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
         }
     }
 
-    override fun onEvent(valueEvent: ValueEvent) {
-        log().trace { "$this received event: $valueEvent" }
-        when (valueEvent) {
-            is SetCellValueEvent -> {
-                handleSetCellValueEvent(valueEvent)
-            }
-            is CellRemoveCandidatesEvent -> {
-                handleRemoveCandidatesEvent(valueEvent)
-            }
-            else -> {
-                // not expected to be called, so warning:
-                // it would mean we subscribed to an event type that we are not willing to handle
-                log().warn { "Unhandled event type: ${valueEvent.javaClass.simpleName}; event=$valueEvent" }
-                return
-            }
+    protected fun handleEvent(valueEvent: ValueEvent) {
+        if (isSolved) {
+            return
         }
+        log().trace { "Handling event: $valueEvent" }
+//        synchronized(grid) {
+            when (valueEvent) {
+                is SetCellValueEvent -> {
+                    handleSetCellValueEvent(valueEvent)
+                }
+                is CellRemoveCandidatesEvent -> {
+                    handleRemoveCandidatesEvent(valueEvent)
+                }
+                else -> {
+                    // not expected to be called, so warning:
+                    // it would mean we subscribed to an event type that we are not willing to handle
+                    log().warn { "Unhandled event type: ${valueEvent.javaClass.simpleName}; event=$valueEvent" }
+                    return
+                }
+            }
+//        }
         if (isSolving) {
             solvingPhase = firstSolvingPhase()
             solveGridPhase()
         }
     }
 
+    protected fun handleEvents() {
+        if (isSolved) {
+            return
+        }
+        var event: ValueEvent
+        log().trace { "Event count to handle: ${eventQueue.size}" }
+        do { event = eventQueue.poll() ?: return
+            handleEvent(event)
+        } while (true)
+    }
+
+    override fun onEvent(valueEvent: ValueEvent) {
+        if (isSolved) {
+            return
+        }
+        log().trace { "$this received event: $valueEvent" }
+        eventQueue.put(valueEvent)
+    }
+
     override fun toString(): String {
-        return "${this.javaClass.simpleName}: isSolving=$isSolving, solvingPhase=$solvingPhase, grid=$gridToSolve"
+        val gridToString: String
+        if (gridToSolve == null) {
+            gridToString = "null"
+        } else {
+            // If not solved yet, for not too big grids we display the grid with candidates, for easier debugging etc.
+            gridToString = if (isSolved || grid.gridSize > 9) grid.toString() else gridWithCandidatesBoxFormatter.format(grid).toString()
+        }
+        return "${this.javaClass.simpleName}: isSolving=$isSolving, solvingPhase=$solvingPhase, grid=\n$gridToString"
     }
 
     /**
      * [SubSegment]s are artifacts that are used for solving only.
-     * They have quite some similarities with [Row]s and [Col]s, and also with [Block]s, but they are a superficial thing
-     * constructed for solving purposes, not so much an integral part of the Sudoku's [Grid] model.
+     * They have quite some similarities with [Row]s and [Col]s, and also with [Block]s, but constructed for solving purposes only,
+     * not as an integral part of the Sudoku's [Grid] model.
      * [SubSegment]s may have references to [Row]s, [Col]s and [Block]s, but not the other way around: [Row]s, [Col]s and
      * [Block]s are not aware of [SubSegment]s.
      */
-    protected sealed class SubSegment(grid: Grid): GridElement(grid) {
+    protected sealed class SubSegment<out S: LinearSegment>(grid: Grid): GridElement(grid) {
 
         abstract val cells: Set<Cell>
+        abstract val enclosingBlock: Block
+        abstract val enclosingLinearSegment: S
 
-        class HorizontalSubSegment(grid: Grid, val rowIndex: Int, val leftColIndex: Int): SubSegment(grid) {
+        class HorizontalSubSegment(grid: Grid, val rowIndex: Int, val leftColIndex: Int): SubSegment<Row>(grid) {
             val rightColIndex: Int = leftColIndex + grid.blockSize - 1
-            val enclosingRow: Row = grid.rowList.filter { it.rowIndex == rowIndex }.first() // filter returns 1 row only
-            val enclosingBlock: Block = grid.blockList.filter { rowIndex in it.topRowIndex..it.bottomRowIndex && leftColIndex == it.leftColIndex }.first() // filter returns 1 row only
+            private val enclosingRow: Row = grid.rowList.filter { it.rowIndex == rowIndex }.first() // filter returns 1 row only
+            override val enclosingLinearSegment: Row = enclosingRow
+            override val enclosingBlock: Block = grid.blockList.filter { rowIndex in it.topRowIndex..it.bottomRowIndex && leftColIndex == it.leftColIndex }.first() // filter returns 1 row only
             override val cells: Set<Cell> = LinkedHashSet(enclosingRow.cells.filter { it.colIndex in leftColIndex..rightColIndex })
 
             override fun toString(): String = "${this.javaClass.simpleName}: [rowIndex=$rowIndex] [leftColIndex=$leftColIndex] [rightColIndex=$rightColIndex]" +
-                    if (grid.blockSize <= 4) ("\n" + format(defaultGridToStringFormatter)) else ""
+                    if (grid.blockSize <= 4) ("\n" + format(defaultGridFormatter)) else ""
 
             /** Concatenates the formatted [Cell]s */
             override fun format(formatter: SudokuFormatter): FormattableList {
@@ -411,14 +772,15 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
             }
         }
 
-        class VerticalSubSegment(grid: Grid, val colIndex: Int, val topRowIndex: Int): SubSegment(grid) {
+        class VerticalSubSegment(grid: Grid, val colIndex: Int, val topRowIndex: Int): SubSegment<Col>(grid) {
             val botttomRowIndex: Int = topRowIndex + grid.blockSize - 1
-            val enclosingCol: Col = grid.colList.filter { it.colIndex == colIndex }.first() // filter returns 1 col only
-            val enclosingBlock: Block = grid.blockList.filter { colIndex in it.leftColIndex..it.rightColIndex && topRowIndex == it.topRowIndex }.first() // filter returns 1 row only
+            private val enclosingCol: Col = grid.colList.filter { it.colIndex == colIndex }.first() // filter returns 1 col only
+            override val enclosingLinearSegment: Col = enclosingCol
+            override val enclosingBlock: Block = grid.blockList.filter { colIndex in it.leftColIndex..it.rightColIndex && topRowIndex == it.topRowIndex }.first() // filter returns 1 row only
             override val cells: Set<Cell> = LinkedHashSet(enclosingCol.cells.filter { it.rowIndex in topRowIndex..botttomRowIndex })
 
             override fun toString(): String = "${this.javaClass.simpleName}: [colIndex=$colIndex] [topRowIndex=$topRowIndex] [botttomRowIndex=$botttomRowIndex]" +
-                    if (grid.blockSize <= 4) ("\n" + format(defaultGridToStringFormatter)) else ""
+                    if (grid.blockSize <= 4) ("\n" + format(defaultGridFormatter)) else ""
 
             /** Returns the formatted [Cell]s below each other */
             override fun format(formatter: SudokuFormatter): FormattableList {
@@ -441,52 +803,56 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
 
         /**
          * Phase [SOLVE_SINGLE_CANDIDATE_VALUES] indicates that the [GridSolver] is processing, searching for single candidate values within [GridSegment]s. [isSolving] = `true`.
-         *  * E.g. if a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
-         *    can have that value, so `[5]` can be eliminated from the other cells.
-         *     * See [solveSingularCandidates]
+         * * E.g. if a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
+         *   can have that value, so `[5]` can be eliminated from the other cells.
+         * > See: [solveSingularCandidates]
          */
         SOLVE_SINGLE_CANDIDATE_VALUES(true),
         
         /**
-         * Phase [SOLVE_EXCLUDING_COMBINATIONS] indicates that the [GridSolver] is processing, searching for combinations of candidate values
-         * that exclude these values from other cells in the [GridSegment]. [isSolving] = `true`.
+         * Phase [SOLVE_EXCLUDING_COMBINATIONS] indicates that the [GridSolver] is processing,
+         * searching for combinations of candidate values that exclude these values from other cells
+         * in the [GridSegment]. [isSolving] = `true`.
          * E.g.,
-         *  * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
-         *    candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
-         *     * See [solveIdenticalCandidateSets]
-         *  * if cells in a [GridSegment] have different combinations of values, e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
-         *    and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
-         *     * See [solveSingleValueInSegments]
-         *  * if in a [Block] a value, say, `[2]`, only exists in a single row part ([SubSegment]) of the [Block], (so these all have, say,
-         *    [Block.rowIndex] = 7, and the cells with [Block.rowIndex] 7 have candidates `[1, 4, 7]`, `[2, 7]` and `[2, 3]`,
-         *    and no other cells in that block have candidate `[2]`), than that value 2 can be removed from all other cells
-         *    in the [Row] with [Row.rowIndex] = 7.
-         *     * See: [solveExcludingSubsetValues]
+         * * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
+         *   candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
+         * > See: [solveIdenticalCandidateSets]
+         * * if cells in a [GridSegment] have different combinations of values,
+         *   e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
+         *   and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
+         * > See: [solveSingleValueInSegments]
          */
         SOLVE_EXCLUDING_COMBINATIONS(true),
         
         /**
          * Phase [SOLVE_POLYMORPHIC_COMBINATIONS] indicates that the [GridSolver] is processing, and searching for polymorphic combinations of candidate values. [isSolving] = `true`.
          * E.g.
-         *  * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`, and none of the values
-         *    in `[4, 7, 8]` is a candidate value of the other cells in the same [GridSegment], the other values can be removed
-         *    from these cells.
-         *    So in these 3 cells, the candidate values are reduced like this: `[4, 7]` -> `[4, 7]`;  `[1, 4, 7, 8]` -> `[4, 7, 8]`; `[2, 4, 7, 8, 9]` -> `[4, 7, 8]`
-         *  * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
-         *    [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
-         *    So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
-         *  * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block], (so these all have, say,
-         *    [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]` and `[3, 6]`,
-         *    and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from all other cells
-         *    in the [Row] with [Row.rowIndex] = 4.
-         *     * See: [solveExcludingSubsetCombinations]
+         * * if in a [Block] a combination of values, say, `[2, 6]`, only exists in a single row part ([SubSegment]) of the [Block],
+         *   (so these all have, say, [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
+         *   and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
+         *   all other cells in the [Row] with [Row.rowIndex] = 4.
+         * > See: [solveExcludingSubsetCandidates]
+         *
+         * * if 3 cells in a [GridSegment] have candidates, say, `[2, 8]`, `[3, 8]`, `[2, 8]`, then the values `[2, 3, 8]` can be removed
+         *   from the candidates of all other cells in the same [GridSegment].
+         * * if 4 cells have candidates `[1, 2]`, `[1, 2, 3]`, `[2, 3]`, `[1, 4]`, then the values `[1, 2, 3, 4]` can be removed
+         *   from the candidates of all other cells in the same [GridSegment].
+         * > See: [solvePolymorphicExclusions]
+         *
+         * * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`,
+         *  and none of the values `[4, 7, 8]` is a candidate value of the other cells in the same [GridSegment], the other values can be
+         *  removed from these cells.
+         *  So in these 3 cells, the candidate values are reduced like this: `[4, 7]` -> `[4, 7]`;  `[1, 4, 7, 8]` -> `[4, 7, 8]`; `[2, 4, 7, 8, 9]` -> `[4, 7, 8]`
+         * * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
+         *   [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
+         *   So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
+         * > See: [solvePolymorphicCombinations]
          *
          * Re the 'polymorphic' in [SOLVE_POLYMORPHIC_COMBINATIONS], this is because none of the cells may have the exact combination of values searched for,
          * some candidate values of the combination searched for may not be present in the touched cells, and cells may have candidate values
          * that are not part of the combination searched for.
          * This is computationally relatively costly, so this method should be the last one if unsolved candidates remain after all other methods
          * have been applied.
-         *  * See: [solvePolymorphicCombinations]
          */
         SOLVE_POLYMORPHIC_COMBINATIONS(true),
 

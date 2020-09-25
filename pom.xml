@@ -151,6 +151,14 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.dpaukov/combinatoricslib3 -->
+        <dependency>
+            <groupId>com.github.dpaukov</groupId>
+            <artifactId>combinatoricslib3</artifactId>
+            <version>3.3.0</version>
+            <scope>compile</scope>
+        </dependency>
+
 
         <!-- Logging: slf4j implemented by Log4J 2 -->
         <!-- Kotlin logging -->

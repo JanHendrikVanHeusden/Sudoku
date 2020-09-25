@@ -13,7 +13,7 @@ const val fixedValueMarker: Char = '►'
  * Basic stateless [CellValue] formatter for textual output, typically to the console.
  * To be used in other (typically text based) formatters.
  */
-class SimpleCellValueFormatter: CellValueFormatter {
+open class SimpleCellValueFormatter: CellValueFormatter {
 
     val minimalFormattedLength:Int = 3
 

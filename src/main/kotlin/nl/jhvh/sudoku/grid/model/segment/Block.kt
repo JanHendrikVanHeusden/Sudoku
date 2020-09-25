@@ -21,7 +21,7 @@ import nl.jhvh.sudoku.util.incrementFromZero
  * @param leftColIndex The left (x-axis) coordinate of the [Block] within the [Grid]
  * @param topRowIndex The top (y-axis) coordinate of the [Block] within the [Grid]
  */
-class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : GridSegment(grid), Formattable {
+class Block(grid: Grid, val leftColIndex: Int, val topRowIndex: Int) : SquareSegment(grid), Formattable {
 
     /** The right (x-axis) coordinate of the [Block] within the [Grid]  */
     val rightColIndex: Int = leftColIndex + grid.blockSize - 1

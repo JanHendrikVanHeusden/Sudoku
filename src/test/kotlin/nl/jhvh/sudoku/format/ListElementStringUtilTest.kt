@@ -2,6 +2,13 @@ package nl.jhvh.sudoku.format
 
 import io.mockk.every
 import io.mockk.mockk
+import nl.jhvh.sudoku.util.alignCenter
+import nl.jhvh.sudoku.util.alignLeft
+import nl.jhvh.sudoku.util.alignRight
+import nl.jhvh.sudoku.util.concatAlignCenter
+import nl.jhvh.sudoku.util.concatAlignLeft
+import nl.jhvh.sudoku.util.concatAlignRight
+import nl.jhvh.sudoku.util.concatEach
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

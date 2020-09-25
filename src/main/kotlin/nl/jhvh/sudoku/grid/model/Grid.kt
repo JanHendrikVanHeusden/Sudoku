@@ -8,7 +8,8 @@ import nl.jhvh.sudoku.base.validateBlockSize
 import nl.jhvh.sudoku.format.Formattable
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.grid.defaultGridToStringFormatter
+import nl.jhvh.sudoku.grid.defaultGridFormatter
+import nl.jhvh.sudoku.grid.gridWithCandidatesBoxFormatter
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.cell.CellRef
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -93,12 +94,13 @@ private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>,
     override val maxValueLength: Int = this.maxValue.toString().length
 
     fun toStringFull(): String {
-        return toStringCompact() + "\ngrid = \n" + format(defaultGridToStringFormatter)
+        val formatter = if (isSolving) gridWithCandidatesBoxFormatter else defaultGridFormatter
+        return toStringCompact() + "\ngrid = \n" + format(formatter)
     }
 
     fun toStringCompact(): String {
-        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize). ${this.javaClass.simpleName}" +
-                " id = ${System.identityHashCode(this)}"
+        return "${this.javaClass.simpleName}: (blockSize=$blockSize, gridSize=$gridSize), isSolving=$isSolving, isSolved=$isSolved, unSolvable=$unSolvable." +
+                " ${this.javaClass.simpleName} id = ${System.identityHashCode(this)}"
     }
 
     /** Technical [toString] method; for a functional representation, see [format]  */

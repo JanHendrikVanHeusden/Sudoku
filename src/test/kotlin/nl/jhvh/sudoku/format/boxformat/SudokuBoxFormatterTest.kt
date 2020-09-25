@@ -50,7 +50,7 @@ internal class SudokuBoxFormatterTest {
         gridFormatterDelegate = mockk()
 
         val formatterFactoryMock: BoxFormatterFactory = mockk(relaxed = false)
-        every { formatterFactoryMock.simpleCellValueFormatterInstance } returns cellValueFormatterDelegate
+        every { formatterFactoryMock.cellValueFormatterInstance } returns cellValueFormatterDelegate
         every { formatterFactoryMock.cellBoxFormatterInstance } returns cellFormatterDelegate
         every { formatterFactoryMock.rowBoxFormatterInstance } returns rowFormatterDelegate
         every { formatterFactoryMock.columnBoxFormatterInstance } returns colFormatterDelegate

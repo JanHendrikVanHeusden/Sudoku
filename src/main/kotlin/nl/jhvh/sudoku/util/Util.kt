@@ -1,6 +1,8 @@
 package nl.jhvh.sudoku.util
 
+import org.paukov.combinatorics3.Generator
 import java.util.Collections.unmodifiableList
+import java.util.stream.Stream
 
 /**
  * @return An immutable [List]<[Int]> with [size] elements, starting with 0 and every next element incremented by 1 (so last element is [size]-1)
@@ -14,3 +16,21 @@ fun incrementFromZero(size: Int): List<Int> {
     return unmodifiableList((0..size - 1).toList())
 }
 
+/**
+ * Given a [Collection] of [elements] of type [T], gives all possible combinations with length [combinationLength].
+ * * Take care: the number of [List]s in the [Stream] can be huge:
+ *   # [elements.size]! / ( ([elements.size] - [combinationLength])! * [combinationLength]! )
+ *   # So with 20 elements and [combinationLength] = 10 you get about 185 k results...
+ * @param elements The input [Collection]
+ * @param combinationLength The desired length of the combinations
+ * @return A [Stream] of [List]s of [T].
+ *  * The [Stream] will be empty if [combinationLength] > [elements.size]
+ *  * The [Stream] will contain a single empty [List] if [combinationLength] == 0
+ * @throws IllegalArgumentException when [combinationLength] < 0 and [elements] is not empty
+ */
+@Throws(IllegalArgumentException::class)
+fun <T> allCombinations(elements: Collection<T>, combinationLength: Int): Stream<List<T>> {
+    // Negative values would cause ArrayIndexOutOfBoundsException, better let if fail with clear message
+    require(combinationLength >= 0 || elements.isEmpty()) { "Desired combinationLength must be 0 or more, but is $combinationLength" }
+    return Generator.combination(elements).simple(combinationLength).stream()
+}

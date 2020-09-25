@@ -18,7 +18,7 @@ import nl.jhvh.sudoku.util.log
  *
  * A functional synonym for [GridSegment] is **Group**.
  */
-abstract class GridSegment constructor(grid: Grid) : GridElement(grid), ValueEventListener {
+abstract class GridSegment (grid: Grid) : GridElement(grid), ValueEventListener {
 
     abstract val cells: Set<Cell>
 
@@ -48,3 +48,9 @@ abstract class GridSegment constructor(grid: Grid) : GridElement(grid), ValueEve
     }
 
 }
+
+/** Abstraction for [GridSegment] subclasses [Col] (column) and [Row] */
+abstract class LinearSegment(grid: Grid) : GridSegment(grid)
+
+/** Abstraction for [GridSegment] subclass [Block] */
+abstract class SquareSegment(grid: Grid) : GridSegment(grid)

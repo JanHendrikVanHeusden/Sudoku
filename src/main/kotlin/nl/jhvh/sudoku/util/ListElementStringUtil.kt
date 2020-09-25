@@ -1,4 +1,4 @@
-package nl.jhvh.sudoku.format
+package nl.jhvh.sudoku.util
 
 import org.apache.commons.lang3.StringUtils
 

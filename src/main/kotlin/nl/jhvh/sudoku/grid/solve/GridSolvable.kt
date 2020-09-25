@@ -6,6 +6,12 @@ interface GridSolvable {
 
     val gridToSolve: Grid?
 
+    val isSolving: Boolean
+
+    val isSolved: Boolean
+
+    val unSolvable: Boolean?
+
     fun solveGrid()
 
     override fun toString(): String

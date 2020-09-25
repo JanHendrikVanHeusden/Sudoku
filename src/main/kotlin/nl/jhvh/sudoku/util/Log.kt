@@ -7,7 +7,7 @@ import org.slf4j.ILoggerFactory
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
-inline fun <reified T : Any> T.log(name: String = ""): KLogger = lazy { NamedKLogging(if (name.isBlank()) T::class.java.name else name).logger }.value
+internal inline fun <reified T : Any> T.log(name: String = ""): KLogger = lazy { NamedKLogging(if (name.isBlank()) T::class.java.name else name).logger }.value
 
 private val loggerFactory: ILoggerFactory = LoggerFactory.getILoggerFactory()
 
@@ -24,9 +24,9 @@ private fun log4J2Logger(name: String): Log4jLogger = loggerFactory.getLogger(na
  * @param message The `() -> String` message provider that will be evaluated only when needed
  */
 @Throws(IllegalArgumentException::class)
-fun Any.requireAndLog(condition: Boolean, logLevel: Level = Level.WARN, message: () -> String) {
+internal inline fun <reified T : Any> T.requireAndLog(condition: Boolean, logLevel: Level = Level.WARN, message: () -> String) {
     if (!condition) {
-        val logger= log4J2Logger(this.javaClass.name)
+        val logger= log4J2Logger(T::class.java.name)
         logger.log(null, logger.name, logLevel.toInt(), message.invoke(), null, null)
         require(condition, message)
     }
@@ -41,9 +41,9 @@ fun Any.requireAndLog(condition: Boolean, logLevel: Level = Level.WARN, message:
  * @param message The `() -> String` message provider that will be evaluated only when needed
  */
 @Throws(IllegalStateException::class)
-fun Any.checkAndLog(condition: Boolean, logLevel: Level = Level.ERROR, message: () -> String) {
+internal inline fun <reified T : Any> T.checkAndLog(condition: Boolean, logLevel: Level = Level.ERROR, message: () -> String) {
     if (!condition) {
-        val logger= log4J2Logger(this.javaClass.name)
+        val logger= log4J2Logger(T::class.java.name)
         logger.log(null, logger.name, logLevel.toInt(), message.invoke(), null, null)
         check(condition, message)
     }

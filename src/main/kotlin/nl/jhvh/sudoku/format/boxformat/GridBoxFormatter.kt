@@ -1,9 +1,9 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.concatEach
 import nl.jhvh.sudoku.format.element.GridFormatter
 import nl.jhvh.sudoku.grid.model.Grid
+import nl.jhvh.sudoku.util.concatEach
 
 /**
  * Formatter to format a [Grid] using box drawing characters and numbers. Stateless.

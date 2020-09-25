@@ -95,7 +95,7 @@ class GridSolverIT {
                 .fix("F8", 5)
                 .fix("F9", 9)
                 .fix("G2", 2)
-                .fix("G3", 7)
+                .fix("G4", 7)
                 .fix("G5", 6)
                 .fix("H1", 3)
                 .fix("H3", 6)

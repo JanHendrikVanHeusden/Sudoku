@@ -3,7 +3,6 @@ package nl.jhvh.sudoku.format.boxformat
 import nl.jhvh.sudoku.format.Formattable.FormattableList
 import nl.jhvh.sudoku.format.bottomBorderIsBlockBorder
 import nl.jhvh.sudoku.format.bottomBorderIsGridBorder
-import nl.jhvh.sudoku.format.concatEach
 import nl.jhvh.sudoku.format.element.CellFormatter
 import nl.jhvh.sudoku.format.leftBorderIsBlockBorder
 import nl.jhvh.sudoku.format.leftBorderIsGridBorder
@@ -13,6 +12,7 @@ import nl.jhvh.sudoku.format.simple.SimpleCellValueFormatter
 import nl.jhvh.sudoku.format.topBorderIsBlockBorder
 import nl.jhvh.sudoku.format.topBorderIsGridBorder
 import nl.jhvh.sudoku.grid.model.cell.Cell
+import nl.jhvh.sudoku.util.concatEach
 
 /**
  * Simple formatting of a [Cell], typically for output to [System.out]. Stateless.
