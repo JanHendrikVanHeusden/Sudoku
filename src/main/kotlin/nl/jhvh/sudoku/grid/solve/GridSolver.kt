@@ -23,6 +23,7 @@ import nl.jhvh.sudoku.grid.model.segment.LinearSegment
 import nl.jhvh.sudoku.grid.model.segment.Row
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.Companion.firstSolvingPhase
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.GRID_SOLVED
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.MULTI_SEGMENT_COMBINATIONS
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.PREPARED_FOR_SOLVING
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_EXCLUDING_COMBINATIONS
@@ -212,7 +213,11 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
         unmodifiableMap(cellValsBySegment)
     }
 
-    protected val unSolvedNonFixedValues: MutableSet<NonFixedValue> by lazy {
+    /**
+     * Unsolved values, initialized on first access.
+     * After 1st initialization, values are to be removed by the solving algorithm when solved
+     */
+    private val unSolvedNonFixedValues: MutableSet<NonFixedValue> by lazy {
         val map = grid.cellList
                 .map { cell -> cell.cellValue }
                 .filter { cellValue -> !cellValue.isFixed }
@@ -380,10 +385,15 @@ assertCorrectGrid()
             val remainingCandidateValues = (subSegmentCandidateValues - otherBlockCandidates).toIntArray()
             if (remainingCandidateValues.isNotEmpty()) {
                 // we now have candidate values that exist in the current subSegment, but not anywhere else in the Block
-                // so these can be removed from the candidate values in the same linear segment (Row or Col)
-                // that are not part of this subSegment
+                // so these can be removed:
+                //  1. from the candidate values in the same linear segment (Row or Col) that are not part of this Block
                 val otherCellsOfLinearSegment = subSegment.enclosingLinearSegment.cells.filter { !it.isFixed } - subSegment.cells
                 otherCellsOfLinearSegment.map { cell -> cell.cellValue as NonFixedValue }.forEach { nonFixedValue ->
+                    nonFixedValue.removeValueCandidate(*remainingCandidateValues)
+                }
+                //  2. from the candidate values in the sub segments of the Block that are not part of that linear segment
+                val otherCellsOfBlock = subSegment.enclosingBlock.cells.filter { !it.isFixed } - subSegment.cells
+                otherCellsOfBlock.map { cell -> cell.cellValue as NonFixedValue }.forEach { nonFixedValue ->
                     nonFixedValue.removeValueCandidate(*remainingCandidateValues)
                 }
             }
@@ -614,6 +624,9 @@ assertCorrectGrid()
                 solvePolymorphicCombinations()
                 handleEvents()
             }
+            MULTI_SEGMENT_COMBINATIONS -> {
+                // TODO
+            }
             else -> {
                 if (isSolving) {
                     throw NotImplementedError("$solvingPhase is not implemented!")
@@ -805,7 +818,8 @@ assertCorrectGrid()
          * Phase [SOLVE_SINGLE_CANDIDATE_VALUES] indicates that the [GridSolver] is processing, searching for single candidate values within [GridSegment]s. [isSolving] = `true`.
          * * E.g. if a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
          *   can have that value, so `[5]` can be eliminated from the other cells.
-         * > See: [solveSingularCandidates]
+         * > Aka [Naked Single](http://sudopedia.enjoysudoku.com/Naked_Single.html) or Forced Digit.
+         * > See: [solveSingularCandidates].
          */
         SOLVE_SINGLE_CANDIDATE_VALUES(true),
         
@@ -816,11 +830,13 @@ assertCorrectGrid()
          * E.g.,
          * * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
          *   candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
-         * > See: [solveIdenticalCandidateSets]
+         * > See: [solveIdenticalCandidateSets].
+         * > Aka [Naked Pair](http://sudopedia.enjoysudoku.com/Naked_Pair.html), which is a Naked Subset of size 2.
          * * if cells in a [GridSegment] have different combinations of values,
          *   e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
          *   and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
-         * > See: [solveSingleValueInSegments]
+         * > Aka [Hidden Single](http://sudopedia.enjoysudoku.com/Hidden_Single.html)
+         * > See: [solveSingleValueInSegments].
          */
         SOLVE_EXCLUDING_COMBINATIONS(true),
         
@@ -831,13 +847,19 @@ assertCorrectGrid()
          *   (so these all have, say, [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
          *   and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
          *   all other cells in the [Row] with [Row.rowIndex] = 4.
-         * > See: [solveExcludingSubsetCandidates]
+         *   > Aka Block Line or [Locked Candidates type 1](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_1_.28Pointing.29)
+         * * the same combination of values, say `[2, 6]` from the above example can also be removed from the cells in the [Block]
+         *   that are not part of the [SubSegment] of the [Block].
+         *   > Aka Block Line or [Locked Candidates type 2](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_2_.28Claiming_or_Box-Line_Reduction.29)
+         *
+         * > See: [solveExcludingSubsetCandidates].
          *
          * * if 3 cells in a [GridSegment] have candidates, say, `[2, 8]`, `[3, 8]`, `[2, 8]`, then the values `[2, 3, 8]` can be removed
          *   from the candidates of all other cells in the same [GridSegment].
          * * if 4 cells have candidates `[1, 2]`, `[1, 2, 3]`, `[2, 3]`, `[1, 4]`, then the values `[1, 2, 3, 4]` can be removed
          *   from the candidates of all other cells in the same [GridSegment].
-         * > See: [solvePolymorphicExclusions]
+         * > Aka [Naked Subset](http://sudopedia.enjoysudoku.com/Naked_Subset.html)
+         * > See: [solvePolymorphicExclusions].
          *
          * * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`,
          *  and none of the values `[4, 7, 8]` is a candidate value of the other cells in the same [GridSegment], the other values can be
@@ -846,15 +868,21 @@ assertCorrectGrid()
          * * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
          *   [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
          *   So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
-         * > See: [solvePolymorphicCombinations]
+         * > Aka [Hidden Subset](http://sudopedia.enjoysudoku.com/Hidden_Subset.html)
+         * > See: [solvePolymorphicCombinations].
          *
          * Re the 'polymorphic' in [SOLVE_POLYMORPHIC_COMBINATIONS], this is because none of the cells may have the exact combination of values searched for,
          * some candidate values of the combination searched for may not be present in the touched cells, and cells may have candidate values
          * that are not part of the combination searched for.
-         * This is computationally relatively costly, so this method should be the last one if unsolved candidates remain after all other methods
-         * have been applied.
+         * This is computationally relatively costly, so this method should be the last one before starting with [MULTI_SEGMENT_COMBINATIONS]
+         * if unsolved candidates remain after all previous methods have been applied.
          */
         SOLVE_POLYMORPHIC_COMBINATIONS(true),
+
+        /**
+         *
+         */
+        MULTI_SEGMENT_COMBINATIONS(true),
 
         /** Indicates that the [Grid] was solved successfully; [isSolving] = `false` */
         GRID_SOLVED(false);

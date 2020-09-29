@@ -1,13 +1,13 @@
 package nl.jhvh.sudoku.format.boxformat.withcandidates
 
-import nl.jhvh.sudoku.format.GridFormatterFactory
 import nl.jhvh.sudoku.format.SudokuFormatter
-import nl.jhvh.sudoku.format.element.BlockFormatter
-import nl.jhvh.sudoku.format.element.CellFormatter
-import nl.jhvh.sudoku.format.element.CellValueFormatter
-import nl.jhvh.sudoku.format.element.ColumnFormatter
-import nl.jhvh.sudoku.format.element.GridFormatter
-import nl.jhvh.sudoku.format.element.RowFormatter
+import nl.jhvh.sudoku.format.SudokuFormatterFactory
+import nl.jhvh.sudoku.format.element.BlockFormatting
+import nl.jhvh.sudoku.format.element.CellFormatting
+import nl.jhvh.sudoku.format.element.CellValueFormatting
+import nl.jhvh.sudoku.format.element.ColumnFormatting
+import nl.jhvh.sudoku.format.element.GridFormatting
+import nl.jhvh.sudoku.format.element.RowFormatting
 
 /**
  * Formatter to format a grid or grid element using box drawing characters and numbers
@@ -16,11 +16,11 @@ import nl.jhvh.sudoku.format.element.RowFormatter
  * Typically for console output, to inspect results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-class SudokuWithCandidatesBoxFormatter(val formatterFactory: GridFormatterFactory = BoxFormatterWithCandidatesFactory.factoryInstance) :
+class SudokuWithCandidatesBoxFormatter(val formatterFactory: SudokuFormatterFactory = BoxFormatterWithCandidatesFactory.factoryInstance) :
         SudokuFormatter,
-        CellValueFormatter by formatterFactory.cellValueFormatterInstance,
-        CellFormatter by formatterFactory.cellBoxFormatterInstance,
-        ColumnFormatter by formatterFactory.columnBoxFormatterInstance,
-        RowFormatter by formatterFactory.rowBoxFormatterInstance,
-        BlockFormatter by formatterFactory.blockBoxFormatterInstance,
-        GridFormatter by formatterFactory.gridBoxFormatterInstance
+        CellValueFormatting by formatterFactory.cellValueFormatterInstance,
+        CellFormatting by formatterFactory.cellFormatterInstance,
+        ColumnFormatting by formatterFactory.columnFormatterInstance,
+        RowFormatting by formatterFactory.rowFormatterInstance,
+        BlockFormatting by formatterFactory.blockFormatterInstance,
+        GridFormatting by formatterFactory.gridFormatterInstance

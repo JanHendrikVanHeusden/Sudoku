@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 /** Unit integration test for [Block] formatting */
 internal class BlockBoxFormatterTest {
 
-    private val subject = BlockBoxFormatter(BoxFormatterFactory().cellBoxFormatterInstance)
+    private val subject = BlockBoxFormatter(BoxFormatterFactory().cellFormatterInstance as CellBoxFormatter)
 
     /**
      * * `A, B, C,` etc. denote rows (top row is `A` => y = 0)

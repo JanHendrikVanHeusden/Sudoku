@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.simple
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.element.CellValueFormatter
+import nl.jhvh.sudoku.format.element.CellValueFormatting
 import nl.jhvh.sudoku.grid.model.cell.CellValue
 import nl.jhvh.sudoku.grid.model.cell.VALUE_UNKNOWN
 import org.apache.commons.lang3.StringUtils
@@ -13,7 +13,7 @@ const val fixedValueMarker: Char = '►'
  * Basic stateless [CellValue] formatter for textual output, typically to the console.
  * To be used in other (typically text based) formatters.
  */
-open class SimpleCellValueFormatter: CellValueFormatter {
+open class SimpleCellValueFormatter: CellValueFormatting {
 
     val minimalFormattedLength:Int = 3
 

@@ -34,8 +34,11 @@ import java.util.Collections.unmodifiableMap
 class Grid
 
 @Throws(IllegalArgumentException::class)
-private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver) :
-        Formattable, SegmentValueEventHandlable by SegmentValueEventHandler(), ValueEventHandlable by gridSolver, GridSolvable by gridSolver {
+private constructor (val blockSize: Int = 3, val fixedValues: Map<CellRef, Int>, val gridSolver: GridSolver):
+        Formattable, GridStructural,
+        SegmentValueEventHandlable by SegmentValueEventHandler(),
+        ValueEventHandlable by gridSolver,
+        GridSolvable by gridSolver {
 
     // early validation
     init {

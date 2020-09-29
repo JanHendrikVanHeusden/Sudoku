@@ -198,11 +198,11 @@ internal class GridTest {
 
     @Test
     fun validateBlockSize() {
-        // Blocksize 1 is not very useful, but should not fail
-        GridBuilder(1).build()
+        GridBuilder(2).build()
         // should fail
-        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(0).build() }
         assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(-1).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(0).build() }
+        assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(1).build() }
         assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(Int.MIN_VALUE).build() }
         assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(MAX_BLOCK_SIZE+1).build() }
         assertFailsWith<java.lang.IllegalArgumentException> { GridBuilder(Int.MAX_VALUE).build() }

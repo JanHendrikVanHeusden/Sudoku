@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 internal class GridBoxFormatterTest {
 
     private val formatterFactory = BoxFormatterFactory()
-    private val subject = GridBoxFormatter(formatterFactory.rowBoxFormatterInstance, formatterFactory.columnBoxFormatterInstance)
+    private val subject = GridBoxFormatter(formatterFactory.rowFormatterInstance as RowBoxFormatter, formatterFactory.columnFormatterInstance as ColumnBoxFormatter)
 
     /**
      * * `A, B, C,` etc. denote rows (top row is `A` => y = 0)

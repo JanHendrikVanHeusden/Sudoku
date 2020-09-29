@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.element.GridFormatter
+import nl.jhvh.sudoku.format.element.GridFormatting
 import nl.jhvh.sudoku.grid.model.Grid
 import nl.jhvh.sudoku.util.concatEach
 
@@ -12,14 +12,13 @@ import nl.jhvh.sudoku.util.concatEach
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `grid: Grid` (instead of `grid: Grid`)
-class GridBoxFormatter(private val rowFormatter: RowBoxFormatter, private val colFormatter: ColumnBoxFormatter
-) : GridFormatter, ElementBoxFormattable<Grid> {
+open class GridBoxFormatter(protected val rowBoxFormatter: RowBoxFormatter, protected val colBoxFormatter: ColumnBoxFormatter
+) : GridFormatting, GridElementBoxFormatter<Grid> {
 
     override fun format(grid: Grid): FormattableList {
         val formattedRows = mutableListOf<String>()
         val bottomBorder: List<String>
-        with (rowFormatter) {
+        with (rowBoxFormatter) {
             grid.rowList.forEach {
                 formattedRows += listOf(getTopLeftEdge(it)) concatEach getTopBorder(it) concatEach listOf(getTopRightEdge(it))
                 formattedRows += (getLeftBorder(it) concatEach nakedFormat(it) concatEach getRightBorder(it))
@@ -29,35 +28,35 @@ class GridBoxFormatter(private val rowFormatter: RowBoxFormatter, private val co
         return FormattableList(formattedRows + bottomBorder)
     }
 
-    override fun nakedFormat(grid: Grid): FormattableList {
-        val topRowsWithBottomBorder = grid.rowList.dropLast(1).map {
-            rowFormatter.nakedFormat(it) + rowFormatter.getBottomBorder(it)
+    override fun nakedFormat(element: Grid): FormattableList {
+        val topRowsWithBottomBorder = element.rowList.dropLast(1).map {
+            rowBoxFormatter.nakedFormat(it) + rowBoxFormatter.getBottomBorder(it)
         }.flatten()
-        val bottomRowNaked = rowFormatter.nakedFormat(grid.rowList.last())
+        val bottomRowNaked = rowBoxFormatter.nakedFormat(element.rowList.last())
         return FormattableList(topRowsWithBottomBorder + bottomRowNaked)
     }
 
-    override fun getLeftBorder(grid: Grid): FormattableList {
-        return colFormatter.getLeftBorder(grid.colList.first())
+    override fun getLeftBorder(element: Grid): FormattableList {
+        return colBoxFormatter.getLeftBorder(element.colList.first())
     }
 
-    override fun getRightBorder(grid: Grid): FormattableList {
-        return colFormatter.getRightBorder(grid.colList.last())
+    override fun getRightBorder(element: Grid): FormattableList {
+        return colBoxFormatter.getRightBorder(element.colList.last())
     }
 
-    override fun getTopBorder(grid: Grid): FormattableList {
-        return rowFormatter.getTopBorder(grid.rowList.first())
+    override fun getTopBorder(element: Grid): FormattableList {
+        return rowBoxFormatter.getTopBorder(element.rowList.first())
     }
 
-    override fun getBottomBorder(grid: Grid): FormattableList {
-        return rowFormatter.getBottomBorder(grid.rowList.last())
+    override fun getBottomBorder(element: Grid): FormattableList {
+        return rowBoxFormatter.getBottomBorder(element.rowList.last())
     }
 
-    override fun getTopLeftEdge(grid: Grid): String = rowFormatter.getTopLeftEdge(grid.rowList.first())
+    override fun getTopLeftEdge(element: Grid): String = rowBoxFormatter.getTopLeftEdge(element.rowList.first())
 
-    override fun getTopRightEdge(grid: Grid): String = rowFormatter.getTopRightEdge(grid.rowList.first())
+    override fun getTopRightEdge(element: Grid): String = rowBoxFormatter.getTopRightEdge(element.rowList.first())
 
-    override fun getBottomLeftEdge(grid: Grid): String = rowFormatter.getBottomLeftEdge(grid.rowList.last())
+    override fun getBottomLeftEdge(element: Grid): String = rowBoxFormatter.getBottomLeftEdge(element.rowList.last())
 
-    override fun getBottomRightEdge(grid: Grid): String = rowFormatter.getBottomRightEdge(grid.rowList.last())
+    override fun getBottomRightEdge(element: Grid): String = rowBoxFormatter.getBottomRightEdge(element.rowList.last())
 }

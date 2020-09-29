@@ -58,7 +58,6 @@ class CellValueWithCandidatesFormatter: SimpleCellValueFormatter() {
             val strBuilder = StringBuilder(formattedLength)
             (0 until grid.blockSize).forEach { lineNr ->
                 strBuilder.clear().append(' ')
-                var value: Int = 0
                 (0 until grid.blockSize).forEach { horPos ->
                     val candidateStr: String
                     if (allCandidatesPresent) {
@@ -66,7 +65,7 @@ class CellValueWithCandidatesFormatter: SimpleCellValueFormatter() {
                         candidateStr = "  "
                     } else {
                         // Candidates have been removed, show the ones that are present yet
-                        value = horPos + grid.blockSize * lineNr + 1
+                        val value = horPos + grid.blockSize * lineNr + 1
                         candidateStr = if (!nonFixedValue.getValueCandidates().contains(value)) "  " else value.toString() + " "
                     }
                     strBuilder.append(candidateStr)

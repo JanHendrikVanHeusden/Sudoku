@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.element.ColumnFormatter
+import nl.jhvh.sudoku.format.element.ColumnFormatting
 import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.util.concatEach
 
@@ -12,8 +12,7 @@ import nl.jhvh.sudoku.util.concatEach
  * Typically for console output, to observe results of actions (grid construction, Sudoku solving,
  * testing etc.)
  */
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `col: Col` (instead of `element: Col`)
-class ColumnBoxFormatter(private val cellFormatter: CellBoxFormatter) : ColumnFormatter, ElementBoxFormattable<Col> {
+class ColumnBoxFormatter(private val cellBoxFormatter: CellBoxFormatter) : ColumnFormatting, GridElementBoxFormatter<Col> {
 
     override fun format(col: Col): FormattableList {
         val topBorder =
@@ -25,42 +24,43 @@ class ColumnBoxFormatter(private val cellFormatter: CellBoxFormatter) : ColumnFo
         return FormattableList(topBorder + valueWithLeftRightBorders + bottomBorder)
     }
 
-    override fun nakedFormat(col: Col): FormattableList {
-        val topCellsWithBottomBorder = col.cells.toList().dropLast(1)
-                .map {cellFormatter.nakedFormat(it) + cellFormatter.getBottomBorder(it)
+    override fun nakedFormat(element: Col): FormattableList {
+        val topCellsWithBottomBorder = element.cells.toList().dropLast(1)
+                .map {
+                    cellBoxFormatter.nakedFormat(it) + cellBoxFormatter.getBottomBorder(it)
         }.flatten()
-        val bottomCellNaked = cellFormatter.nakedFormat(col.cells.last())
+        val bottomCellNaked = cellBoxFormatter.nakedFormat(element.cells.last())
         return FormattableList(topCellsWithBottomBorder + bottomCellNaked)
     }
 
-    override fun getLeftBorder(col: Col): FormattableList {
-        val topCellsLeftBordersWithBottomEdge = col.cells.toList().dropLast(1)
-                .map { cellFormatter.getLeftBorder(it) + listOf(cellFormatter.getBottomLeftEdge(it)) }.flatten()
-        val leftBorderOfBottomCell = cellFormatter.getLeftBorder(col.cells.last())
+    override fun getLeftBorder(element: Col): FormattableList {
+        val topCellsLeftBordersWithBottomEdge = element.cells.toList().dropLast(1)
+                .map { cellBoxFormatter.getLeftBorder(it) + listOf(cellBoxFormatter.getBottomLeftEdge(it)) }.flatten()
+        val leftBorderOfBottomCell = cellBoxFormatter.getLeftBorder(element.cells.last())
         return FormattableList(topCellsLeftBordersWithBottomEdge + leftBorderOfBottomCell)
     }
 
-    override fun getRightBorder(col: Col): FormattableList {
-        val topCellsRightBordersWithBottomEdge = col.cells.toList().dropLast(1)
-                .map { cellFormatter.getRightBorder(it) as List<String> + listOf(cellFormatter.getBottomRightEdge(it)) }.flatten()
-        val rightBorderOfBottomCell = cellFormatter.getRightBorder(col.cells.last()) as List<String>
+    override fun getRightBorder(element: Col): FormattableList {
+        val topCellsRightBordersWithBottomEdge = element.cells.toList().dropLast(1)
+                .map { cellBoxFormatter.getRightBorder(it) as List<String> + listOf(cellBoxFormatter.getBottomRightEdge(it)) }.flatten()
+        val rightBorderOfBottomCell = cellBoxFormatter.getRightBorder(element.cells.last()) as List<String>
         return FormattableList(topCellsRightBordersWithBottomEdge + rightBorderOfBottomCell)
     }
 
-    override fun getTopBorder(col: Col): FormattableList {
-        return cellFormatter.getTopBorder(col.cells.first())
+    override fun getTopBorder(element: Col): FormattableList {
+        return cellBoxFormatter.getTopBorder(element.cells.first())
     }
 
-    override fun getBottomBorder(col: Col): FormattableList {
-        return cellFormatter.getBottomBorder(col.cells.last())
+    override fun getBottomBorder(element: Col): FormattableList {
+        return cellBoxFormatter.getBottomBorder(element.cells.last())
     }
 
-    override fun getTopLeftEdge(col: Col): String = cellFormatter.getTopLeftEdge(col.cells.first())
+    override fun getTopLeftEdge(element: Col): String = cellBoxFormatter.getTopLeftEdge(element.cells.first())
 
-    override fun getTopRightEdge(col: Col): String = cellFormatter.getTopRightEdge(col.cells.first())
+    override fun getTopRightEdge(element: Col): String = cellBoxFormatter.getTopRightEdge(element.cells.first())
 
-    override fun getBottomLeftEdge(col: Col): String = cellFormatter.getBottomLeftEdge(col.cells.last())
+    override fun getBottomLeftEdge(element: Col): String = cellBoxFormatter.getBottomLeftEdge(element.cells.last())
 
-    override fun getBottomRightEdge(col: Col): String = cellFormatter.getBottomRightEdge(col.cells.last())
+    override fun getBottomRightEdge(element: Col): String = cellBoxFormatter.getBottomRightEdge(element.cells.last())
 
 }

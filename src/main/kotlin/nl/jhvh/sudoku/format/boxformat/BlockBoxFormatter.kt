@@ -1,7 +1,7 @@
 package nl.jhvh.sudoku.format.boxformat
 
 import nl.jhvh.sudoku.format.Formattable.FormattableList
-import nl.jhvh.sudoku.format.element.BlockFormatter
+import nl.jhvh.sudoku.format.element.BlockFormatting
 import nl.jhvh.sudoku.format.rightBorderIsBlockBorder
 import nl.jhvh.sudoku.grid.model.cell.Cell
 import nl.jhvh.sudoku.grid.model.segment.Block
@@ -14,8 +14,7 @@ import nl.jhvh.sudoku.util.concatEach
  * Typically for console output, to observe results of actions (block construction, Sudoku solving,
  * testing etc.)
  */
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // parameter `block: Block` (instead of `element: Block`)
-class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFormatter, ElementBoxFormattable<Block> {
+class BlockBoxFormatter (private val cellBoxFormatter: CellBoxFormatter) : BlockFormatting, GridElementBoxFormatter<Block> {
 
     override fun format(block: Block): FormattableList {
         val nakedWithTopAndBottom = getTopBorder(block) + nakedFormat(block) + getBottomBorder(block)
@@ -24,7 +23,8 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
         return FormattableList(leftBorder concatEach nakedWithTopAndBottom concatEach rightBorder)
     }
 
-    override fun nakedFormat(block: Block): FormattableList {
+    override fun nakedFormat(element: Block): FormattableList {
+        val block = element
         // Block has n sub-rows (n = blockSize; sub-row as Cells of a Row insofar these Cells are part of the Block)
         // Create 2 lists-of-lists with identical structure, 1 with cells, 1 with formatted cells
         val cellsBySubRow = mutableListOf(mutableListOf<Cell>())
@@ -34,16 +34,16 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
             cellsBySubRow[x].addAll(block.cells.filter { x == it.rowIndex - block.topRowIndex })
 
             val leftCellsWithRightBorder = concatEach(*cellsBySubRow[x].dropLast(1).map {
-                cellFormatter.nakedFormat(it) concatEach cellFormatter.getRightBorder(it)
+                cellBoxFormatter.nakedFormat(it) concatEach cellBoxFormatter.getRightBorder(it)
             }.toTypedArray())
-            val rightCellNaked = cellFormatter.nakedFormat(cellsBySubRow[x].last())
+            val rightCellNaked = cellBoxFormatter.nakedFormat(cellsBySubRow[x].last())
             formattedCellsBySubRow.add(FormattableList(leftCellsWithRightBorder concatEach rightCellNaked))
 
             if (x < block.grid.blockSize-1) {
                 // add bottom border (except for last sub-row)
                 val bottomBorder = concatEach(*cellsBySubRow[x].map {
-                    cellFormatter.getBottomBorder(it) concatEach
-                            if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellFormatter.getBottomRightEdge(it))
+                    cellBoxFormatter.getBottomBorder(it) concatEach
+                            if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellBoxFormatter.getBottomRightEdge(it))
                 }.toTypedArray())
                 formattedCellsBySubRow.add(FormattableList(bottomBorder))
             }
@@ -51,57 +51,61 @@ class BlockBoxFormatter (private val cellFormatter: CellBoxFormatter) : BlockFor
         return FormattableList(formattedCellsBySubRow.flatten())
     }
 
-    override fun getLeftBorder(block: Block): FormattableList {
+    override fun getLeftBorder(element: Block): FormattableList {
+        val block = element
         val leftColCells = block.cells.filter { it.colIndex == block.leftColIndex }
         val result = mutableListOf<String>()
         leftColCells.dropLast(1).forEach {
-            result.addAll(cellFormatter.getLeftBorder(it) + listOf(cellFormatter.getBottomLeftEdge(it)))
+            result.addAll(cellBoxFormatter.getLeftBorder(it) + listOf(cellBoxFormatter.getBottomLeftEdge(it)))
         }
-        result.addAll(cellFormatter.getLeftBorder(leftColCells.last()))
+        result.addAll(cellBoxFormatter.getLeftBorder(leftColCells.last()))
         return FormattableList(result)
     }
 
-    override fun getRightBorder(block: Block): FormattableList {
+    override fun getRightBorder(element: Block): FormattableList {
+        val block = element
         val rightColCells = block.cells.filter { it.colIndex == block.rightColIndex }
         val result = mutableListOf<String>()
         rightColCells.dropLast(1).forEach {
-            result.addAll(cellFormatter.getRightBorder(it) + listOf(cellFormatter.getBottomRightEdge(it)))
+            result.addAll(cellBoxFormatter.getRightBorder(it) + listOf(cellBoxFormatter.getBottomRightEdge(it)))
         }
-        result.addAll(cellFormatter.getRightBorder(rightColCells.last()))
+        result.addAll(cellBoxFormatter.getRightBorder(rightColCells.last()))
         return FormattableList(result)
     }
 
-    override fun getTopBorder(block: Block): FormattableList {
+    override fun getTopBorder(element: Block): FormattableList {
+        val block = element
         val topRowCells = block.cells.toList().subList(0, block.grid.blockSize)
         val topBorder = concatEach(*topRowCells.map {
-            cellFormatter.getTopBorder(it) concatEach
-                    if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellFormatter.getTopRightEdge(it))
+            cellBoxFormatter.getTopBorder(it) concatEach
+                    if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellBoxFormatter.getTopRightEdge(it))
         }.toTypedArray())
         return FormattableList(topBorder)
     }
 
-    override fun getBottomBorder(block: Block): FormattableList {
+    override fun getBottomBorder(element: Block): FormattableList {
+        val block = element
         val bottomRowCells = block.cells.toList().subList(block.grid.gridSize - block.grid.blockSize, block.grid.gridSize)
         val bottomBorder = concatEach(*bottomRowCells.map {
-            cellFormatter.getBottomBorder(it) concatEach
-                    if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellFormatter.getBottomRightEdge(it))
+            cellBoxFormatter.getBottomBorder(it) concatEach
+                    if (it.rightBorderIsBlockBorder()) listOf("") else listOf(cellBoxFormatter.getBottomRightEdge(it))
         }.toTypedArray())
         return FormattableList(bottomBorder)
     }
 
-    override fun getTopLeftEdge(block: Block): String {
-        return cellFormatter.getTopLeftEdge(block.cells.first())
+    override fun getTopLeftEdge(element: Block): String {
+        return cellBoxFormatter.getTopLeftEdge(element.cells.first())
     }
 
-    override fun getTopRightEdge(block: Block): String {
-        return cellFormatter.getTopRightEdge(block.cells.toList()[block.grid.blockSize-1])
+    override fun getTopRightEdge(element: Block): String {
+        return cellBoxFormatter.getTopRightEdge(element.cells.toList()[element.grid.blockSize-1])
     }
 
-    override fun getBottomLeftEdge(block: Block): String {
-        return cellFormatter.getBottomLeftEdge(block.cells.toList()[block.grid.gridSize - block.grid.blockSize])
+    override fun getBottomLeftEdge(element: Block): String {
+        return cellBoxFormatter.getBottomLeftEdge(element.cells.toList()[element.grid.gridSize - element.grid.blockSize])
     }
 
-    override fun getBottomRightEdge(block: Block): String {
-        return cellFormatter.getBottomRightEdge(block.cells.last())
+    override fun getBottomRightEdge(element: Block): String {
+        return cellBoxFormatter.getBottomRightEdge(element.cells.last())
     }
 }

@@ -20,7 +20,7 @@ internal class GridBuilderTest {
     @Test
     fun `GridBuilder constructor`() {
         // regular block sizes
-        var blockSize = 1
+        var blockSize = 2
         var builder = GridBuilder(blockSize) // OK
         assertThat(builder.blockSize).isEqualTo(blockSize)
         assertThat(builder.isBuilt).isFalse()
@@ -48,8 +48,9 @@ internal class GridBuilderTest {
         // Invalid block sizes
         assertFailsWith<IllegalArgumentException> {GridBuilder(MAX_BLOCK_SIZE+1) }
         assertFailsWith<IllegalArgumentException> {GridBuilder(MAX_BLOCK_SIZE+100) }
-        assertFailsWith<IllegalArgumentException> {GridBuilder(0) }
         assertFailsWith<IllegalArgumentException> {GridBuilder(-1) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(0) }
+        assertFailsWith<IllegalArgumentException> {GridBuilder(1) }
         assertFailsWith<IllegalArgumentException> {GridBuilder(Int.MAX_VALUE) }
         assertFailsWith<IllegalArgumentException> {GridBuilder(Int.MIN_VALUE) }
     }
@@ -57,7 +58,7 @@ internal class GridBuilderTest {
     @Test
     fun isBuilt() {
         // given
-        val subject: GridBuilder = GridBuilder(1)
+        val subject: GridBuilder = GridBuilder(2)
         assertThat(subject.isBuilt).isFalse()
         // when
         subject.build()
@@ -97,7 +98,7 @@ internal class GridBuilderTest {
     fun `build should fail on invalid block sizes`() {
         // Regular values
         GridBuilder().build() // default = 3
-        var blockSize = 1
+        var blockSize = 2
         GridBuilder(blockSize).build()
         blockSize = 10
         GridBuilder(blockSize).build()

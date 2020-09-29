@@ -1,5 +1,8 @@
 package nl.jhvh.sudoku.base
 
+/** Minimal relevant base dimension of a [Block] = 2. */
+const val MIN_BLOCK_SIZE: Int = 2
+
 /**
  * Arbitrary maximal allowed base dimension of a [Block] = 100.
  *  * This is used only to avoid too large Sudokus being constructed that would do nothing but clog memory and CPU.
@@ -29,6 +32,6 @@ fun maxValue(blockSize: Int): Int {
 }
 
 fun validateBlockSize(blockSize: Int) {
-    require(blockSize > 0) { "Given blocksize is $blockSize but must be positive ( > 0 )" }
+    require(blockSize >= MIN_BLOCK_SIZE) { "Given blocksize is $blockSize but must at least $MIN_BLOCK_SIZE" }
     require(blockSize <= MAX_BLOCK_SIZE) { "Given blocksize is $blockSize but must be at most $MAX_BLOCK_SIZE" }
 }

@@ -51,11 +51,11 @@ internal class SudokuBoxFormatterTest {
 
         val formatterFactoryMock: BoxFormatterFactory = mockk(relaxed = false)
         every { formatterFactoryMock.cellValueFormatterInstance } returns cellValueFormatterDelegate
-        every { formatterFactoryMock.cellBoxFormatterInstance } returns cellFormatterDelegate
-        every { formatterFactoryMock.rowBoxFormatterInstance } returns rowFormatterDelegate
-        every { formatterFactoryMock.columnBoxFormatterInstance } returns colFormatterDelegate
-        every { formatterFactoryMock.blockBoxFormatterInstance } returns blockFormatterDelegate
-        every { formatterFactoryMock.gridBoxFormatterInstance } returns gridFormatterDelegate
+        every { formatterFactoryMock.cellFormatterInstance } returns cellFormatterDelegate
+        every { formatterFactoryMock.rowFormatterInstance } returns rowFormatterDelegate
+        every { formatterFactoryMock.columnFormatterInstance } returns colFormatterDelegate
+        every { formatterFactoryMock.blockFormatterInstance } returns blockFormatterDelegate
+        every { formatterFactoryMock.gridFormatterInstance } returns gridFormatterDelegate
 
         subject = SudokuBoxFormatter(formatterFactoryMock)
     }
