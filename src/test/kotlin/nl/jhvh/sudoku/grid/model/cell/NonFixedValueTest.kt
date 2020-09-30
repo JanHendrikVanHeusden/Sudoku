@@ -42,7 +42,7 @@ internal class NonFixedValueTest {
         cellMock = mockk(relaxed = true)
         every {cellMock.grid.blockSize} returns blockSize
         every {cellMock.grid.gridSize} returns gridSize
-        every {cellMock.grid.maxValue} returns gridSize
+        every {cellMock.grid.maxValue} returns maxValue
 
         subject = NonFixedValue(cellMock)
     }

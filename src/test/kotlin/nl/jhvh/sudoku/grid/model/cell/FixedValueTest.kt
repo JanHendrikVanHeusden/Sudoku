@@ -18,13 +18,14 @@ internal class FixedValueTest {
     private lateinit var cellMock: Cell
     private val blockSize = 3
     private val gridSize = blockSize * blockSize
+    private val maxValue = gridSize
 
     @BeforeEach
     fun setUp() {
         cellMock = mockk(relaxed = true)
         every {cellMock.grid.blockSize} returns blockSize
         every {cellMock.grid.gridSize} returns gridSize
-        every {cellMock.grid.maxValue} returns gridSize
+        every {cellMock.grid.maxValue} returns maxValue
     }
 
     @Test

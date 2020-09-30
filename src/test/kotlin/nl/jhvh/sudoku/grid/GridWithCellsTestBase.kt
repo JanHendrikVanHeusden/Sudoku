@@ -31,13 +31,14 @@ internal abstract class GridWithCellsTestBase(protected val blockSize: Int) {
 
     protected lateinit var gridMock: Grid
     protected val gridSize = blockSize * blockSize
+    protected val maxValue = gridSize
 
     @BeforeEach
     fun gridSetUp() {
         gridMock = mockk(relaxed = true)
         every { gridMock.blockSize } returns blockSize
         every { gridMock.gridSize } returns gridSize
-        every { gridMock.maxValue } returns gridSize
+        every { gridMock.maxValue } returns maxValue
 
         val cellColIndexCapturer: CapturingSlot<Int> = slot()
         val cellRowIndexCapturer: CapturingSlot<Int> = slot()

@@ -18,11 +18,12 @@ class CellValueTest {
 
     private lateinit var cellMock: Cell
     private val gridSize = 9
+    private val maxValue = gridSize
 
     @BeforeEach
     fun setUp() {
         cellMock = mockk(relaxed = true)
-        every {cellMock.grid.maxValue} returns gridSize
+        every {cellMock.grid.maxValue} returns maxValue
     }
 
     @Test
