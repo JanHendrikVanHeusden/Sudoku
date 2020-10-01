@@ -19,6 +19,7 @@ But no, it still can't solve the really hard ones that you find on specialized S
   So I do not expect to need explicit synchronization or guarding.
   We will see!
 * Maybe I will build a web frontend to it. Would really like that! Maybe using something like Angular or so. But no detailed plans for it yet, and zero experience in frontend developing!
+* Would also be interesting to use an Amazon Web Service to read a Sudoku from an image and load it into the tool - fancy plan, but there are more things to do yet 😉
 
 ### Design patterns
 Quite some commmon design patterns have been applied in this project, not just to see if it works, but rather the other way around: the things I wanted to program just asked for it
