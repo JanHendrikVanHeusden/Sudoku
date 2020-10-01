@@ -3,6 +3,10 @@ package nl.jhvh.sudoku.grid.solve
 import nl.jhvh.sudoku.grid.model.Grid
 import org.junit.jupiter.api.Test
 
+/**
+ * Class to integration-test [GridSolver] with correct (solvable) and incorrect (not solvable or multiple solutions) Sudoku puzzles.
+ * > See also the README.md in this project for links to testcases, various websites, etc.
+ */
 class GridSolverIT {
 
     @Test
@@ -110,7 +114,7 @@ class GridSolverIT {
     }
 
     @Test
-    fun solveGridVeryHard1() {
+    fun solveGridExpertLevel1() {
         val gridBuilder = Grid.GridBuilder()
         val grid = gridBuilder
                 .fix("A2", 4)
@@ -138,6 +142,37 @@ class GridSolverIT {
                 .fix("H8", 3)
                 .fix("I1", 2)
                 .fix("I2", 7)
+                .build()
+
+        grid.solveGrid()
+        // todo: asserts
+    }
+
+    @Test
+    fun `solve Hardest Sudoku Ever - Golden Nugget`() {
+        val gridBuilder = Grid.GridBuilder()
+        val grid = gridBuilder
+                .fix("A8", 3)
+                .fix("A9", 9)
+                .fix("B5", 1)
+                .fix("B9", 5)
+                .fix("C3", 3)
+                .fix("C6", 5)
+                .fix("C7", 8)
+                .fix("D3", 8)
+                .fix("D6", 9)
+                .fix("D9", 6)
+                .fix("E2", 7)
+                .fix("E5", 2)
+                .fix("F1", 1)
+                .fix("F4", 4)
+                .fix("G3", 9)
+                .fix("G6", 8)
+                .fix("G8", 5)
+                .fix("H2", 2)
+                .fix("H7", 6)
+                .fix("I1", 4)
+                .fix("I4", 7)
                 .build()
 
         grid.solveGrid()

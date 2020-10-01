@@ -21,6 +21,7 @@ import nl.jhvh.sudoku.grid.model.segment.Col
 import nl.jhvh.sudoku.grid.model.segment.GridSegment
 import nl.jhvh.sudoku.grid.model.segment.LinearSegment
 import nl.jhvh.sudoku.grid.model.segment.Row
+import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.CHAINING_TECHNIQUE
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.Companion.firstSolvingPhase
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.GRID_SOLVED
 import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.MULTI_SEGMENT_COMBINATIONS
@@ -149,14 +150,6 @@ open class GridSolver: GridSolvable, ValueEventListener, ValueEventHandlable {
                 verticalSubSegments
                         .groupBy{ it.enclosingBlock }
                         .mapValues { it -> it.value.toSet() }
-        unmodifiableMap(subSegmentsByBlockMap)
-    }
-
-    protected val linearSubSegmentsByBlock: Map<Block, Set<SubSegment<LinearSegment>>> by lazy {
-        val subSegmentsByBlockMap: MutableMap<Block, Set<SubSegment<LinearSegment>>>
-                = HashMap(horizontalSubSegmentsByBlock.size + verticalSubSegmentsByBlock.size)
-        subSegmentsByBlockMap.putAll(horizontalSubSegmentsByBlock)
-        subSegmentsByBlockMap.putAll(verticalSubSegmentsByBlock)
         unmodifiableMap(subSegmentsByBlockMap)
     }
 
@@ -481,12 +474,12 @@ assertCorrectGrid()
      *    from the candidates of all other cells in the same [GridSegment].
      */
     fun solvePolymorphicExclusions() {
-        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 2..8.
+        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 1..8.
         // But if you have a combination of, say [1, 4, 5, 6, 7, 9], then there must also be a smaller combination,
         // in this case [1, 3, 8]. So it makes no sense to look for combinations of gridSize / 2 or larger, finding
         // larger combinations is much more costly in terms of computing power & memory
         var goNextCombinationSize = true
-        (2..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
+        (1..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
             if (!goNextCombinationSize) {
                 // If we have found combinations of, say, 3, we do not proceed with combinations of 4,
                 // we better handle events first (with less complicated solution methods)
@@ -551,12 +544,12 @@ assertCorrectGrid()
      */
     fun solvePolymorphicCombinations() {
 //        synchronized(grid) {
-        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 2..8.
+        // gridSize divided by 2: In a grid of nine you may have excluding combinations of 1..8.
         // But if you have a combination of, say [1, 4, 5, 6, 7, 9], then there must also be a smaller combination,
         // in this case [1, 3, 8]. So it makes no sense to look for combinations of gridSize / 2 or larger, finding
         // larger combinations is much more costly in terms of computing power & memory
         var goNextCombinationSize = true
-        (2..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
+        (1..(grid.gridSize/2)).forEach combiLengthLoop@ { combinationLength ->
             if (!goNextCombinationSize) {
                 // If we have found combinations of, say, 3, we do not proceed with combinations of 4,
                 // we better handle events first (with less complicated solution methods)
@@ -625,6 +618,9 @@ assertCorrectGrid()
                 handleEvents()
             }
             MULTI_SEGMENT_COMBINATIONS -> {
+                // TODO
+            }
+            CHAINING_TECHNIQUE -> {
                 // TODO
             }
             else -> {
@@ -810,18 +806,19 @@ assertCorrectGrid()
      */
     enum class GridSolvingPhase(val isSolving: Boolean) {
         /** Indicates that processing was not started yet ([Grid] not assigned yet). [isSolving] = `false` */
-        NOT_STARTED(false),
+        NOT_STARTED(isSolving = false),
         /** Indicates that the [GridSolver] is ready to start processing ([Grid] has been assigned). [isSolving] = `false` */
-        PREPARED_FOR_SOLVING(false),
+        PREPARED_FOR_SOLVING(isSolving = false),
 
         /**
          * Phase [SOLVE_SINGLE_CANDIDATE_VALUES] indicates that the [GridSolver] is processing, searching for single candidate values within [GridSegment]s. [isSolving] = `true`.
          * * E.g. if a cell has `[5]` as it's only remaining candidate value, no other cells in the [GridSegment]s the cell is part of
          *   can have that value, so `[5]` can be eliminated from the other cells.
-         * > Aka [Naked Single](http://sudopedia.enjoysudoku.com/Naked_Single.html) or Forced Digit.
+         * > Aka [Sudopedia: Naked Single](http://sudopedia.enjoysudoku.com/Naked_Single.html),
+         *   [Decabit: Naked Single](http://www.decabit.com/Sudoku/NakedSingle), or Forced Digit.
          * > See: [solveSingularCandidates].
          */
-        SOLVE_SINGLE_CANDIDATE_VALUES(true),
+        SOLVE_SINGLE_CANDIDATE_VALUES(isSolving = true),
         
         /**
          * Phase [SOLVE_EXCLUDING_COMBINATIONS] indicates that the [GridSolver] is processing,
@@ -831,14 +828,15 @@ assertCorrectGrid()
          * * if 2 cells in a [GridSegment] both have `[2, 4]` as candidates, no other cells in that segment can have these
          *   candidate values, so these can be eliminated from the other [CellValue]s in the [GridSegment]
          * > See: [solveIdenticalCandidateSets].
-         * > Aka [Naked Pair](http://sudopedia.enjoysudoku.com/Naked_Pair.html), which is a Naked Subset of size 2.
+         * > Aka [Sudopedia: Naked Pair](http://sudopedia.enjoysudoku.com/Naked_Pair.html),
+         *   which is a [Naked Subset](http://www.decabit.com/Sudoku/NakedSubset) of size 2.
          * * if cells in a [GridSegment] have different combinations of values,
          *   e.g. `[1, 3, 6]`, `[2, 3, 7]`, `[1, 3, 7, 9]`, `[2, 4, 5, 8, 9]`
          *   and only 1 of those has `[6]` as a candidate value, that cell's value can be set to `[6]`.
-         * > Aka [Hidden Single](http://sudopedia.enjoysudoku.com/Hidden_Single.html)
+         * > Aka [Sudopedia: Hidden Single](http://sudopedia.enjoysudoku.com/Hidden_Single.html)
          * > See: [solveSingleValueInSegments].
          */
-        SOLVE_EXCLUDING_COMBINATIONS(true),
+        SOLVE_EXCLUDING_COMBINATIONS(isSolving = true),
         
         /**
          * Phase [SOLVE_POLYMORPHIC_COMBINATIONS] indicates that the [GridSolver] is processing, and searching for polymorphic combinations of candidate values. [isSolving] = `true`.
@@ -847,10 +845,10 @@ assertCorrectGrid()
          *   (so these all have, say, [Block.rowIndex] = 4, thus the cells with [Block.rowIndex] 4 have candidates `[2, 4, 7]`, `[2, 6, 7]`
          *   and `[3, 6]`, and no other cells in that block have candidate `[2]` or `[6]`), than these values 2 and 6 can be removed from
          *   all other cells in the [Row] with [Row.rowIndex] = 4.
-         *   > Aka Block Line or [Locked Candidates type 1](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_1_.28Pointing.29)
+         *   > Aka Block Line or [Sudopedia: Locked Candidates type 1](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_1_.28Pointing.29)
          * * the same combination of values, say `[2, 6]` from the above example can also be removed from the cells in the [Block]
          *   that are not part of the [SubSegment] of the [Block].
-         *   > Aka Block Line or [Locked Candidates type 2](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_2_.28Claiming_or_Box-Line_Reduction.29)
+         *   > Aka Block Line or [Sudopedia: Locked Candidates type 2](http://sudopedia.enjoysudoku.com/Locked_Candidates.html#Type_2_.28Claiming_or_Box-Line_Reduction.29)
          *
          * > See: [solveExcludingSubsetCandidates].
          *
@@ -858,7 +856,8 @@ assertCorrectGrid()
          *   from the candidates of all other cells in the same [GridSegment].
          * * if 4 cells have candidates `[1, 2]`, `[1, 2, 3]`, `[2, 3]`, `[1, 4]`, then the values `[1, 2, 3, 4]` can be removed
          *   from the candidates of all other cells in the same [GridSegment].
-         * > Aka [Naked Subset](http://sudopedia.enjoysudoku.com/Naked_Subset.html)
+         * > Aka [Sudopedia: Naked Subset](http://sudopedia.enjoysudoku.com/Naked_Subset.html), [Decabit: Naked Subset](http://www.decabit.com/Sudoku/NakedSubset);
+         *   depending on their size also Naked Pair, Naked Triple, Naked Quad etc.
          * > See: [solvePolymorphicExclusions].
          *
          * * if 3 cells in a [GridSegment] have candidates, say, `[4, 7]`, `[1, 4, 7, 8]`, `[2, 4, 7, 8, 9]`,
@@ -868,24 +867,46 @@ assertCorrectGrid()
          * * if 4 cells have candidates `[1, 2]`, `[1, 3, 4, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 4, 5, 8]`, and no other cells in the same
          *   [GridSegment] have any of the values `[1, 2, 5, 9]`, the other values can be eliminated from these cells.
          *   So in these 4 cells, the remaining candidate values of those 4 cells will be `[1, 2]`, `[1, 5, 9]`, `[1, 2, 5, 9]`, `[1, 2, 5]`.
-         * > Aka [Hidden Subset](http://sudopedia.enjoysudoku.com/Hidden_Subset.html)
+         * > Aka [Sudopedia: Hidden Subset](http://sudopedia.enjoysudoku.com/Hidden_Subset.html), [Decabit: Hidden Subset](http://www.decabit.com/Sudoku/HiddenSubset).
+         *   Depending on their size also Naked Pair, Naked Triple, Naked Quad etc.
          * > See: [solvePolymorphicCombinations].
          *
-         * Re the 'polymorphic' in [SOLVE_POLYMORPHIC_COMBINATIONS], this is because none of the cells may have the exact combination of values searched for,
-         * some candidate values of the combination searched for may not be present in the touched cells, and cells may have candidate values
-         * that are not part of the combination searched for.
+         * Re the 'polymorphic' in [SOLVE_POLYMORPHIC_COMBINATIONS], this is because none of the cells may have the
+         * exact combination of values searched for, some candidate values of the combination searched for may not be
+         * present in the touched cells, and cells may have candidate values that are not part of the combination searched for.
          * This is computationally relatively costly, so this method should be the last one before starting with [MULTI_SEGMENT_COMBINATIONS]
          * if unsolved candidates remain after all previous methods have been applied.
          */
-        SOLVE_POLYMORPHIC_COMBINATIONS(true),
+        SOLVE_POLYMORPHIC_COMBINATIONS(isSolving = true),
 
         /**
+         * The previous (less advanced) techniques can easily be deduced from the simple Sudoku rules.
+         * But many many Sudoku puzzles appear to exist that can't be solved by these techniques (in fact, when trying to
+         * solve the [hardest ever Sudoku "Golden Nugget"](http://www.sudokusnake.com/images/GoldenNugget.PNG),
+         * _none_ of the cells are solved with these previous techniques! (see GridSolverIT)
          *
+         * The following more advanced techniques are less obvious; undoubtedly they can be mathematically proven,
+         * but here they are taken "as is".
+         *
+         * TBD!
+         * * [X-Wing](http://www.decabit.com/Sudoku/XWing), [Swordfish](http://www.decabit.com/Sudoku/Swordfish),
+         *   [Jellyfish](http://www.decabit.com/Sudoku/Jellyfish), [Squirmbag](http://sudopedia.enjoysudoku.com/Squirmbag.html)
+         *   essentially, these are equal techniques but on different numbers of segments;
+         * * [XY-Wing](http://www.decabit.com/Sudoku/XYWing) and [XYZ-Wing](http://www.decabit.com/Sudoku/XYZWing);
+         *   these are equal techniques but with different numbers of candidate values;
+         *   * Maybe also: [XY-Chain](http://www.decabit.com/Sudoku/XYChain), which is an extension of the XY-Wing technique
+         * * Maybe: [Colouring-technique](http://www.decabit.com/Sudoku/Colouring)
          */
-        MULTI_SEGMENT_COMBINATIONS(true),
+        MULTI_SEGMENT_COMBINATIONS(isSolving = true),
+
+        /**
+         * Even more advanced techniques, maybe including [Almost Locked Sets](http://sudopedia.enjoysudoku.com/Almost_Locked_Set.html)
+         * > TBD !
+         */
+        CHAINING_TECHNIQUE(isSolving = true),
 
         /** Indicates that the [Grid] was solved successfully; [isSolving] = `false` */
-        GRID_SOLVED(false);
+        GRID_SOLVED(isSolving = false);
 
         /**
          * Given `this` [GridSolvingPhase], get the next one from [values];
