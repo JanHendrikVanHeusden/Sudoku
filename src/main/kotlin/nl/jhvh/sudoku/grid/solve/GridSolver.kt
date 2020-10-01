@@ -882,7 +882,7 @@ assertCorrectGrid()
         /**
          * The previous (less advanced) techniques can easily be deduced from the simple Sudoku rules.
          * But many many Sudoku puzzles appear to exist that can't be solved by these techniques (in fact, when trying to
-         * solve the [hardest ever Sudoku "Golden Nugget"](http://www.sudokusnake.com/images/GoldenNugget.PNG),
+         * solve some of the hardest puzzles available [e.g. the hardest ever Sudoku "Golden Nugget"](http://www.sudokusnake.com/images/GoldenNugget.PNG),
          * _none_ of the cells are solved with these previous techniques! (see GridSolverIT)
          *
          * The following more advanced techniques are less obvious; undoubtedly they can be mathematically proven,

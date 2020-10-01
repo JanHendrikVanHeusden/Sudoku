@@ -149,7 +149,38 @@ class GridSolverIT {
     }
 
     @Test
-    fun `solve Hardest Sudoku Ever - Golden Nugget`() {
+    fun `supposed Hardest Ever Sudoku`() {
+        val gridBuilder = Grid.GridBuilder()
+        val grid = gridBuilder
+                .fix("A1", 8)
+                .fix("B3", 3)
+                .fix("B4", 6)
+                .fix("C2", 7)
+                .fix("C5", 9)
+                .fix("C7", 2)
+                .fix("D2", 5)
+                .fix("D6", 7)
+                .fix("E5", 4)
+                .fix("E6", 5)
+                .fix("E7", 7)
+                .fix("F4", 1)
+                .fix("F8", 3)
+                .fix("G3", 1)
+                .fix("G8", 6)
+                .fix("G9", 8)
+                .fix("H3", 8)
+                .fix("H4", 5)
+                .fix("H8", 1)
+                .fix("I2", 9)
+                .fix("I7", 4)
+                .build()
+
+        grid.solveGrid()
+        // todo: asserts
+    }
+
+    @Test
+    fun `try Hardest Sudoku Ever - Golden Nugget`() {
         val gridBuilder = Grid.GridBuilder()
         val grid = gridBuilder
                 .fix("A8", 3)
