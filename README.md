@@ -37,7 +37,7 @@ As this aims to be a coding exercise rather than the ultimate Sudoku solver proj
   * Until now I have the feeling that **even when applying asynchronous processing, there will be little or no need for explicit synchronization or guarding**.
   Due to the nature of a Sudoku puzzle, you never will have to increment a value (well, maybe except some statistics in future, which probably can be AtomicIntegers etc.).
   
-  All mutable lists, maps and sets already use thread safe implementations like `ConcurrentHashMap` etc., and changes on these will always go into the same direction (e.g. candidate values are removed only, never added; and if a value is set, it will never be set again). Of course, when applying  parallel processing, threads may see stale state, but as I grasp now, this will result to an invalid state.
+  All mutable lists, maps and sets already use thread safe implementations like `ConcurrentHashMap` etc., and changes on these will always go into the same direction (e.g. candidate values are removed only, never added; and if a value is set, it will never be set again). Of course, when applying  parallel processing, threads may see stale state, but as I grasp now, this will never result to an invalid state.
   So I do not expect to need explicit synchronization or guarding.
   We will see!
   
