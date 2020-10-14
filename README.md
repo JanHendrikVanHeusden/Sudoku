@@ -37,11 +37,11 @@ As this aims to be a coding exercise rather than the ultimate Sudoku solver proj
   * Until now I have the feeling that **even when applying asynchronous processing, there will be little or no need for explicit synchronization or guarding**.
   Due to the nature of a Sudoku puzzle, you never will have to increment a value (well, maybe except some statistics in future, which probably can be AtomicIntegers etc.).
   
-  All mutable lists, maps and sets already use thread safe implementations like `ConcurrentHashMap` etc., and changes on these will always go into the same direction (e.g. candidate values are removed only, never added; and if a value is set, it will never be set again). Of course, when applying  parallel processing, threads may see stale state, but as I grasp now, this will never be an invalid state.
+  All mutable lists, maps and sets already use thread safe implementations like `ConcurrentHashMap` etc., and changes on these will always go into the same direction (e.g. candidate values are removed only, never added; and if a value is set, it will never be set again). Of course, when applying  parallel processing, threads may see stale state, but as I grasp now, this will result to an invalid state.
   So I do not expect to need explicit synchronization or guarding.
   We will see!
   
-* Maybe I will build a **web frontend** to it. Would really like that! Maybe using something like Angular, Vue or so. But no detailed plans for it yet, and zero experience in frontend developing!
+* Maybe I'd like to build a **web frontend** for it. Would really like that! Maybe using something like ktor + Vue or maybe Angular. But no detailed plans for it yet, and zero experience in frontend developing!
 
 * Would also be interesting to use an Amazon Web OCR Service to read a Sudoku from an image and load it into the tool - fancy plan, but imagination rather than realisation yet 😉
 

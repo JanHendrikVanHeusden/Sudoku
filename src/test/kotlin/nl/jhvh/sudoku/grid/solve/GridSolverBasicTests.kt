@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import nl.jhvh.sudoku.grid.model.Grid
-import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.NOT_STARTED
-import nl.jhvh.sudoku.grid.solve.GridSolver.GridSolvingPhase.SOLVE_SINGLE_CANDIDATE_VALUES
+import nl.jhvh.sudoku.grid.solve.GridSolvingPhase.SOLVE_SINGLE_CANDIDATE_VALUES
+import nl.jhvh.sudoku.grid.solve.GridSolvingPhase.UNASSIGNED
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ internal class GridSolverBasicTests {
                 this.solvingPhase = phase
             }
         }
-        assertThat(subject.solvingPhase).isEqualTo(NOT_STARTED)
+        assertThat(subject.solvingPhase).isEqualTo(UNASSIGNED)
         assertThat(subject.solvingPhase.isSolving).isFalse()
         // when, then
         assertThat(subject.isSolving).isFalse()
