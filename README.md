@@ -17,11 +17,13 @@
 * This project started as a learning project for me personally, to sharpen my skills in Java and related stuff like unit testing & mocking (JUnit, Mockito), Maven, design patterns, etc.
    * Note that not all tests are unit tests, strictly taken. Some are integration tests. Others look like unit tests, but may use real (stubbed, not mocked) collaboration objects, which causes them to test state rather than behaviour ([see this old post of Martin Fowler about the difference](https://martinfowler.com/articles/mocksArentStubs.html)).
    Not really a problem imho, but some who are more strict may argue (with valid arguments!) that _all_ collaboration objects always should be mocked to make them strictly unit tests. I am a bit pragmatic here in that having things covered by tests is more important than exactly colouring within the theoretical lines, valid as they are.
-   Anyhow, test coverage should be really close to 100%. One may notice that reported coverage figures are lower, the coverage tooling is tuned for Java but does not work very well for Kotlin... 😮
    
-* Later when starting with Kotlin I converted it to Kotlin, aiming to learn and practice techniques specific for Kotlin, like the Kotlin native support for Delegation, which has become one of my favourites, but also coroutines, mockk, and all other nice stuff that makes Kotlin "the better Java" imho!
+   * Anyhow, test coverage should be really close to 100%. One may notice that reported coverage figures are lower, the coverage tooling is tuned for Java but does not work very well for Kotlin... 😮
+   
+* Later when starting with Kotlin I converted it to **Kotlin**, aiming to learn and practice techniques specific for Kotlin, like the Kotlin native support for Delegation, which has become one of my favourites, but also coroutines, mockk, and all other nice stuff that makes Kotlin "the better Java" imho!
+Also I converted the mocking to **mockk** which allows to elegantly integrate Kotlin language features into test code.
 
-* Because of it's learning goals I do not aim to provide the ultimate Sudoku solver. In fact, it probably will never be able to solve the hardest Sudoku's out there, simply because implementing all known solution algorithms, techniques and tricks out there takes more time to this aspect alone than I am willing to - there are other interesting things I'd like to do, especially with asynchronous parallel computation by using coroutines!
+* Because of it's learning goals I do not aim to provide the ultimate Sudoku solver. In fact, it probably will never be able to solve the hardest Sudoku's out there, simply because implementing all known solution algorithms, techniques and tricks out there takes more time to this aspect alone than I am willing to - there are other interesting things I'd like to do, like a web frontend (Angular probably), and maybe asynchronous parallel solving by using coroutines!
 
 #### No 4 eyes principle
 It's just my project. Not reviewed so far, and made by myself alone. So maybe I've overlooked some obvious ways to do thins, etc.; comments are welcome!
@@ -33,7 +35,7 @@ But no, it still can't solve the really hard ones that you find on specialized S
 As this aims to be a coding exercise rather than the ultimate Sudoku solver project, I leave this for now, as there are several other coding techniques I'd like to explore!
 
 #### What will be next?
-* Instead of focussing on solving algorithms, the next thing will be applying asynchronous solution executiong by using **coroutines**, I'm really excited by the possibilities Kotlin offers here.
+* Instead of focussing on solving algorithms, the next thing might be applying asynchronous solution executiong by using **coroutines**, I'm really excited by the possibilities Kotlin offers here.
 
 * I'm sorry to state that the solving part is not unit tested yet (despite my wish to have everything 100% covered). But I'd like to try out other things first, so the unit testing of the solving part (which is not finished yet anyhow) is postponed for now
 
