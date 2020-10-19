@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>13</java.version>
-        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin.version>1.4.10</kotlin.version>
         <commons-lang3.version>3.10</commons-lang3.version>
 
         <!-- Take care when upgrading slf4j to version 1.8 or higher!
@@ -74,23 +74,7 @@
 
                 <configuration>
                     <jvmTarget>13</jvmTarget>
-
-                    <compilerPlugins>
-                        <plugin>all-open</plugin>
-                    </compilerPlugins>
-                    <pluginOptions>
-                        <!-- Each annotation is placed on its own line -->
-                        <!-- <option>all-open:annotation=com.my.Annotation</option>-->
-                        <!-- <option>all-open:annotation=com.their.AnotherAnnotation</option>-->
-                    </pluginOptions>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-maven-allopen</artifactId>
-                        <version>${kotlin.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
