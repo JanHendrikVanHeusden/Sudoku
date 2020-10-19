@@ -62,6 +62,11 @@ import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashSet
 import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
+/* TODO: Solver is far too big. Solver methods can be expressed als lambda's that can be passed
+         into the "main" solver (this class).
+         Also lacking unit or integration tests yet.
+ */
+
 /**
  * Stateful solver for the [gridToSolve]. The class is deliberately defined as open, to allow extension.
  *  * The [gridToSolve] must be set before any further use
