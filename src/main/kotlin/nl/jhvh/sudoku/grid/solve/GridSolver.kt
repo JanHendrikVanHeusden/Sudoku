@@ -62,9 +62,9 @@ import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashSet
 import java.util.concurrent.ConcurrentHashMap.newKeySet as ConcurrentHashSet
 
-/* TODO: Solver is far too big. Solver methods can be expressed als lambda's that can be passed
-         into the "main" solver (this class).
-         Also lacking unit or integration tests yet.
+/* TODO: This solver class is far too big, needs to be split / refactored.
+         Splitting: Solver methods can be expressed als lambda's that can be passed into the "main" solver (this class).
+         Also TODO: add lacking unit or integration tests yet.
  */
 
 /**
