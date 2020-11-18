@@ -37,7 +37,11 @@ As this aims to be a coding exercise rather than the ultimate Sudoku solver proj
 #### What will be next?
 * Instead of focussing on solving algorithms, the next thing might be applying asynchronous solution executiong by using **coroutines**, I'm really excited by the possibilities Kotlin offers here.
 
-* I'm sorry to state that the solving part is not unit tested yet (despite my wish to have everything 100% covered). But I'd like to try out other things first, so the unit testing of the solving part (which is not finished yet anyhow) is postponed for now
+* The solving stuff (class `GridSolver`) is far too big and complicated.
+  And given that the solution methods all have a simple and similar structure (no input parameters, void return)
+  these could be refactored as lambda's of type `() -> ()`, and probably refactored to separate classes.
+
+* I'm sorry to state that the solving stuff (class `GridSolver`) is not unit tested yet (despite my wish to have everything 100% covered). But I'd like to try out other things first, so the unit testing of the solving part (which is not finished yet anyhow) is postponed for now
 
   * Until now I have the feeling that **even when applying asynchronous processing, there will be little or no need for explicit synchronization or guarding**.
   Due to the nature of a Sudoku puzzle, you never will have to increment a value (well, maybe except some statistics in future, which probably can be AtomicIntegers etc.).
@@ -47,7 +51,7 @@ As this aims to be a coding exercise rather than the ultimate Sudoku solver proj
   We will see!
   So I also should remove all the commented out stuff on synchronization.
   
-* I'd like to build a **web frontend** for it. Would really like that! Maybe using something like ktor + Vue or maybe Angular. But no detailed plans for it yet, and zero experience in frontend developing!
+* I'd like to build a **web frontend** for it. Would really like that! Maybe using something like ktor + Vue or maybe Angular. But no detailed plans for it yet, and not much experience in frontend developing!
 
 * Would also be interesting to use an Amazon Web OCR Service to read a Sudoku from an image and load it into the tool - fancy plan, but imagination rather than realisation yet 😉
 
