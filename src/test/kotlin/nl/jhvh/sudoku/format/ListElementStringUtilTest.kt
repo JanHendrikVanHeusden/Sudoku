@@ -15,8 +15,6 @@ package nl.jhvh.sudoku.format
    limitations under the License.
  */
 
-import io.mockk.every
-import io.mockk.mockk
 import nl.jhvh.sudoku.util.alignCenter
 import nl.jhvh.sudoku.util.alignLeft
 import nl.jhvh.sudoku.util.alignRight
@@ -47,16 +45,12 @@ class ListElementStringUtilTest {
                         " Apache               ",
                         " CodeEnvy             "
                 ))
-        val obj1: Any = mockk(relaxed = false)
-        val obj2: Any = mockk(relaxed = false)
-        val obj3: Any = mockk(relaxed = false)
-        every {obj1.toString()} returns "John"
-        every {obj2.toString()} returns "Ann"
-        every {obj3.toString()} returns "William"
-        assertThat(listOf(obj1, obj2, obj3).alignLeft()).isEqualTo(listOf(
-                "John   ",
-                "Ann    ",
-                "William"))
+        assertThat(listOf(1, 10, 100).alignLeft(2, 1))
+            .isEqualTo(listOf(
+                "  1   ",
+                "  10  ",
+                "  100 "
+            ))
     }
 
     @Test
