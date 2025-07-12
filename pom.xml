@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>13</java.version>
         <kotlin.version>1.4.10</kotlin.version>
-        <commons-lang3.version>3.10</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
 
         <!-- Take care when upgrading slf4j to version 1.8 or higher!
              Compatibility with log4j 2 may be broken, see https://logging.apache.org/log4j/2.x/log4j-slf4j-impl/ !!
